@@ -138,4 +138,5 @@ app.*.symbols
 !.vscode/settings.json
 
 
-assets/video/*
+assets/*
+fonts/*

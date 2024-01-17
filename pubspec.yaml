@@ -38,6 +38,8 @@ dependencies:
   record: ^5.0.1
   path_provider: ^2.1.1
   http: ^1.1.0
+  flutter_svg: ^2.0.9
+  audioplayers: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -64,6 +66,8 @@ flutter:
   assets:
     - assets/video/demo-sheet-play.mp4
     - assets/video/demo-sheet-play-unmuted.mp4
+    - assets/music/stay-with-me.svg
+    - assets/sound/metronome.wav
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -76,17 +80,25 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
-  #   - family: Trajan Pro
-  #     fonts:
-  #       - asset: fonts/TrajanPro.ttf
-  #       - asset: fonts/TrajanPro_Bold.ttf
-  #         weight: 700
+  fonts:
+    - family: NanumBarunGothic
+      fonts:
+        - asset: fonts/NanumBarunGothic.ttf
+        - asset: fonts/NanumBarunGothicBold.ttf
+          weight: 700
+        - asset: fonts/NanumBarunGothicLight.ttf
+          weight: 300
+        - asset: fonts/NanumBarunGothicUltraLight.ttf
+          weight: 100
+    # - family: NotoMusic
+    #   fonts:
+    #     - asset: fonts/NotoMusic-Regular.ttf
+    # - family: Bravura
+    #   fonts:
+    #     - asset: fonts/Bravura.otf
+    # - family: BravuraText
+    #   fonts:
+    #     - asset: fonts/BravuraText.otf
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
