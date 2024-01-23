@@ -1,6 +1,5 @@
-import 'package:application/screens/record_screen.dart';
+import 'package:application/screens/home_screen.dart';
 import 'package:application/styles/color_styles.dart';
-
 import 'package:flutter/material.dart';
 
 void main() {
@@ -19,12 +18,16 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: ColorStyles.background,
         useMaterial3: true,
         fontFamily: 'NanumBarunGothic',
-        //ref: https://api.flutter.dev/flutter/material/TextTheme-class.html
         textTheme: const TextTheme(
           bodyLarge: TextStyle(fontSize: 16),
         ),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          titleSpacing: 0,
+        ),
       ),
-      home: const RecordScreen(),
+      home: const Scaffold(body: HomeScreen()),
     );
   }
 }

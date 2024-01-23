@@ -17,9 +17,7 @@ class CursorWidget extends StatelessWidget {
             color: ColorStyles.primaryShadow36,
             borderRadius: BorderRadius.circular(4)),
         child: SizedBox(
-          // height: 100,
           height: cursorInfo.height,
-          // width: 20,
           width: cursorInfo.width,
         ),
       ),

@@ -1,35 +1,46 @@
+import 'package:application/constants.dart';
 import 'package:application/models/music_model.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/scheduler.dart';
 
-typedef VoidCallback = void Function(CursorModel newCursor);
-
 class Metronome {
+  /// 악보에 의존
   final MusicModel music;
-  final VoidCallback callback;
+  final void Function(CursorModel) updateCursor;
+  final void Function(int) updateTime;
+  final void Function() onComplete;
+  double volume = 1;
 
-  late Ticker _ticker;
+  /// 사용자가 선택한 속도
+  late final int currentBPM;
   late final int usPerBeat;
-  int usCounter = 0;
+  late int offset;
 
+  /// 현재 상태 변수
+  late Ticker _ticker;
+  int usCounter = 0;
   int nextCursorTimestamp = 0;
   int nextCursorIdx = 0;
-  late int offset;
+  int _currentAudioIdx = 0;
 
   // for metronome sound
   //TODO: 속도 개선하기, 초반에 왜 밀리는지 해결, 더 나은 audio player혹은 파일 구해보기.
   final AssetSource _tickSoundSrc = AssetSource('sound/metronome.wav');
   static const int _audioPlayerSize = 3;
   final List<AudioPlayer> _audioPlayers = [
-    for (int i = 0; i < _audioPlayerSize; i++) AudioPlayer()
+    for (var i = 0; i < _audioPlayerSize; i++) AudioPlayer()
   ];
-  int _currentAudioIdx = 0;
 
   Metronome({
+    required this.updateTime,
     required this.music,
-    required this.callback,
-  }) : usPerBeat = (60 * 1000000) ~/ music.bpm {
-    _ticker = Ticker(_onTick);
+    required this.updateCursor,
+    required this.onComplete,
+  });
+
+  setBPM(int bpm) {
+    currentBPM = bpm;
+    usPerBeat = (60 * Constants.convertToMicro) ~/ currentBPM;
     offset = usPerBeat * 4;
   }
 
@@ -42,55 +53,78 @@ class Metronome {
 
       _audioPlayers[_currentAudioIdx].resume();
 
-      _audioPlayers[
-              (_currentAudioIdx - 1 + _audioPlayerSize) % _audioPlayerSize]
-          .stop();
+      // _audioPlayers[
+      //         (_currentAudioIdx - 1 + _audioPlayerSize) % _audioPlayerSize]
+      //     .stop();
       _currentAudioIdx++;
       _currentAudioIdx %= _audioPlayerSize;
     }
 
     // 2. move cursor
     if (elasped.inMicroseconds >= nextCursorTimestamp + offset) {
-      callback(music.cursorList[nextCursorIdx++]);
+      updateCursor(music.cursorList[nextCursorIdx++]);
 
       if (nextCursorIdx == music.cursorList.length) {
-        stop();
+        nextCursorTimestamp += 8 * usPerBeat;
+        Future.delayed(Duration(microseconds: 4 * usPerBeat), onComplete);
         return;
       }
 
       nextCursorTimestamp =
           (music.cursorList[nextCursorIdx].timestamp * 4 * usPerBeat).toInt();
     }
+
+    // update time
+    updateTime((elasped.inMicroseconds - offset) ~/ Constants.convertToMicro);
   }
 
   /// initialize player for metronome sound
   initialize() async {
+    _ticker = Ticker(_onTick);
+
     for (int i = 0; i < _audioPlayerSize; i++) {
-      await _audioPlayers[i].setPlayerMode(PlayerMode.lowLatency);
-      await _audioPlayers[i].setReleaseMode(ReleaseMode.stop);
-      await _audioPlayers[i].setSource(_tickSoundSrc);
-      await _audioPlayers[i].setVolume(0);
-      await _audioPlayers[i].resume();
+      var player = AudioPlayer();
+      await player.setPlayerMode(PlayerMode.lowLatency);
+      await player.setReleaseMode(ReleaseMode.stop);
+      await player.setSource(_tickSoundSrc);
+      // await player.setVolume(0);
+      // await player.resume();
 
-      await Future.delayed(const Duration(milliseconds: 300), () {
-        _audioPlayers[i].stop();
-      });
+      // await Future.delayed(const Duration(milliseconds: 100), () {
+      //   player.stop();
+      //   player.setVolume(volume);
+      // });
 
-      await _audioPlayers[i].setVolume(1);
+      _audioPlayers[i] = player;
     }
   }
 
   start() {
+    if (_ticker.isActive) {
+      throw Exception('already started');
+    }
     usCounter = usPerBeat;
+    nextCursorTimestamp = 0;
+    nextCursorIdx = 0;
+    _currentAudioIdx = 0;
+
     _ticker.start();
   }
 
   stop() {
-    _ticker.stop();
-    _ticker.dispose();
-
+    if (_ticker.isActive) {
+      _ticker.stop();
+      _ticker.dispose();
+    }
     for (int i = 0; i < _audioPlayerSize; i++) {
       _audioPlayers[i].dispose();
+    }
+  }
+
+  setVolume(double volume) {
+    this.volume = volume;
+    for (int i = 0; i < _audioPlayerSize; i++) {
+      _audioPlayers[i].setVolume(volume);
     }
   }
 }

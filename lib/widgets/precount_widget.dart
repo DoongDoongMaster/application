@@ -1,4 +1,5 @@
 import 'package:application/styles/color_styles.dart';
+import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -6,8 +7,10 @@ import 'package:flutter/scheduler.dart';
 class PrecountWidget extends StatefulWidget {
   final int usPerBeat;
   final int usPerSixteenth;
+  final Future<void> Function() startPractice;
 
-  const PrecountWidget({super.key, required this.usPerBeat})
+  const PrecountWidget(
+      {super.key, required this.usPerBeat, required this.startPractice})
       : usPerSixteenth = usPerBeat ~/ 4;
 
   @override
@@ -21,13 +24,12 @@ class _PrecountWidgetState extends State<PrecountWidget> {
   static const int sixteenthCountMax = 4 * quaterCountMax;
 
   int quaterCount = 0;
-  int sixteenthCount = 0;
+  int sixteenthCount = -4;
   int usCounter = 0;
 
   @override
   void initState() {
     super.initState();
-    print('${widget.usPerBeat}, ${widget.usPerSixteenth}');
     _ticker = Ticker((Duration elapsed) {
       if (elapsed.inMicroseconds - usCounter >= widget.usPerSixteenth) {
         usCounter = elapsed.inMicroseconds;
@@ -43,12 +45,18 @@ class _PrecountWidgetState extends State<PrecountWidget> {
       }
     });
 
+    startPrecount();
+  }
+
+  startPrecount() async {
+    await widget.startPractice();
+
+    sixteenthCount = 0;
     _ticker.start();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     if (_ticker.isActive) {
       _ticker.stop();
@@ -59,7 +67,8 @@ class _PrecountWidgetState extends State<PrecountWidget> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 1000,
+      width: MediaQuery.of(context).size.width,
+      height: 135,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -100,7 +109,8 @@ class CountCircle extends StatelessWidget {
         width: 100,
         child: AnimatedContainer(
           decoration: BoxDecoration(
-            color: isActive ? ColorStyles.primary : ColorStyles.secondaryShadow,
+            color:
+                isActive ? ColorStyles.primary : ColorStyles.secondaryShadow90,
             shape: BoxShape.circle,
             boxShadow: [
               isActive
@@ -109,12 +119,7 @@ class CountCircle extends StatelessWidget {
                       color: ColorStyles.primaryShadow50,
                     )
                   : const BoxShadow(),
-              BoxShadow(
-                offset: const Offset(0, 2),
-                blurRadius: 6,
-                spreadRadius: 0,
-                color: Colors.transparent.withOpacity(0.36),
-              )
+              ShadowStyles.dropShadow,
             ],
           ),
           duration: Duration(microseconds: usPerSixteenth),
@@ -122,7 +127,8 @@ class CountCircle extends StatelessWidget {
             child: Text(
               label,
               style: TextStyles.displayLarge.copyWith(
-                  color: isActive ? Colors.white : const Color(0xCCFFFFFF)),
+                color: isActive ? Colors.white : ColorStyles.whiteShadow80,
+              ),
             ),
           ),
         ),
