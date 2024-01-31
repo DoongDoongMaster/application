@@ -25,7 +25,9 @@ class ResultButton extends StatelessWidget {
         GestureDetector(
           onTap: () {
             Future<PlayResultModel> result = ApiService.uploadFile(
-                filePath: audioFilePath!, delay: delay, bpm: metronome.bpm);
+                filePath: audioFilePath!,
+                delay: delay,
+                bpm: metronome.music.bpm);
 
             result.then((value) {
               Navigator.push(

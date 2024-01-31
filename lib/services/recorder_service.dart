@@ -3,26 +3,26 @@ import 'dart:typed_data';
 import 'package:record/record.dart';
 
 class RecorderService {
-  final record = AudioRecorder();
-  final String filePath;
+  AudioRecorder _recorder = AudioRecorder();
   late Stream<Uint8List> stream;
-  RecorderService({required this.filePath});
+  RecorderService();
 
-  Future<int> startRecord() async {
+  Future<int> startRecord(String filePath) async {
+    _recorder = AudioRecorder();
     // Check and request permission if needed
     // DateTime dt1 = DateTime.now();
-    if (await record.hasPermission()) {
+    if (await _recorder.hasPermission()) {
       // Start recording to file
-      await record.start(const RecordConfig(), path: filePath);
+      await _recorder.start(const RecordConfig(), path: filePath);
     }
-    // DateTime dt2 = DateTime.now();
-    // return dt1.microsecondsSinceEpoch - dt2.microsecondsSinceEpoch;
     return 0;
   }
 
   stopRecord() async {
-    // Stop recording...
-    await record.stop();
-    await record.dispose();
+    if (await _recorder.isRecording()) {
+      // Stop recording...
+      await _recorder.stop();
+      await _recorder.dispose();
+    }
   }
 }
