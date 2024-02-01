@@ -16,8 +16,9 @@ import 'package:application/widgets/prompt/prompt_footer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
-// TODO: 켜지는 속도 조절, 비상 종료 예외 처리 등. // 스낵바 위로 띄우기
+// TODO: 켜지는 속도 조절, 비상 종료 예외 처리 등
 
+/// 삭제 시 안내 스낵바.
 SnackBar buildSnackbar(BuildContext context) {
   return SnackBar(
     dismissDirection: DismissDirection.up,
@@ -34,6 +35,7 @@ SnackBar buildSnackbar(BuildContext context) {
   );
 }
 
+/// 프롬프트 화면
 class PromptScreen extends StatefulWidget {
   final MusicInfo music;
   const PromptScreen({
@@ -143,6 +145,7 @@ class PromptScreenState extends State<PromptScreen> {
     triggerPractice();
   }
 
+  /// 커서 이동 함수, 필요시, 다음 줄로 스크롤 진행
   moveCursor(Cursors newCursor) {
     int offset = 20;
     // if new line started
@@ -254,7 +257,7 @@ class PromptScreenState extends State<PromptScreen> {
                       ],
                     ),
                     const SizedBox(
-                      height: 100,
+                      height: 100, // 하단 빈 영역, 없으면 너무 딱 맞춰서 끝날 수 있음.
                     ),
                   ],
                 ),

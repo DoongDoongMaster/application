@@ -7,6 +7,7 @@ import 'package:application/styles/text_styles.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+/// 연습장 화면 왼쪽 패널
 class NavigationPanel extends StatefulWidget {
   final RouterPath currentPath;
   final String? projectId;
@@ -61,7 +62,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
           ),
           const SizedBox(height: 10),
           MenuChip(
-            label: '즐겨찾는 연습',
+            label: "즐겨찾는 연습",
             icon: Icons.favorite_border_rounded,
             isSelected: widget.currentPath == RouterPath.favoriteList,
             onSelected: (x) => changePath(x, path: RouterPath.favoriteList),
@@ -96,7 +97,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
           ),
           if (isProjectListOpen) ...[
             MenuChip(
-              label: '모든 연습장',
+              label: "모든 연습장",
               icon: Icons.apps_rounded,
               isSelected: widget.currentPath == RouterPath.list,
               onSelected: (x) => changePath(x, path: RouterPath.list),
@@ -136,14 +137,14 @@ class _NavigationPanelState extends State<NavigationPanel> {
                     ),
                   );
                 } else {
-                  return const CircularProgressIndicator();
+                  return const Center(child: CircularProgressIndicator());
                 }
               },
             )
           ],
           const Spacer(),
           MenuChip(
-            label: '새로운 연습',
+            label: "새로운 연습",
             isSelected: widget.currentPath == RouterPath.musicList,
             onSelected: (x) => changePath(x, path: RouterPath.musicList),
             iconBgColor: widget.currentPath == RouterPath.musicList

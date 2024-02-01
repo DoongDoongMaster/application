@@ -3,6 +3,7 @@ import 'package:application/styles/text_styles.dart';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 
+/// 연습, 악보 추가를 위한 투명한 점선 버튼
 class AddNewButton extends StatelessWidget {
   final String label;
   final Size size;
