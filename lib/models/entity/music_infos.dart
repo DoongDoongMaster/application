@@ -1,0 +1,47 @@
+import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:drift/drift.dart';
+import 'package:application/models/entity/default_table.dart';
+
+enum MusicType {
+  ddm, // 서버 제공
+  user,
+  // shared, // 공유된 악보 (현재 미사용)
+}
+
+class MusicInfo {
+  final String id, title, artist;
+  final int bpm;
+  final List<Cursors> cursorList;
+  final Uint8List sheetSvg;
+  final List<Cursors> measureList;
+  final MusicType type;
+
+  MusicInfo({
+    required this.id,
+    required this.title,
+    required this.artist,
+    required this.bpm,
+    required this.cursorList,
+    required this.sheetSvg,
+    required this.measureList,
+    required this.type,
+  });
+}
+
+@UseRowClass(MusicInfo)
+class MusicInfos extends DefaultTable {
+  /// 1. 곡 정보, 악보 사진 등 저장 필요함. => 앱 내 저장공간 활용한 후 경로 작성. (근데 이 방식은 무결성 유지가 안될 수가 있음/물론 밖에서 삭제는 안되지만 그래도.)
+  /// 2. blob 형태로 저장 -  일단 이걸로 해봅시다. [v]
+  /// 3. S3 bucket [x]
+  /// 4. firebase 저장소
+
+  TextColumn get title => text()();
+  IntColumn get bpm => integer()();
+  TextColumn get artist => text()();
+
+  // BlobColumn get infoJson => blob()();
+  TextColumn get cursorList => text().map(const CursorListConvertor())();
+  TextColumn get measureList => text().map(const CursorListConvertor())();
+  BlobColumn get sheetSvg => blob()();
+  IntColumn get type => intEnum<MusicType>()();
+}

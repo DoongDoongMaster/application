@@ -1,12 +1,13 @@
 import 'package:application/constants.dart';
-import 'package:application/models/music_model.dart';
+import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/models/entity/music_infos.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/scheduler.dart';
 
 class Metronome {
   /// 악보에 의존
-  final MusicModel music;
-  final void Function(CursorModel) updateCursor;
+  final MusicInfo music;
+  final void Function(Cursors) updateCursor;
   final void Function(int) updateTime;
   final void Function() onComplete;
   double volume = 1;

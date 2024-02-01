@@ -1,5 +1,6 @@
 import 'package:application/constants.dart';
-import 'package:application/models/music_model.dart';
+import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/models/entity/music_infos.dart';
 import 'package:application/screens/complete_screen.dart';
 import 'package:application/services/local_storage.dart';
 import 'package:application/services/metronome.dart';
@@ -7,11 +8,11 @@ import 'package:application/services/recorder_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
-import 'package:application/widgets/practice_setting_modal.dart';
-import 'package:application/widgets/prompt_app_bar_widget.dart';
-import 'package:application/widgets/cursor_widget.dart';
-import 'package:application/widgets/precount_widget.dart';
-import 'package:application/widgets/prompt_footer_widget.dart';
+import 'package:application/widgets/prompt_screen/practice_setting_modal.dart';
+import 'package:application/widgets/prompt_screen/prompt_app_bar_widget.dart';
+import 'package:application/widgets/prompt_screen/cursor_widget.dart';
+import 'package:application/widgets/prompt_screen/precount_widget.dart';
+import 'package:application/widgets/prompt_screen/prompt_footer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -33,18 +34,18 @@ SnackBar buildSnackbar(BuildContext context) {
   );
 }
 
-class RecordScreen extends StatefulWidget {
-  final MusicModel music;
-  const RecordScreen({
+class PromptScreen extends StatefulWidget {
+  final MusicInfo music;
+  const PromptScreen({
     super.key,
     required this.music,
   });
 
   @override
-  State<RecordScreen> createState() => _RecordScreenState();
+  State<PromptScreen> createState() => PromptScreenState();
 }
 
-class _RecordScreenState extends State<RecordScreen> {
+class PromptScreenState extends State<PromptScreen> {
   final RecorderService _recorder = RecorderService();
   final ScrollController _controller = ScrollController();
   late Metronome metronome;
@@ -55,7 +56,7 @@ class _RecordScreenState extends State<RecordScreen> {
 
   late String dirPath;
 
-  CursorModel currentCursor = CursorModel();
+  Cursors currentCursor = Cursors.createEmpty();
   double currentScrollYPos = 0;
   int currentSec = 0;
   int lengthInSec = 0;
@@ -142,7 +143,7 @@ class _RecordScreenState extends State<RecordScreen> {
     triggerPractice();
   }
 
-  moveCursor(CursorModel newCursor) {
+  moveCursor(Cursors newCursor) {
     int offset = 20;
     // if new line started
     if (newCursor.top - offset > currentScrollYPos) {
@@ -195,7 +196,7 @@ class _RecordScreenState extends State<RecordScreen> {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => RecordScreen(music: widget.music),
+          builder: (context) => PromptScreen(music: widget.music),
         ));
   }
 

@@ -55,7 +55,7 @@ class _PracticeSettingModalState extends State<PracticeSettingModal> {
                     children: [
                       TextButton.icon(
                         onPressed: () {
-                          Navigator.pop(context, -1);
+                          Navigator.pop(context);
                         },
                         icon: const Icon(
                           Icons.arrow_back_ios_rounded,
@@ -136,18 +136,15 @@ class _PracticeSettingModalState extends State<PracticeSettingModal> {
                             labelStyle: TextStyles.bodysmall.copyWith(
                                 color: selected ? Colors.white : Colors.black),
                             backgroundColor: ColorStyles.lightGray,
-                            selectedColor: ColorStyles.primary,
-                            shadowColor: Colors.transparent,
-                            surfaceTintColor: Colors.transparent,
+                            // shadowColor: Colors.transparent,
+                            // surfaceTintColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 7, vertical: 5),
-                            side: BorderSide.none,
                             label: Text('${speed[index]}x'),
                             selected: selected,
-                            showCheckmark: false,
                             onSelected: (bool selected) {
                               setState(() {
                                 if (selected) {
