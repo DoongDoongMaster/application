@@ -8,11 +8,11 @@ import 'package:application/services/recorder_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
-import 'package:application/widgets/prompt_screen/practice_setting_modal.dart';
-import 'package:application/widgets/prompt_screen/prompt_app_bar_widget.dart';
-import 'package:application/widgets/prompt_screen/cursor_widget.dart';
-import 'package:application/widgets/prompt_screen/precount_widget.dart';
-import 'package:application/widgets/prompt_screen/prompt_footer_widget.dart';
+import 'package:application/widgets/prompt/practice_setting_modal.dart';
+import 'package:application/widgets/prompt/prompt_app_bar_widget.dart';
+import 'package:application/widgets/prompt/cursor_widget.dart';
+import 'package:application/widgets/prompt/precount_widget.dart';
+import 'package:application/widgets/prompt/prompt_footer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
