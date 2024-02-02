@@ -35,7 +35,7 @@ class _MusicListScreenState extends State<MusicListScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 10),
                     child: Text(
                       "연습하고 싶은 악보를 선택하거나, 추가하세요.",
-                      style: TextStyles.bodysmall.copyWith(
+                      style: TextStyles.bodyMedium.copyWith(
                         color: ColorStyles.onSurfaceBlackVariant,
                         letterSpacing: 0.25,
                       ),
@@ -106,7 +106,7 @@ class MusicPreview extends StatelessWidget {
           Text(
             music.artist,
             style: TextStyles.bodysmall.copyWith(
-              color: const Color(0xFF9F9F9F),
+              color: ColorStyles.darkGray,
               overflow: TextOverflow.ellipsis,
             ),
             maxLines: 1,
@@ -207,35 +207,3 @@ class TopMusicPreview extends StatelessWidget {
     );
   }
 }
-
-/// 현재 미사용.
-// class BackButtonWithText extends StatelessWidget {
-//   const BackButtonWithText({
-//     super.key,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return TextButton(
-//       onPressed: () => context.pop(),
-//       child: Row(
-//         children: [
-//           IconButton(
-//             onPressed: () {},
-//             icon: const Icon(
-//               Icons.arrow_back_ios_rounded,
-//               size: 24,
-//             ),
-//             padding: EdgeInsets.zero,
-//             constraints: const BoxConstraints(),
-//             style: const ButtonStyle(
-//                 tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-//           ),
-//           const SizedBox(width: 4),
-//           Text("연습장",
-//               style: TextStyles.bodyMedium.copyWith(color: ColorStyles.primary))
-//         ],
-//       ),
-//     );
-//   }
-// }

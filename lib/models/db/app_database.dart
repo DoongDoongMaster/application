@@ -5,9 +5,11 @@ import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:application/models/views/music_thumbnail_view.dart';
+import 'package:application/models/views/project_detail_view.dart';
 import 'package:application/models/views/project_sidebar_view.dart';
 import 'package:application/models/views/project_thumbnail_view.dart';
 import 'package:application/services/local_storage.dart';
+import 'package:application/time_utils.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
@@ -37,9 +39,10 @@ LazyDatabase _openConnection() {
   ProjectInfos,
   PracticeInfos,
 ], views: [
+  MusicThumbnailView,
+  ProjectDetailView,
   ProjectSidebarView,
   ProjectThumbnailView,
-  MusicThumbnailView,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -75,5 +78,20 @@ class AppDatabase extends _$AppDatabase {
           ..where((tbl) => tbl.type.equalsValue(type))
           ..limit(count))
         .get();
+  }
+
+  Future<int> toggleProjectLike(String projectId) async {
+    final result = await customWriteReturning(
+      'UPDATE project_infos SET is_liked = 1 - is_liked WHERE id = ? RETURNING is_liked',
+      variables: [Variable(projectId)],
+      updateKind: UpdateKind.update,
+      updates: {projectInfos},
+    );
+
+    if (result.length != 1) {
+      throw Exception('no such project');
+    }
+
+    return result[0].data["is_liked"];
   }
 }

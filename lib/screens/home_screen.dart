@@ -127,7 +127,12 @@ class _ProjectPreview extends StatelessWidget {
           5 * max(-2, 2 - data.unreadCount.toString().length.toDouble()), -5),
       isLabelVisible: data.unreadCount != 0,
       child: ElevatedButton(
-        onPressed: () {},
+        onPressed: () {
+          context.pushNamed(
+            RouterPath.project.name,
+            pathParameters: {"id": data.id},
+          );
+        },
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),

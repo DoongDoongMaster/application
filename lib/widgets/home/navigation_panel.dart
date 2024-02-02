@@ -30,7 +30,12 @@ class _NavigationPanelState extends State<NavigationPanel> {
     required RouterPath path,
     Map<String, String> params = const <String, String>{},
   }) {
-    if (isSelected) {
+    if (!isSelected) {
+      return;
+    }
+    if (path == widget.currentPath) {
+      context.pushReplacementNamed(path.name, pathParameters: params);
+    } else {
       context.goNamed(path.name, pathParameters: params);
     }
   }
@@ -82,7 +87,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 children: [
                   const SizedBox(width: 8),
                   Text("연습장",
-                      style: TextStyles.titleMedium
+                      style: TextStyles.titleLarge
                           .copyWith(fontWeight: FontWeight.bold)),
                   const Spacer(),
                   Icon(
@@ -119,7 +124,7 @@ class _NavigationPanelState extends State<NavigationPanel> {
                                 onSelected: (x) => changePath(
                                   x,
                                   path: RouterPath.project,
-                                  params: {"projectId": data.title},
+                                  params: {"id": data.id},
                                 ),
                                 iconBgColor: data.type == MusicType.ddm
                                     ? ColorStyles.primaryLight
@@ -189,6 +194,11 @@ class MenuChip extends StatelessWidget {
       selected: isSelected,
       labelPadding: const EdgeInsets.symmetric(vertical: 3),
       visualDensity: const VisualDensity(vertical: -3),
+      labelStyle: TextStyles.bodyLarge.copyWith(
+        fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        color: isSelected ? Colors.white : textDefaultColor,
+        overflow: TextOverflow.ellipsis,
+      ),
       avatar: Container(
         width: 24,
         height: 24,
@@ -206,14 +216,12 @@ class MenuChip extends StatelessWidget {
       label: Row(
         children: [
           const SizedBox(width: 8),
-          Text(
-            label,
-            style: TextStyles.bodyMedium.copyWith(
-              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-              color: isSelected ? Colors.white : textDefaultColor,
+          Expanded(
+            child: Text(
+              label,
               overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
-            maxLines: 1,
           ),
         ],
       ),

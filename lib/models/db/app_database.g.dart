@@ -836,6 +836,383 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
   }
 }
 
+class MusicThumbnailViewData extends DataClass {
+  final String id;
+  final MusicType type;
+  final String title;
+  final String artist;
+  final Uint8List sheetSvg;
+  const MusicThumbnailViewData(
+      {required this.id,
+      required this.type,
+      required this.title,
+      required this.artist,
+      required this.sheetSvg});
+  factory MusicThumbnailViewData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return MusicThumbnailViewData(
+      id: serializer.fromJson<String>(json['id']),
+      type: $MusicInfosTable.$convertertype
+          .fromJson(serializer.fromJson<int>(json['type'])),
+      title: serializer.fromJson<String>(json['title']),
+      artist: serializer.fromJson<String>(json['artist']),
+      sheetSvg: serializer.fromJson<Uint8List>(json['sheetSvg']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'type':
+          serializer.toJson<int>($MusicInfosTable.$convertertype.toJson(type)),
+      'title': serializer.toJson<String>(title),
+      'artist': serializer.toJson<String>(artist),
+      'sheetSvg': serializer.toJson<Uint8List>(sheetSvg),
+    };
+  }
+
+  MusicThumbnailViewData copyWith(
+          {String? id,
+          MusicType? type,
+          String? title,
+          String? artist,
+          Uint8List? sheetSvg}) =>
+      MusicThumbnailViewData(
+        id: id ?? this.id,
+        type: type ?? this.type,
+        title: title ?? this.title,
+        artist: artist ?? this.artist,
+        sheetSvg: sheetSvg ?? this.sheetSvg,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('MusicThumbnailViewData(')
+          ..write('id: $id, ')
+          ..write('type: $type, ')
+          ..write('title: $title, ')
+          ..write('artist: $artist, ')
+          ..write('sheetSvg: $sheetSvg')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, type, title, artist, $driftBlobEquality.hash(sheetSvg));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is MusicThumbnailViewData &&
+          other.id == this.id &&
+          other.type == this.type &&
+          other.title == this.title &&
+          other.artist == this.artist &&
+          $driftBlobEquality.equals(other.sheetSvg, this.sheetSvg));
+}
+
+class $MusicThumbnailViewView
+    extends ViewInfo<$MusicThumbnailViewView, MusicThumbnailViewData>
+    implements HasResultSet {
+  final String? _alias;
+  @override
+  final _$AppDatabase attachedDatabase;
+  $MusicThumbnailViewView(this.attachedDatabase, [this._alias]);
+  $MusicInfosTable get musicInfos =>
+      attachedDatabase.musicInfos.createAlias('t0');
+  @override
+  List<GeneratedColumn> get $columns => [id, type, title, artist, sheetSvg];
+  @override
+  String get aliasedName => _alias ?? entityName;
+  @override
+  String get entityName => 'music_thumbnail_view';
+  @override
+  Map<SqlDialect, String>? get createViewStatements => null;
+  @override
+  $MusicThumbnailViewView get asDslTable => this;
+  @override
+  MusicThumbnailViewData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return MusicThumbnailViewData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      type: $MusicInfosTable.$convertertype.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      artist: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}artist'])!,
+      sheetSvg: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}sheet_svg'])!,
+    );
+  }
+
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.id, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumnWithTypeConverter<MusicType, int> type =
+      GeneratedColumn<int>('type', aliasedName, false,
+              generatedAs: GeneratedAs(musicInfos.type, false),
+              type: DriftSqlType.int)
+          .withConverter<MusicType>($MusicInfosTable.$convertertype);
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.title, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<String> artist = GeneratedColumn<String>(
+      'artist', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.artist, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<Uint8List> sheetSvg = GeneratedColumn<Uint8List>(
+      'sheet_svg', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.sheetSvg, false),
+      type: DriftSqlType.blob);
+  @override
+  $MusicThumbnailViewView createAlias(String alias) {
+    return $MusicThumbnailViewView(attachedDatabase, alias);
+  }
+
+  @override
+  Query? get query =>
+      (attachedDatabase.selectOnly(musicInfos)..addColumns($columns));
+  @override
+  Set<String> get readTables => const {'music_infos'};
+}
+
+class ProjectDetailViewData extends DataClass {
+  final String id;
+  final String title;
+  final bool isLiked;
+  final DateTime createdAt;
+  final String? musicId;
+  final String? musicTitle;
+  final String artist;
+  final int bpm;
+  final MusicType type;
+  final int? musicLength;
+  const ProjectDetailViewData(
+      {required this.id,
+      required this.title,
+      required this.isLiked,
+      required this.createdAt,
+      this.musicId,
+      this.musicTitle,
+      required this.artist,
+      required this.bpm,
+      required this.type,
+      this.musicLength});
+  factory ProjectDetailViewData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProjectDetailViewData(
+      id: serializer.fromJson<String>(json['id']),
+      title: serializer.fromJson<String>(json['title']),
+      isLiked: serializer.fromJson<bool>(json['isLiked']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      musicId: serializer.fromJson<String?>(json['musicId']),
+      musicTitle: serializer.fromJson<String?>(json['musicTitle']),
+      artist: serializer.fromJson<String>(json['artist']),
+      bpm: serializer.fromJson<int>(json['bpm']),
+      type: $MusicInfosTable.$convertertype
+          .fromJson(serializer.fromJson<int>(json['type'])),
+      musicLength: serializer.fromJson<int?>(json['musicLength']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'title': serializer.toJson<String>(title),
+      'isLiked': serializer.toJson<bool>(isLiked),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'musicId': serializer.toJson<String?>(musicId),
+      'musicTitle': serializer.toJson<String?>(musicTitle),
+      'artist': serializer.toJson<String>(artist),
+      'bpm': serializer.toJson<int>(bpm),
+      'type':
+          serializer.toJson<int>($MusicInfosTable.$convertertype.toJson(type)),
+      'musicLength': serializer.toJson<int?>(musicLength),
+    };
+  }
+
+  ProjectDetailViewData copyWith(
+          {String? id,
+          String? title,
+          bool? isLiked,
+          DateTime? createdAt,
+          Value<String?> musicId = const Value.absent(),
+          Value<String?> musicTitle = const Value.absent(),
+          String? artist,
+          int? bpm,
+          MusicType? type,
+          Value<int?> musicLength = const Value.absent()}) =>
+      ProjectDetailViewData(
+        id: id ?? this.id,
+        title: title ?? this.title,
+        isLiked: isLiked ?? this.isLiked,
+        createdAt: createdAt ?? this.createdAt,
+        musicId: musicId.present ? musicId.value : this.musicId,
+        musicTitle: musicTitle.present ? musicTitle.value : this.musicTitle,
+        artist: artist ?? this.artist,
+        bpm: bpm ?? this.bpm,
+        type: type ?? this.type,
+        musicLength: musicLength.present ? musicLength.value : this.musicLength,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ProjectDetailViewData(')
+          ..write('id: $id, ')
+          ..write('title: $title, ')
+          ..write('isLiked: $isLiked, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('musicId: $musicId, ')
+          ..write('musicTitle: $musicTitle, ')
+          ..write('artist: $artist, ')
+          ..write('bpm: $bpm, ')
+          ..write('type: $type, ')
+          ..write('musicLength: $musicLength')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, title, isLiked, createdAt, musicId,
+      musicTitle, artist, bpm, type, musicLength);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProjectDetailViewData &&
+          other.id == this.id &&
+          other.title == this.title &&
+          other.isLiked == this.isLiked &&
+          other.createdAt == this.createdAt &&
+          other.musicId == this.musicId &&
+          other.musicTitle == this.musicTitle &&
+          other.artist == this.artist &&
+          other.bpm == this.bpm &&
+          other.type == this.type &&
+          other.musicLength == this.musicLength);
+}
+
+class $ProjectDetailViewView
+    extends ViewInfo<$ProjectDetailViewView, ProjectDetailViewData>
+    implements HasResultSet {
+  final String? _alias;
+  @override
+  final _$AppDatabase attachedDatabase;
+  $ProjectDetailViewView(this.attachedDatabase, [this._alias]);
+  $MusicInfosTable get musicInfos =>
+      attachedDatabase.musicInfos.createAlias('t0');
+  $ProjectInfosTable get projects =>
+      attachedDatabase.projectInfos.createAlias('t1');
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        isLiked,
+        createdAt,
+        musicId,
+        musicTitle,
+        artist,
+        bpm,
+        type,
+        musicLength
+      ];
+  @override
+  String get aliasedName => _alias ?? entityName;
+  @override
+  String get entityName => 'project_detail_view';
+  @override
+  Map<SqlDialect, String>? get createViewStatements => null;
+  @override
+  $ProjectDetailViewView get asDslTable => this;
+  @override
+  ProjectDetailViewData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProjectDetailViewData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      isLiked: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_liked'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      musicId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}music_id']),
+      musicTitle: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}music_title']),
+      artist: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}artist'])!,
+      bpm: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}bpm'])!,
+      type: $MusicInfosTable.$convertertype.fromSql(attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
+      musicLength: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}music_length']),
+    );
+  }
+
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      generatedAs: GeneratedAs(projects.id, false), type: DriftSqlType.string);
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      generatedAs: GeneratedAs(projects.title, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<bool> isLiked = GeneratedColumn<bool>(
+      'is_liked', aliasedName, false,
+      generatedAs: GeneratedAs(projects.isLiked, false),
+      type: DriftSqlType.bool,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_liked" IN (0, 1))'));
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      generatedAs: GeneratedAs(projects.createdAt, false),
+      type: DriftSqlType.dateTime);
+  late final GeneratedColumn<String> musicId = GeneratedColumn<String>(
+      'music_id', aliasedName, true,
+      generatedAs: GeneratedAs(musicInfos.id, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<String> musicTitle = GeneratedColumn<String>(
+      'music_title', aliasedName, true,
+      generatedAs: GeneratedAs(musicInfos.title, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<String> artist = GeneratedColumn<String>(
+      'artist', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.artist, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<int> bpm = GeneratedColumn<int>(
+      'bpm', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.bpm, false), type: DriftSqlType.int);
+  late final GeneratedColumnWithTypeConverter<MusicType, int> type =
+      GeneratedColumn<int>('type', aliasedName, false,
+              generatedAs: GeneratedAs(musicInfos.type, false),
+              type: DriftSqlType.int)
+          .withConverter<MusicType>($MusicInfosTable.$convertertype);
+  late final GeneratedColumn<int> musicLength = GeneratedColumn<int>(
+      'music_length', aliasedName, true,
+      generatedAs: GeneratedAs(
+          TimeUtils.getTotalDurationInSec(
+              musicInfos.bpm, musicInfos.measureList.length),
+          false),
+      type: DriftSqlType.int);
+  @override
+  $ProjectDetailViewView createAlias(String alias) {
+    return $ProjectDetailViewView(attachedDatabase, alias);
+  }
+
+  @override
+  Query? get query => (attachedDatabase.selectOnly(projects)
+        ..addColumns($columns))
+      .join([innerJoin(musicInfos, projects.musicId.equalsExp(musicInfos.id))]);
+  @override
+  Set<String> get readTables => const {'music_infos', 'project_infos'};
+}
+
 class ProjectSidebarViewData extends DataClass {
   final String id;
   final String title;
@@ -1105,162 +1482,19 @@ class $ProjectThumbnailViewView
       const {'practice_infos', 'music_infos', 'project_infos'};
 }
 
-class MusicThumbnailViewData extends DataClass {
-  final String id;
-  final MusicType type;
-  final String title;
-  final String artist;
-  final Uint8List sheetSvg;
-  const MusicThumbnailViewData(
-      {required this.id,
-      required this.type,
-      required this.title,
-      required this.artist,
-      required this.sheetSvg});
-  factory MusicThumbnailViewData.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return MusicThumbnailViewData(
-      id: serializer.fromJson<String>(json['id']),
-      type: $MusicInfosTable.$convertertype
-          .fromJson(serializer.fromJson<int>(json['type'])),
-      title: serializer.fromJson<String>(json['title']),
-      artist: serializer.fromJson<String>(json['artist']),
-      sheetSvg: serializer.fromJson<Uint8List>(json['sheetSvg']),
-    );
-  }
-  @override
-  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
-    serializer ??= driftRuntimeOptions.defaultSerializer;
-    return <String, dynamic>{
-      'id': serializer.toJson<String>(id),
-      'type':
-          serializer.toJson<int>($MusicInfosTable.$convertertype.toJson(type)),
-      'title': serializer.toJson<String>(title),
-      'artist': serializer.toJson<String>(artist),
-      'sheetSvg': serializer.toJson<Uint8List>(sheetSvg),
-    };
-  }
-
-  MusicThumbnailViewData copyWith(
-          {String? id,
-          MusicType? type,
-          String? title,
-          String? artist,
-          Uint8List? sheetSvg}) =>
-      MusicThumbnailViewData(
-        id: id ?? this.id,
-        type: type ?? this.type,
-        title: title ?? this.title,
-        artist: artist ?? this.artist,
-        sheetSvg: sheetSvg ?? this.sheetSvg,
-      );
-  @override
-  String toString() {
-    return (StringBuffer('MusicThumbnailViewData(')
-          ..write('id: $id, ')
-          ..write('type: $type, ')
-          ..write('title: $title, ')
-          ..write('artist: $artist, ')
-          ..write('sheetSvg: $sheetSvg')
-          ..write(')'))
-        .toString();
-  }
-
-  @override
-  int get hashCode =>
-      Object.hash(id, type, title, artist, $driftBlobEquality.hash(sheetSvg));
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is MusicThumbnailViewData &&
-          other.id == this.id &&
-          other.type == this.type &&
-          other.title == this.title &&
-          other.artist == this.artist &&
-          $driftBlobEquality.equals(other.sheetSvg, this.sheetSvg));
-}
-
-class $MusicThumbnailViewView
-    extends ViewInfo<$MusicThumbnailViewView, MusicThumbnailViewData>
-    implements HasResultSet {
-  final String? _alias;
-  @override
-  final _$AppDatabase attachedDatabase;
-  $MusicThumbnailViewView(this.attachedDatabase, [this._alias]);
-  $MusicInfosTable get musicInfos =>
-      attachedDatabase.musicInfos.createAlias('t0');
-  @override
-  List<GeneratedColumn> get $columns => [id, type, title, artist, sheetSvg];
-  @override
-  String get aliasedName => _alias ?? entityName;
-  @override
-  String get entityName => 'music_thumbnail_view';
-  @override
-  Map<SqlDialect, String>? get createViewStatements => null;
-  @override
-  $MusicThumbnailViewView get asDslTable => this;
-  @override
-  MusicThumbnailViewData map(Map<String, dynamic> data, {String? tablePrefix}) {
-    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return MusicThumbnailViewData(
-      id: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
-      type: $MusicInfosTable.$convertertype.fromSql(attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
-      title: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
-      artist: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}artist'])!,
-      sheetSvg: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}sheet_svg'])!,
-    );
-  }
-
-  late final GeneratedColumn<String> id = GeneratedColumn<String>(
-      'id', aliasedName, false,
-      generatedAs: GeneratedAs(musicInfos.id, false),
-      type: DriftSqlType.string);
-  late final GeneratedColumnWithTypeConverter<MusicType, int> type =
-      GeneratedColumn<int>('type', aliasedName, false,
-              generatedAs: GeneratedAs(musicInfos.type, false),
-              type: DriftSqlType.int)
-          .withConverter<MusicType>($MusicInfosTable.$convertertype);
-  late final GeneratedColumn<String> title = GeneratedColumn<String>(
-      'title', aliasedName, false,
-      generatedAs: GeneratedAs(musicInfos.title, false),
-      type: DriftSqlType.string);
-  late final GeneratedColumn<String> artist = GeneratedColumn<String>(
-      'artist', aliasedName, false,
-      generatedAs: GeneratedAs(musicInfos.artist, false),
-      type: DriftSqlType.string);
-  late final GeneratedColumn<Uint8List> sheetSvg = GeneratedColumn<Uint8List>(
-      'sheet_svg', aliasedName, false,
-      generatedAs: GeneratedAs(musicInfos.sheetSvg, false),
-      type: DriftSqlType.blob);
-  @override
-  $MusicThumbnailViewView createAlias(String alias) {
-    return $MusicThumbnailViewView(attachedDatabase, alias);
-  }
-
-  @override
-  Query? get query =>
-      (attachedDatabase.selectOnly(musicInfos)..addColumns($columns));
-  @override
-  Set<String> get readTables => const {'music_infos'};
-}
-
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   late final $MusicInfosTable musicInfos = $MusicInfosTable(this);
   late final $ProjectInfosTable projectInfos = $ProjectInfosTable(this);
   late final $PracticeInfosTable practiceInfos = $PracticeInfosTable(this);
+  late final $MusicThumbnailViewView musicThumbnailView =
+      $MusicThumbnailViewView(this);
+  late final $ProjectDetailViewView projectDetailView =
+      $ProjectDetailViewView(this);
   late final $ProjectSidebarViewView projectSidebarView =
       $ProjectSidebarViewView(this);
   late final $ProjectThumbnailViewView projectThumbnailView =
       $ProjectThumbnailViewView(this);
-  late final $MusicThumbnailViewView musicThumbnailView =
-      $MusicThumbnailViewView(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -1269,8 +1503,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         musicInfos,
         projectInfos,
         practiceInfos,
+        musicThumbnailView,
+        projectDetailView,
         projectSidebarView,
-        projectThumbnailView,
-        musicThumbnailView
+        projectThumbnailView
       ];
 }

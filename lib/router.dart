@@ -1,15 +1,12 @@
+import 'package:application/models/entity/music_infos.dart';
 import 'package:application/screens/home_screen.dart';
 import 'package:application/screens/music_list_screen.dart';
 import 'package:application/screens/project_screen.dart';
+import 'package:application/screens/prompt_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-enum RouterPath {
-  list,
-  favoriteList,
-  project,
-  musicList,
-}
+enum RouterPath { list, favoriteList, project, musicList, prompt }
 
 CustomTransitionPage buildPageWithDefaultTransition<T>(
     BuildContext context, GoRouterState state, Widget child) {
@@ -46,6 +43,20 @@ final GoRouter goRouter = GoRouter(
       name: RouterPath.musicList.name,
       pageBuilder: (context, state) => buildPageWithDefaultTransition(
           context, state, const MusicListScreen()),
+    ),
+    GoRoute(
+      path: '/prompt/:id',
+      name: RouterPath.prompt.name,
+      pageBuilder: (context, state) {
+        return buildPageWithDefaultTransition(
+          context,
+          state,
+          PromptScreen(
+            music: state.extra as MusicInfo,
+            projectId: state.pathParameters["id"],
+          ),
+        );
+      },
     )
   ],
 );

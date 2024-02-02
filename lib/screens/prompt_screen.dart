@@ -1,4 +1,4 @@
-import 'package:application/constants.dart';
+import 'package:application/time_utils.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/screens/complete_screen.dart';
@@ -15,6 +15,7 @@ import 'package:application/widgets/prompt/precount_widget.dart';
 import 'package:application/widgets/prompt/prompt_footer_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
 // TODO: 켜지는 속도 조절, 비상 종료 예외 처리 등
 
@@ -37,10 +38,12 @@ SnackBar buildSnackbar(BuildContext context) {
 
 /// 프롬프트 화면
 class PromptScreen extends StatefulWidget {
+  final String? projectId;
   final MusicInfo music;
   const PromptScreen({
     super.key,
     required this.music,
+    required this.projectId,
   });
 
   @override
@@ -65,6 +68,9 @@ class PromptScreenState extends State<PromptScreen> {
 
   @override
   void initState() {
+    if (widget.projectId == null) {
+      context.pop();
+    }
     super.initState();
     metronome = Metronome(
       music: widget.music,
@@ -124,10 +130,8 @@ class PromptScreenState extends State<PromptScreen> {
     double? result = await showDialog<double>(
       context: context,
       barrierDismissible: false,
-      barrierColor: ColorStyles.blackShadow36,
+      // barrierColor: ColorStyles.blackShadow36,
       builder: (BuildContext context) => const AlertDialog(
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
         content: PracticeSettingModal(),
       ),
     );
@@ -139,8 +143,17 @@ class PromptScreenState extends State<PromptScreen> {
       metronome.setBPM((widget.music.bpm * currentSpeed!).toInt());
       lengthInSec =
           (widget.music.measureList.length * metronome.usPerBeat * 4) ~/
-              Constants.convertToMicro;
+              TimeUtils.convertToMicro;
     });
+
+// TODO: 종료 로직 다시 짜야 함.....
+    if (result == -1) {
+      setState(() {
+        context.pop();
+      });
+
+      return;
+    }
 
     triggerPractice();
   }
@@ -199,7 +212,8 @@ class PromptScreenState extends State<PromptScreen> {
     Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => PromptScreen(music: widget.music),
+          builder: (context) =>
+              PromptScreen(music: widget.music, projectId: widget.projectId),
         ));
   }
 

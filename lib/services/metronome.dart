@@ -1,4 +1,4 @@
-import 'package:application/constants.dart';
+import 'package:application/time_utils.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:audioplayers/audioplayers.dart';
@@ -41,7 +41,7 @@ class Metronome {
 
   setBPM(int bpm) {
     currentBPM = bpm;
-    usPerBeat = (60 * Constants.convertToMicro) ~/ currentBPM;
+    usPerBeat = TimeUtils.getUsPerBeat(currentBPM);
     offset = usPerBeat * 4;
   }
 
@@ -76,7 +76,7 @@ class Metronome {
     }
 
     // update time
-    updateTime((elasped.inMicroseconds - offset) ~/ Constants.convertToMicro);
+    updateTime((elasped.inMicroseconds - offset) ~/ TimeUtils.convertToMicro);
   }
 
   /// initialize player for metronome sound

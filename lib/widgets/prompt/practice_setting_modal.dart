@@ -55,7 +55,7 @@ class _PracticeSettingModalState extends State<PracticeSettingModal> {
                     children: [
                       TextButton.icon(
                         onPressed: () {
-                          Navigator.pop(context);
+                          Navigator.pop(context, -1.0);
                         },
                         icon: const Icon(
                           Icons.arrow_back_ios_rounded,

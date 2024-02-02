@@ -41,7 +41,7 @@ class _ProfileButton extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
       position: PopupMenuPosition.under,
       tooltip: 'show logout',
-      // surfaceTintColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
       constraints: const BoxConstraints(),
       onSelected: (value) {
         switch (value) {
