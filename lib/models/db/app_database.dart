@@ -94,4 +94,18 @@ class AppDatabase extends _$AppDatabase {
 
     return result[0].data["is_liked"];
   }
+
+  Future<void> addNewProject(String title, String musicId) => into(projectInfos)
+      .insert(ProjectInfosCompanion.insert(title: title, musicId: musicId));
+
+  Future<void> addNewMusic(MusicInfo music) =>
+      into(musicInfos).insert(MusicInfosCompanion.insert(
+        title: music.title,
+        bpm: music.bpm,
+        artist: music.artist,
+        cursorList: [],
+        measureList: [],
+        sheetSvg: music.sheetSvg,
+        type: music.type,
+      ));
 }

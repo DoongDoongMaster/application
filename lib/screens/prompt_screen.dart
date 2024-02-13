@@ -131,9 +131,7 @@ class PromptScreenState extends State<PromptScreen> {
       context: context,
       barrierDismissible: false,
       // barrierColor: ColorStyles.blackShadow36,
-      builder: (BuildContext context) => const AlertDialog(
-        content: PracticeSettingModal(),
-      ),
+      builder: (BuildContext context) => const PracticeSettingModal(),
     );
 
     setState(() {

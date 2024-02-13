@@ -113,7 +113,7 @@ class _VerticalContent extends StatelessWidget {
                         child: OneLineTextWithMarquee(
                           projectDetailInfo.musicTitle!,
                           alignment: Alignment.bottomLeft,
-                          style: TextStyles.headlineSmall.copyWith(height: 1),
+                          style: TextStyles.headlineSmall.copyWith(height: 1.5),
                           crossAxisAlignment: CrossAxisAlignment.end,
                         ),
                       ),
@@ -264,13 +264,14 @@ class _InfoText extends StatelessWidget {
   final String artist;
   final int bpm;
   final int length;
+  final Duration duration;
   final DateTime createdAt;
-  const _InfoText({
+  _InfoText({
     required this.bpm,
     required this.length,
     required this.createdAt,
     required this.artist,
-  });
+  }) : duration = Duration(seconds: length);
 
   @override
   Widget build(BuildContext context) {

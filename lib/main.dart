@@ -17,7 +17,7 @@ void main() async {
 
 // TODO: 우선 디버깅 용으로, 재 실행시 테스트 데이터 있는지 확인하고 넣도록 수정 필요함.
 
-  for (var i = 0; i < 5; i++) {
+  for (var i = 0; i < 25; i++) {
     MusicInfo music = await database.into(database.musicInfos).insertReturning(
           MusicInfosCompanion.insert(
             title: '이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!',
@@ -28,7 +28,8 @@ void main() async {
                 .asUint8List(),
             cursorList: List<Cursors>.from(
                 sheetInfo["cursorList"].map((v) => Cursors.fromJson(v))),
-            measureList: [],
+            measureList: List<Cursors>.from(
+                sheetInfo["cursorList"].map((v) => Cursors.fromJson(v))),
             type: MusicType.ddm,
           ),
         );

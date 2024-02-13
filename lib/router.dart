@@ -6,7 +6,15 @@ import 'package:application/screens/prompt_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-enum RouterPath { list, favoriteList, project, musicList, prompt }
+enum RouterPath {
+  list,
+  favoriteList,
+  project,
+  musicList,
+  prompt,
+  musicListDDM,
+  musicListUser,
+}
 
 CustomTransitionPage buildPageWithDefaultTransition<T>(
     BuildContext context, GoRouterState state, Widget child) {
@@ -19,33 +27,53 @@ CustomTransitionPage buildPageWithDefaultTransition<T>(
 }
 
 final GoRouter goRouter = GoRouter(
-  initialLocation: '/list',
+  initialLocation: '/${RouterPath.musicList}',
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
-        path: '/list',
+        path: '/${RouterPath.list}',
         name: RouterPath.list.name,
         pageBuilder: (context, state) =>
             buildPageWithDefaultTransition(context, state, const HomeScreen())),
     GoRoute(
-        path: '/favorite-list',
+        path: '/${RouterPath.favoriteList}',
         name: RouterPath.favoriteList.name,
         pageBuilder: (context, state) => buildPageWithDefaultTransition(
             context, state, const HomeScreen(favoriteOnly: true))),
     GoRoute(
-      path: '/project/:id',
+      path: '/${RouterPath.project}/:id',
       name: RouterPath.project.name,
       pageBuilder: (context, state) => buildPageWithDefaultTransition(
           context, state, ProjectScreen(projectId: state.pathParameters['id'])),
     ),
     GoRoute(
-      path: '/music-list',
+      path: '/${RouterPath.musicList}',
       name: RouterPath.musicList.name,
       pageBuilder: (context, state) => buildPageWithDefaultTransition(
           context, state, const MusicListScreen()),
     ),
     GoRoute(
-      path: '/prompt/:id',
+      path: '/${RouterPath.musicList}/${MusicType.ddm.name}',
+      name: RouterPath.musicListDDM.name,
+      pageBuilder: (context, state) => buildPageWithDefaultTransition(
+          context,
+          state,
+          const MusicListScreen(
+            filter: MusicType.ddm,
+          )),
+    ),
+    GoRoute(
+      path: '/${RouterPath.musicList}/${MusicType.user.name}',
+      name: RouterPath.musicListUser.name,
+      pageBuilder: (context, state) => buildPageWithDefaultTransition(
+          context,
+          state,
+          const MusicListScreen(
+            filter: MusicType.user,
+          )),
+    ),
+    GoRoute(
+      path: '/${RouterPath.prompt}/:id',
       name: RouterPath.prompt.name,
       pageBuilder: (context, state) {
         return buildPageWithDefaultTransition(

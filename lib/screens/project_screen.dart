@@ -5,6 +5,7 @@ import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/home/Navigation_panel.dart';
+import 'package:application/widgets/no_content_widget.dart';
 import 'package:application/widgets/responsive_project_header.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -64,7 +65,8 @@ class _ProjectScreenState extends State<ProjectScreen> {
                 const SizedBox(height: 40),
                 Row(
                   children: [
-                    if (context.canPop()) const BackButtonWithText(),
+                    if (context.canPop())
+                      const BackButtonWithText(label: '연습장'),
                     const Spacer(),
                     IconButtonWithGrayBackground(
                       icon: projectDetailInfo.isLiked
@@ -103,9 +105,10 @@ class _ProjectScreenState extends State<ProjectScreen> {
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              const Padding(
-                                padding: EdgeInsets.symmetric(vertical: 24),
-                                child: _BigThumbnail(),
+                              Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 24),
+                                child: _BigThumbnail(projectDetailInfo.type),
                               ),
                               Expanded(
                                 child: ResponsiveProjectHeader(
@@ -115,22 +118,23 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           ),
                         ),
                       ),
-
-                      /// items
-                      for (var i = 0; i < 10; i++) ...[
-                        SliverToBoxAdapter(
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 40, right: 24),
                           child: Container(
-                            color: Colors.black,
-                            height: 100,
+                            height: 400,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(8),
+                              color: const Color(0xFFF3F1ED),
+                            ),
+                            alignment: Alignment.center,
+                            child: const NoContentWidget(
+                              title: '연주 기록이 비어 있음',
+                              subTitle: '완곡 연주 버튼을 눌러 연주를 시작하세요.',
+                            ),
                           ),
                         ),
-                        SliverToBoxAdapter(
-                          child: Container(
-                            color: Colors.blue,
-                            height: 100,
-                          ),
-                        )
-                      ]
+                      ),
                     ],
                   ),
                 )
@@ -145,29 +149,34 @@ class _ProjectScreenState extends State<ProjectScreen> {
 
 /// 연습 섬네일 TODO: 사용자 등록 악보 섬네일 따로 처리 필요함.
 class _BigThumbnail extends StatelessWidget {
-  const _BigThumbnail();
+  final MusicType musicType;
+  const _BigThumbnail(this.musicType);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(10),
       decoration: BoxDecoration(
-          color: ColorStyles.primaryLight,
-          border: Border.all(
-            color: Colors.white,
-            width: 2.4,
-            strokeAlign: BorderSide.strokeAlignInside,
-          ),
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: const [
-            BoxShadow(
-              color: ColorStyles.blackShadow8,
-              blurRadius: 24,
-              offset: Offset(0, 12),
-            )
-          ]),
+        color: musicType == MusicType.ddm
+            ? ColorStyles.primaryLight
+            : ColorStyles.secondary,
+        border: Border.all(
+          color: Colors.white,
+          width: 2.4,
+          strokeAlign: BorderSide.strokeAlignInside,
+        ),
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: ColorStyles.blackShadow8,
+            blurRadius: 24,
+            offset: Offset(0, 12),
+          )
+        ],
+      ),
       child: Image.asset(
         'assets/images/logo.png',
+        color: musicType != MusicType.ddm ? Colors.transparent : null,
       ),
     );
   }
@@ -204,8 +213,10 @@ class IconButtonWithGrayBackground extends StatelessWidget {
 }
 
 class BackButtonWithText extends StatelessWidget {
+  final String label;
   const BackButtonWithText({
     super.key,
+    required this.label,
   });
 
   @override
@@ -221,7 +232,7 @@ class BackButtonWithText extends StatelessWidget {
             size: 24,
           ),
           const SizedBox(width: 4),
-          Text("연습장",
+          Text(label,
               style: TextStyles.bodyMedium.copyWith(color: ColorStyles.primary))
         ],
       ),

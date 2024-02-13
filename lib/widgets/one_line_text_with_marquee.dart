@@ -31,8 +31,8 @@ class OneLineTextWithMarquee extends StatelessWidget {
           blankSpace: 100,
           velocity: 50,
           crossAxisAlignment: crossAxisAlignment,
+          pauseAfterRound: const Duration(seconds: 3),
         ),
-        // overflowReplacement: const Text("sdf"),
       ),
     );
   }

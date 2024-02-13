@@ -146,8 +146,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
                 }
               },
             )
-          ],
-          const Spacer(),
+          ] else
+            const Spacer(),
           MenuChip(
             label: "새로운 연습",
             isSelected: widget.currentPath == RouterPath.musicList,

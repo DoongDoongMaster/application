@@ -17,14 +17,14 @@ class MusicInfo {
   final MusicType type;
 
   MusicInfo({
-    required this.id,
-    required this.title,
-    required this.artist,
-    required this.bpm,
-    required this.cursorList,
+    this.id = "",
+    this.title = "",
+    this.artist = "",
+    this.bpm = 0,
+    this.cursorList = const [],
     required this.sheetSvg,
-    required this.measureList,
-    required this.type,
+    this.measureList = const [],
+    this.type = MusicType.user,
   });
 }
 

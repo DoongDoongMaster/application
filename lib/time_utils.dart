@@ -19,6 +19,6 @@ class TimeUtils {
 
   static Expression<int> getTotalDurationInSec(
       Column<int> bpm, Expression<int> measureLength) {
-    return (const Constant(4 * timeUnit) * measureLength) / bpm;
+    return (const Constant(4 * timeUnit) / bpm) * measureLength;
   }
 }

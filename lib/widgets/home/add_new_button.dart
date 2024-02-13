@@ -18,7 +18,7 @@ class AddNewButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.transparent,
+          backgroundColor: ColorStyles.background,
           shadowColor: Colors.transparent,
           fixedSize: size,
           padding: EdgeInsets.zero,
@@ -39,7 +39,7 @@ class AddNewButton extends StatelessWidget {
             children: [
               const Icon(Icons.add_rounded, size: 36),
               const SizedBox(height: 7),
-              Text(label, style: TextStyles.bodyMedium)
+              Text(label, style: TextStyles.bodyMedium),
             ],
           ),
         ));
