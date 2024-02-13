@@ -107,5 +107,9 @@ class AppDatabase extends _$AppDatabase {
         measureList: [],
         sheetSvg: music.sheetSvg,
         type: music.type,
+        lengthInSec: TimeUtils.getTotalDurationInSec(music.bpm, 0),
       ));
+
+  Future<void> deleteProject(String id) =>
+      (delete(projectInfos)..where((tbl) => tbl.id.equals(id))).go();
 }

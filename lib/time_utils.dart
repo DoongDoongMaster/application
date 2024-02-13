@@ -1,5 +1,3 @@
-import 'package:drift/drift.dart';
-
 class TimeUtils {
   static const int timeUnit = 60;
   static const int convertToMilli = 1000;
@@ -17,8 +15,7 @@ class TimeUtils {
     return Duration(microseconds: getUsPerBeat(bpm) * measureLength * 4);
   }
 
-  static Expression<int> getTotalDurationInSec(
-      Column<int> bpm, Expression<int> measureLength) {
-    return (const Constant(4 * timeUnit) / bpm) * measureLength;
+  static int getTotalDurationInSec(int bpm, int measureLength) {
+    return getTotalDuration(bpm, measureLength).inSeconds;
   }
 }

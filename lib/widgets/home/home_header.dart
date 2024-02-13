@@ -38,10 +38,7 @@ class _ProfileButton extends StatelessWidget {
         Icons.account_circle_rounded,
         size: 36,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-      position: PopupMenuPosition.under,
       tooltip: 'show logout',
-      surfaceTintColor: Colors.transparent,
       constraints: const BoxConstraints(),
       onSelected: (value) {
         switch (value) {
@@ -50,23 +47,17 @@ class _ProfileButton extends StatelessWidget {
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
-        PopupMenuItem(
+        const PopupMenuItem(
           padding: EdgeInsets.zero,
           height: 28,
           value: 0,
           child: ListTile(
-            visualDensity: const VisualDensity(vertical: -3),
-            dense: true,
-            trailing: const Icon(
+            trailing: Icon(
               Icons.logout_rounded,
               size: 18,
-              color: Colors.black,
             ),
-            contentPadding: const EdgeInsets.only(left: 16, right: 16),
-            minLeadingWidth: 200,
             leading: Text(
               "로그아웃",
-              style: TextStyles.bodyMedium.copyWith(color: Colors.black),
             ),
           ),
         )

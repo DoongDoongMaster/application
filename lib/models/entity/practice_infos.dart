@@ -29,5 +29,6 @@ class PracticeInfos extends DefaultTable {
   // BlobColumn get resultJson => blob()();
   BoolColumn get isNew => boolean().withDefault(const Constant(true))();
 
-  TextColumn get projectId => text().references(ProjectInfos, #id)();
+  TextColumn get projectId =>
+      text().references(ProjectInfos, #id, onDelete: KeyAction.cascade)();
 }

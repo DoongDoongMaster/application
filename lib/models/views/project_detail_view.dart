@@ -1,6 +1,5 @@
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
-import 'package:application/time_utils.dart';
 import 'package:drift/drift.dart';
 
 abstract class ProjectDetailView extends View {
@@ -9,8 +8,7 @@ abstract class ProjectDetailView extends View {
 
   Expression<String> get musicId => musicInfos.id;
   Expression<String> get musicTitle => musicInfos.title;
-  Expression<int> get musicLength => TimeUtils.getTotalDurationInSec(
-      musicInfos.bpm, musicInfos.measureList.length);
+  Expression<int> get musicLength => musicInfos.lengthInSec;
 
   @override
   Query as() => select([

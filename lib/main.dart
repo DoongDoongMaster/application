@@ -5,6 +5,8 @@ import 'package:application/models/entity/project_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/sample_music.dart';
 import 'package:application/styles/color_styles.dart';
+import 'package:application/styles/text_styles.dart';
+import 'package:application/time_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -21,7 +23,7 @@ void main() async {
     MusicInfo music = await database.into(database.musicInfos).insertReturning(
           MusicInfosCompanion.insert(
             title: '이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!',
-            bpm: 87,
+            bpm: 240,
             artist: '아티스트 $i',
             sheetSvg: (await rootBundle.load('assets/music/stay-with-me.svg'))
                 .buffer
@@ -29,8 +31,10 @@ void main() async {
             cursorList: List<Cursors>.from(
                 sheetInfo["cursorList"].map((v) => Cursors.fromJson(v))),
             measureList: List<Cursors>.from(
-                sheetInfo["cursorList"].map((v) => Cursors.fromJson(v))),
+                    sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
+                .sublist(0, 10),
             type: MusicType.ddm,
+            lengthInSec: TimeUtils.getTotalDurationInSec(240, 10),
           ),
         );
 
@@ -44,8 +48,6 @@ void main() async {
           PracticeInfosCompanion.insert(bpm: 100, projectId: project.id));
     }
   }
-
-  database.select(database.projectThumbnailView).get();
 
   // final temp = await database.select(database.projectThumbnailView).get();
   // print(temp);
@@ -61,59 +63,74 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       theme: ThemeData(
-        useMaterial3: true,
-        // primaryColor: ColorStyles.primary,
-        // scaffoldBackgroundColor: ColorStyles.background,
-        canvasColor: Colors.transparent,
-        fontFamily: 'NanumBarunGothic',
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.transparent,
-          surfaceTintColor: Colors.transparent,
-          titleSpacing: 0,
-        ),
-        colorScheme: const ColorScheme(
-          primary: ColorStyles.primary,
-          onPrimary: Colors.white,
-          background: ColorStyles.background,
-          onBackground: Colors.black,
-          brightness: Brightness.light,
-          secondary: ColorStyles.secondary,
-          onSecondary: Colors.white,
-          error: ColorStyles.primary,
-          onError: Colors.white,
-          surface: Colors.white,
-          onSurface: Colors.black,
-          outlineVariant: Color(0xFFCAC4D0),
-        ),
-        iconTheme: const IconThemeData(color: ColorStyles.primary),
-        buttonTheme: ButtonThemeData(
-          buttonColor: Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+          useMaterial3: true,
+          // primaryColor: ColorStyles.primary,
+          // scaffoldBackgroundColor: ColorStyles.background,
+          canvasColor: Colors.transparent,
+          fontFamily: 'NanumBarunGothic',
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.transparent,
+            surfaceTintColor: Colors.transparent,
+            titleSpacing: 0,
           ),
-        ),
-        textButtonTheme: TextButtonThemeData(
-          style: TextButton.styleFrom(
+          colorScheme: const ColorScheme(
+            primary: ColorStyles.primary,
+            onPrimary: Colors.white,
+            background: ColorStyles.background,
+            onBackground: Colors.black,
+            brightness: Brightness.light,
+            secondary: ColorStyles.secondary,
+            onSecondary: Colors.white,
+            error: ColorStyles.primary,
+            onError: Colors.white,
+            surface: Colors.white,
+            onSurface: Colors.black,
+            outlineVariant: Color(0xFFCAC4D0),
+          ),
+          iconTheme: const IconThemeData(color: ColorStyles.primary),
+          buttonTheme: ButtonThemeData(
+            buttonColor: Colors.transparent,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-          surfaceTintColor: Colors.transparent,
-          foregroundColor: ColorStyles.primary,
-        )),
-        chipTheme: const ChipThemeData(
-          selectedColor: ColorStyles.primary,
-          side: BorderSide.none,
-          showCheckmark: false,
-        ),
-        dialogTheme: const DialogTheme(
-          surfaceTintColor: Colors.transparent,
-        ),
-        dialogBackgroundColor: Colors.transparent,
-      ),
+          textButtonTheme: TextButtonThemeData(
+            style: TextButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+          ),
+          elevatedButtonTheme: ElevatedButtonThemeData(
+              style: ElevatedButton.styleFrom(
+            surfaceTintColor: Colors.transparent,
+            foregroundColor: ColorStyles.primary,
+          )),
+          chipTheme: const ChipThemeData(
+            selectedColor: ColorStyles.primary,
+            side: BorderSide.none,
+            showCheckmark: false,
+          ),
+          dialogTheme: const DialogTheme(
+            surfaceTintColor: Colors.transparent,
+          ),
+          dialogBackgroundColor: Colors.transparent,
+          listTileTheme: ListTileThemeData(
+            visualDensity: const VisualDensity(vertical: -3),
+            dense: true,
+            minLeadingWidth: 200,
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            leadingAndTrailingTextStyle: TextStyles.bodyMedium.copyWith(
+              color: Colors.black,
+            ),
+            iconColor: Colors.black,
+          ),
+          popupMenuTheme: PopupMenuThemeData(
+            position: PopupMenuPosition.under,
+            surfaceTintColor: Colors.transparent,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          )),
       color: ColorStyles.primary,
       routerConfig: goRouter,
       // home: const Scaffold(body: MusicListScreen()),

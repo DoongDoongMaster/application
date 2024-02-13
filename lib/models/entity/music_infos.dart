@@ -1,4 +1,5 @@
 import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/time_utils.dart';
 import 'package:drift/drift.dart';
 import 'package:application/models/entity/default_table.dart';
 
@@ -10,7 +11,7 @@ enum MusicType {
 
 class MusicInfo {
   final String id, title, artist;
-  final int bpm;
+  final int bpm, lengthInSec;
   final List<Cursors> cursorList;
   final Uint8List sheetSvg;
   final List<Cursors> measureList;
@@ -25,7 +26,8 @@ class MusicInfo {
     required this.sheetSvg,
     this.measureList = const [],
     this.type = MusicType.user,
-  });
+  }) : lengthInSec =
+            TimeUtils.getTotalDuration(bpm, measureList.length).inSeconds;
 }
 
 @UseRowClass(MusicInfo)
@@ -37,6 +39,7 @@ class MusicInfos extends DefaultTable {
 
   TextColumn get title => text()();
   IntColumn get bpm => integer()();
+  IntColumn get lengthInSec => integer()();
   TextColumn get artist => text()();
 
   // BlobColumn get infoJson => blob()();

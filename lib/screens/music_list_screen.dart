@@ -8,7 +8,7 @@ import 'package:application/widgets/home/add_new_button.dart';
 import 'package:application/widgets/home/add_new_modal.dart';
 import 'package:application/widgets/home/n_column_grid_view.dart';
 import 'package:application/widgets/home/navigation_panel.dart';
-import 'package:application/widgets/home_header.dart';
+import 'package:application/widgets/home/home_header.dart';
 import 'package:application/widgets/no_content_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';

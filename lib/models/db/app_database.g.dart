@@ -42,6 +42,12 @@ class $MusicInfosTable extends MusicInfos
   late final GeneratedColumn<int> bpm = GeneratedColumn<int>(
       'bpm', aliasedName, false,
       type: DriftSqlType.int, requiredDuringInsert: true);
+  static const VerificationMeta _lengthInSecMeta =
+      const VerificationMeta('lengthInSec');
+  @override
+  late final GeneratedColumn<int> lengthInSec = GeneratedColumn<int>(
+      'length_in_sec', aliasedName, false,
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _artistMeta = const VerificationMeta('artist');
   @override
   late final GeneratedColumn<String> artist = GeneratedColumn<String>(
@@ -80,6 +86,7 @@ class $MusicInfosTable extends MusicInfos
         updatedAt,
         title,
         bpm,
+        lengthInSec,
         artist,
         cursorList,
         measureList,
@@ -118,6 +125,14 @@ class $MusicInfosTable extends MusicInfos
           _bpmMeta, bpm.isAcceptableOrUnknown(data['bpm']!, _bpmMeta));
     } else if (isInserting) {
       context.missing(_bpmMeta);
+    }
+    if (data.containsKey('length_in_sec')) {
+      context.handle(
+          _lengthInSecMeta,
+          lengthInSec.isAcceptableOrUnknown(
+              data['length_in_sec']!, _lengthInSecMeta));
+    } else if (isInserting) {
+      context.missing(_lengthInSecMeta);
     }
     if (data.containsKey('artist')) {
       context.handle(_artistMeta,
@@ -183,6 +198,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
   final Value<DateTime> updatedAt;
   final Value<String> title;
   final Value<int> bpm;
+  final Value<int> lengthInSec;
   final Value<String> artist;
   final Value<List<Cursors>> cursorList;
   final Value<List<Cursors>> measureList;
@@ -195,6 +211,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.updatedAt = const Value.absent(),
     this.title = const Value.absent(),
     this.bpm = const Value.absent(),
+    this.lengthInSec = const Value.absent(),
     this.artist = const Value.absent(),
     this.cursorList = const Value.absent(),
     this.measureList = const Value.absent(),
@@ -208,6 +225,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.updatedAt = const Value.absent(),
     required String title,
     required int bpm,
+    required int lengthInSec,
     required String artist,
     required List<Cursors> cursorList,
     required List<Cursors> measureList,
@@ -216,6 +234,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.rowid = const Value.absent(),
   })  : title = Value(title),
         bpm = Value(bpm),
+        lengthInSec = Value(lengthInSec),
         artist = Value(artist),
         cursorList = Value(cursorList),
         measureList = Value(measureList),
@@ -227,6 +246,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     Expression<DateTime>? updatedAt,
     Expression<String>? title,
     Expression<int>? bpm,
+    Expression<int>? lengthInSec,
     Expression<String>? artist,
     Expression<String>? cursorList,
     Expression<String>? measureList,
@@ -240,6 +260,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (title != null) 'title': title,
       if (bpm != null) 'bpm': bpm,
+      if (lengthInSec != null) 'length_in_sec': lengthInSec,
       if (artist != null) 'artist': artist,
       if (cursorList != null) 'cursor_list': cursorList,
       if (measureList != null) 'measure_list': measureList,
@@ -255,6 +276,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       Value<DateTime>? updatedAt,
       Value<String>? title,
       Value<int>? bpm,
+      Value<int>? lengthInSec,
       Value<String>? artist,
       Value<List<Cursors>>? cursorList,
       Value<List<Cursors>>? measureList,
@@ -267,6 +289,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       updatedAt: updatedAt ?? this.updatedAt,
       title: title ?? this.title,
       bpm: bpm ?? this.bpm,
+      lengthInSec: lengthInSec ?? this.lengthInSec,
       artist: artist ?? this.artist,
       cursorList: cursorList ?? this.cursorList,
       measureList: measureList ?? this.measureList,
@@ -293,6 +316,9 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     }
     if (bpm.present) {
       map['bpm'] = Variable<int>(bpm.value);
+    }
+    if (lengthInSec.present) {
+      map['length_in_sec'] = Variable<int>(lengthInSec.value);
     }
     if (artist.present) {
       map['artist'] = Variable<String>(artist.value);
@@ -326,6 +352,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
           ..write('updatedAt: $updatedAt, ')
           ..write('title: $title, ')
           ..write('bpm: $bpm, ')
+          ..write('lengthInSec: $lengthInSec, ')
           ..write('artist: $artist, ')
           ..write('cursorList: $cursorList, ')
           ..write('measureList: $measureList, ')
@@ -626,8 +653,8 @@ class $PracticeInfosTable extends PracticeInfos
       'project_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES project_infos (id)'));
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES project_infos (id) ON DELETE CASCADE'));
   @override
   List<GeneratedColumn> get $columns =>
       [id, createdAt, updatedAt, title, score, bpm, isNew, projectId];
@@ -1195,10 +1222,7 @@ class $ProjectDetailViewView
           .withConverter<MusicType>($MusicInfosTable.$convertertype);
   late final GeneratedColumn<int> musicLength = GeneratedColumn<int>(
       'music_length', aliasedName, true,
-      generatedAs: GeneratedAs(
-          TimeUtils.getTotalDurationInSec(
-              musicInfos.bpm, musicInfos.measureList.length),
-          false),
+      generatedAs: GeneratedAs(musicInfos.lengthInSec, false),
       type: DriftSqlType.int);
   @override
   $ProjectDetailViewView createAlias(String alias) {
@@ -1508,4 +1532,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         projectSidebarView,
         projectThumbnailView
       ];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('project_infos',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('practice_infos', kind: UpdateKind.delete),
+            ],
+          ),
+        ],
+      );
 }

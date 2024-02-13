@@ -84,7 +84,55 @@ class _ProjectScreenState extends State<ProjectScreen> {
                     ),
                     IconButtonWithGrayBackground(
                       icon: Icons.more_horiz_rounded,
-                      onPressed: () {},
+                      onPressed: () {
+                        (context) => [
+                              const PopupMenuItem(
+                                child: Text("hi"),
+                              ),
+                            ];
+                      },
+                    ),
+                    Container(
+                      width: 24,
+                      height: 24,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        color: ColorStyles.gray,
+                      ),
+                      child: PopupMenuButton(
+                        iconSize: 20,
+                        icon: const Icon(
+                          Icons.more_horiz_rounded,
+                        ),
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        onSelected: (value) {
+                          switch (value) {
+                            case 0:
+                              database
+                                  .deleteProject(widget.projectId!)
+                                  .then((value) {
+                                context.pushReplacementNamed(
+                                    RouterPath.list.name,
+                                    queryParameters: {'refresh': ''});
+                              });
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            padding: EdgeInsets.zero,
+                            height: 28,
+                            value: 0,
+                            child: ListTile(
+                              trailing: Icon(
+                                Icons.delete_outline_rounded,
+                                size: 18,
+                              ),
+                              leading: Text("삭제하기"),
+                            ),
+                          )
+                        ],
+                      ),
                     ),
                     const SizedBox(width: 20),
                   ],
