@@ -1,9 +1,9 @@
-import 'package:application/models/music_model.dart';
+import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:flutter/material.dart';
 
 class CursorWidget extends StatelessWidget {
-  final CursorModel cursorInfo;
+  final Cursors cursorInfo;
 
   const CursorWidget({super.key, required this.cursorInfo});
 

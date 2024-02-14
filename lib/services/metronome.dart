@@ -1,12 +1,13 @@
-import 'package:application/constants.dart';
-import 'package:application/models/music_model.dart';
+import 'package:application/time_utils.dart';
+import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/models/entity/music_infos.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/scheduler.dart';
 
 class Metronome {
   /// 악보에 의존
-  final MusicModel music;
-  final void Function(CursorModel) updateCursor;
+  final MusicInfo music;
+  final void Function(Cursors) updateCursor;
   final void Function(int) updateTime;
   final void Function() onComplete;
   double volume = 1;
@@ -40,7 +41,7 @@ class Metronome {
 
   setBPM(int bpm) {
     currentBPM = bpm;
-    usPerBeat = (60 * Constants.convertToMicro) ~/ currentBPM;
+    usPerBeat = TimeUtils.getUsPerBeat(currentBPM);
     offset = usPerBeat * 4;
   }
 
@@ -75,7 +76,7 @@ class Metronome {
     }
 
     // update time
-    updateTime((elasped.inMicroseconds - offset) ~/ Constants.convertToMicro);
+    updateTime((elasped.inMicroseconds - offset) ~/ TimeUtils.convertToMicro);
   }
 
   /// initialize player for metronome sound

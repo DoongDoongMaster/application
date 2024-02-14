@@ -1,6 +1,7 @@
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:application/widgets/custom_dialog.dart';
 import 'package:flutter/material.dart';
 
 class PracticeSettingModal extends StatefulWidget {
@@ -19,26 +20,8 @@ class _PracticeSettingModalState extends State<PracticeSettingModal> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 540,
+    return CustomDialog(
       height: 240,
-      decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          color: Colors.white,
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x4C000000),
-              blurRadius: 3,
-              offset: Offset(0, 2),
-              spreadRadius: 0,
-            ),
-            BoxShadow(
-              color: Color(0x26000000),
-              blurRadius: 10,
-              offset: Offset(0, 6),
-              spreadRadius: 4,
-            )
-          ]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -55,7 +38,7 @@ class _PracticeSettingModalState extends State<PracticeSettingModal> {
                     children: [
                       TextButton.icon(
                         onPressed: () {
-                          Navigator.pop(context, -1);
+                          Navigator.pop(context, -1.0);
                         },
                         icon: const Icon(
                           Icons.arrow_back_ios_rounded,
@@ -136,18 +119,15 @@ class _PracticeSettingModalState extends State<PracticeSettingModal> {
                             labelStyle: TextStyles.bodysmall.copyWith(
                                 color: selected ? Colors.white : Colors.black),
                             backgroundColor: ColorStyles.lightGray,
-                            selectedColor: ColorStyles.primary,
-                            shadowColor: Colors.transparent,
-                            surfaceTintColor: Colors.transparent,
+                            // shadowColor: Colors.transparent,
+                            // surfaceTintColor: Colors.transparent,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(6),
                             ),
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 7, vertical: 5),
-                            side: BorderSide.none,
                             label: Text('${speed[index]}x'),
                             selected: selected,
-                            showCheckmark: false,
                             onSelected: (bool selected) {
                               setState(() {
                                 if (selected) {

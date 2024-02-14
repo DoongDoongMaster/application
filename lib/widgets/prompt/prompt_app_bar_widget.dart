@@ -1,7 +1,7 @@
 import 'package:application/screens/complete_screen.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
-import 'package:application/widgets/music_title_widget.dart';
+import 'package:application/widgets/one_line_text_with_marquee.dart';
 import 'package:flutter/material.dart';
 
 class PromptAppBarWidget extends StatelessWidget {
@@ -42,7 +42,7 @@ class PromptAppBarWidget extends StatelessWidget {
                     ),
                   ),
                 ),
-                MusicTitleWidget(musicTitle: title),
+                _MusicTitleWidget(musicTitle: title),
                 Expanded(
                   child: Align(
                     alignment: Alignment.centerRight,
@@ -70,6 +70,28 @@ class PromptAppBarWidget extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _MusicTitleWidget extends StatelessWidget {
+  const _MusicTitleWidget({
+    required this.musicTitle,
+  });
+
+  final String musicTitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 600,
+      height: 50,
+      child: OneLineTextWithMarquee(
+        musicTitle,
+        alignment: Alignment.center,
+        style: TextStyles.headlineSmall,
+        crossAxisAlignment: CrossAxisAlignment.center,
       ),
     );
   }
