@@ -12,6 +12,7 @@ class ColorStyles {
 
   static const background = Color(0xFFFAF8F5);
   static const panelBackground = Color(0xFFF2F2F6);
+  static const panelCard = Color(0xFFF3F1ED);
 
   static const stroke = Color(0xFFC6C6C8);
   static const gray = Color(0xFFEEEEEF);
@@ -32,5 +33,9 @@ class ColorStyles {
   static const onSurfaceBlackVariant = Color(0xFF49454F);
   static const progressBackground = Color(0xA39A948D);
 
-  static const miss = Color(0xFF8A8A8A);
+  static const graphCorrect = Color(0xFF3EB13C);
+  static const graphWrongComponent = Color(0xFFFFD977);
+  static const graphWrongTiming = Color(0xFFFFA049);
+  static const graphWrong = Color(0xFFFF4848);
+  static const graphMiss = Color(0xFF8A8A8A);
 }

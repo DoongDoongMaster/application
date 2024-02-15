@@ -46,7 +46,7 @@ class ProjectPreview extends StatelessWidget {
           fixedSize: size,
           padding: const EdgeInsets.all(2.4),
           elevation: 2,
-          shadowColor: Colors.transparent.withOpacity(0.7),
+          shadowColor: const Color.fromRGBO(0, 0, 0, 0.7),
         ),
         child: Badge(
           label: Icon(
@@ -54,9 +54,9 @@ class ProjectPreview extends StatelessWidget {
             color: data.isLiked ? const Color(0xFFFF0000) : Colors.transparent,
             shadows: [
               if (!data.isLiked) ...[
-                BoxShadow(
-                  color: Colors.transparent.withOpacity(0.25),
-                  offset: const Offset(0, 0),
+                const BoxShadow(
+                  color: Color.fromRGBO(0, 0, 0, 0.25),
+                  offset: Offset(0, 0),
                   blurRadius: 1,
                   spreadRadius: 0,
                 ),

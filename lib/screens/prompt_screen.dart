@@ -1,7 +1,7 @@
 import 'package:application/time_utils.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
-import 'package:application/screens/complete_screen.dart';
+import 'package:application/screens/report_screen.dart';
 import 'package:application/services/local_storage.dart';
 import 'package:application/services/metronome.dart';
 import 'package:application/services/recorder_service.dart';
@@ -219,7 +219,7 @@ class PromptScreenState extends State<PromptScreen> {
   completePractice() {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => const CompleteScreen()),
+      MaterialPageRoute(builder: (context) => const ReportScreen()),
     );
   }
 

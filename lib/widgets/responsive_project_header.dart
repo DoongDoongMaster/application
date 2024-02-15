@@ -306,7 +306,6 @@ class _InfoText extends StatelessWidget {
         ),
         maxLines: 5,
         minFontSize: 10,
-        textScaleFactor: MediaQuery.of(context).textScaleFactor,
       ),
     );
   }

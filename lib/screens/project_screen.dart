@@ -173,7 +173,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                             height: 400,
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(8),
-                              color: const Color(0xFFF3F1ED),
+                              color: ColorStyles.panelCard,
                             ),
                             alignment: Alignment.center,
                             child: const NoContentWidget(
