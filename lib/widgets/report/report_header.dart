@@ -7,8 +7,8 @@ import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/report/disc_shape_widget.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_charts/charts.dart';
 
 class ReportHeader extends StatelessWidget {
   static const double visibleWidth = 292;
@@ -42,20 +42,21 @@ class ReportHeader extends StatelessWidget {
           size: panelSize,
           child: Row(
             children: [
-              _AccuracyAnalysisChart(
-                pieChartData: report.accuracyCount,
-                score: report.score!,
-                bestScore: report.bestScore!,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15),
+                child: _AccuracyAnalysisChart(
+                  accuracyData: report.accuracyCount,
+                  score: report.score!,
+                  bestScore: report.bestScore!,
+                ),
               ),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(right: 20),
-                  child: _AccuracyAnalysisChartLegend(
-                    pieChartData: report.accuracyCount,
-                    totalCount: report.sourceCount![DrumComponent.total.name]!,
-                  ),
+                child: _AccuracyAnalysisChartLegend(
+                  pieChartData: report.accuracyCount,
+                  totalCount: report.sourceCount![DrumComponent.total.name]!,
                 ),
-              )
+              ),
+              const SizedBox(width: 20),
             ],
           ),
         ),
@@ -249,7 +250,7 @@ class _AccuracyAnalysisChartLegend extends StatelessWidget {
                     Text(
                       data.label,
                       style: TextStyles.bodyMedium.copyWith(
-                        color: const Color(0xFF77757A),
+                        color: ColorStyles.graphLegend,
                       ),
                     ),
                   ],
@@ -281,83 +282,97 @@ class _AccuracyAnalysisChartLegend extends StatelessWidget {
 /// 정확도 도넛 차트
 class _AccuracyAnalysisChart extends StatelessWidget {
   /// 차트 크기 관련 설정 값
-  static const double chartSize = 160;
+  static const double chartSize = 150;
   static const double graphThickness = 12; // 그래프 두께.
   static const double strokeWidth = 2;
+  static const double innerPaddingValue = 0; // 그래프 라이브러리 자체에서 생성되는 것 같음. 추정치.
 
-  static const double innerRadiusRatio =
-      100 - graphThickness * 2 / chartSize * 100; // 0 ~ 100으로 설정. 클 수록 얇은 그래프.
-  static const double innerPaddingValue = 20; // 그래프 라이브러리 자체에서 생성되는 것 같음. 추정치.
-
-  final AccuracyCount pieChartData;
+  final AccuracyCount accuracyData;
   final int score, bestScore;
 
   const _AccuracyAnalysisChart({
-    super.key,
-    required this.pieChartData,
+    required this.accuracyData,
     required this.score,
     required this.bestScore,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: chartSize + 2 * innerPaddingValue,
-      height: chartSize + 2 * innerPaddingValue,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            // 바깥 그림자
-            color: Colors.transparent.withOpacity(0.25),
-            blurRadius: 1,
-            spreadRadius: -(innerPaddingValue - 1),
-            offset: const Offset(0, 1),
-            blurStyle: BlurStyle.outer,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          width: chartSize + 2 * innerPaddingValue,
+          height: chartSize + 2 * innerPaddingValue,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                // 바깥 그림자
+                color: Colors.transparent.withOpacity(0.25),
+                blurRadius: 1,
+                spreadRadius: -(innerPaddingValue - 1),
+                offset: const Offset(0, 1),
+                blurStyle: BlurStyle.outer,
+              ),
+              const BoxShadow(
+                // 안쪽 색 어두워지는거 방지
+                color: Colors.white,
+                spreadRadius: -innerPaddingValue,
+                blurStyle: BlurStyle.solid,
+              ),
+              BoxShadow(
+                // 안쪽 그림자
+                color: Colors.transparent.withOpacity(0.25),
+                spreadRadius: -(innerPaddingValue + graphThickness),
+                blurStyle: BlurStyle.solid,
+              ),
+              const BoxShadow(
+                // 안쪽 색 어두워지는거 방지
+                color: ColorStyles.panelCard,
+                blurRadius: 1,
+                spreadRadius: -(innerPaddingValue + graphThickness + 1),
+                offset: Offset(0, 1),
+                blurStyle: BlurStyle.solid,
+              ),
+            ],
           ),
-          const BoxShadow(
-            // 안쪽 색 어두워지는거 방지
-            color: Colors.white,
-            spreadRadius: -innerPaddingValue,
-            blurStyle: BlurStyle.solid,
+          child: PieChart(
+            PieChartData(
+              centerSpaceRadius: chartSize / 2 - graphThickness + strokeWidth,
+              startDegreeOffset: -90,
+              sections: [
+                for (var data in AccuracyType.values)
+                  PieChartSectionData(
+                    value: accuracyData[data.name]!.toDouble(),
+                    showTitle: false,
+                    color: data.color.withOpacity(0.7),
+                    radius: graphThickness - 2 * strokeWidth,
+                  )
+              ],
+            ),
+            swapAnimationDuration:
+                const Duration(milliseconds: 1000), // Optional
+            swapAnimationCurve: Curves.linear, // Optional
           ),
-          BoxShadow(
-            // 안쪽 그림자
-            color: Colors.transparent.withOpacity(0.25),
-            spreadRadius: -(innerPaddingValue + graphThickness),
-            blurStyle: BlurStyle.solid,
+        ),
+        SizedBox(
+          width: chartSize,
+          height: 0,
+          child: OverflowBox(
+            minHeight: chartSize,
+            maxHeight: chartSize,
+            alignment: Alignment.center,
+            child: Transform.translate(
+              offset: const Offset(0, -chartSize / 2),
+              child: _OverAllScoreInfo(
+                score: score,
+                bestScore: bestScore,
+              ),
+            ),
           ),
-          const BoxShadow(
-            // 안쪽 색 어두워지는거 방지
-            color: ColorStyles.panelCard,
-            blurRadius: 1,
-            spreadRadius: -(innerPaddingValue + graphThickness + 1),
-            offset: Offset(0, 1),
-            blurStyle: BlurStyle.solid,
-          ),
-        ],
-      ),
-      child: SfCircularChart(
-        margin: EdgeInsets.zero,
-        annotations: <CircularChartAnnotation>[
-          CircularChartAnnotation(
-            widget: _OverAllScoreInfo(score: score, bestScore: bestScore),
-          ),
-        ],
-        series: <CircularSeries>[
-          DoughnutSeries<AccuracyType, String>(
-            dataSource: AccuracyType.values,
-            xValueMapper: (AccuracyType data, _) => data.label,
-            yValueMapper: (AccuracyType data, _) => pieChartData[data.name],
-            pointColorMapper: (AccuracyType data, _) =>
-                data.color.withOpacity(0.7),
-            innerRadius: '$innerRadiusRatio%',
-            strokeColor: Colors.white,
-            animationDuration: 1000,
-            strokeWidth: strokeWidth,
-          ),
-        ],
-      ),
+        )
+      ],
     );
   }
 }

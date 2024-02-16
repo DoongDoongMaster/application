@@ -134,7 +134,9 @@ class DiscShapeWidget extends StatelessWidget {
                         Row(
                           children: [
                             Text(
-                              bpm == null ? "${speed}x" : bpm.toString(),
+                              bpm == null
+                                  ? "${speed!.toStringAsFixed(2)}x"
+                                  : bpm.toString(),
                               style: TextStyles.bodyMedium.copyWith(
                                 color: Colors.white,
                                 letterSpacing: 1.25,
