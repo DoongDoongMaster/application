@@ -1,4 +1,5 @@
 import 'package:application/main.dart';
+import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/router.dart';
@@ -130,12 +131,14 @@ class _NewMusicModalState extends State<NewMusicModal> {
                 if (_formKey.currentState!.validate()) {
                   database
                       .addNewMusic(MusicInfo(
-                        title: title,
-                        artist: artist,
-                        bpm: bpm,
-                        sheetSvg: file.bytes!,
-                        type: MusicType.user,
-                      ))
+                          title: title,
+                          artist: artist,
+                          bpm: bpm,
+                          sheetSvg: file.bytes!,
+                          type: MusicType.user,
+                          sourceCount: {
+                            for (var v in DrumComponent.values) v.name: 0,
+                          }))
                       .then((value) => context
                           .pushReplacementNamed(RouterPath.musicList.name));
                 }

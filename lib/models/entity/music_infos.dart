@@ -1,3 +1,4 @@
+import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/time_utils.dart';
 import 'package:drift/drift.dart';
@@ -16,6 +17,7 @@ class MusicInfo {
   final Uint8List sheetSvg;
   final List<Cursors> measureList;
   final MusicType type;
+  final ComponentCount sourceCount;
 
   MusicInfo({
     this.id = "",
@@ -23,9 +25,10 @@ class MusicInfo {
     this.artist = "",
     this.bpm = 0,
     this.cursorList = const [],
-    required this.sheetSvg,
     this.measureList = const [],
     this.type = MusicType.user,
+    required this.sheetSvg,
+    required this.sourceCount,
   }) : lengthInSec =
             TimeUtils.getTotalDuration(bpm, measureList.length).inSeconds;
 }
@@ -47,4 +50,6 @@ class MusicInfos extends DefaultTable {
   TextColumn get measureList => text().map(const CursorListConvertor())();
   BlobColumn get sheetSvg => blob()();
   IntColumn get type => intEnum<MusicType>()();
+
+  TextColumn get sourceCount => text().map(const ComponentCountConvertor())();
 }

@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:application/models/convertors/accuracy_count_convertor.dart';
+import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:application/models/views/music_thumbnail_view.dart';
+import 'package:application/models/views/practice_report_veiw.dart';
 import 'package:application/models/views/project_detail_view.dart';
 import 'package:application/models/views/project_sidebar_view.dart';
 import 'package:application/models/views/project_thumbnail_view.dart';
@@ -43,6 +46,7 @@ LazyDatabase _openConnection() {
   ProjectDetailView,
   ProjectSidebarView,
   ProjectThumbnailView,
+  PracticeReportView,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -100,16 +104,24 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> addNewMusic(MusicInfo music) =>
       into(musicInfos).insert(MusicInfosCompanion.insert(
-        title: music.title,
-        bpm: music.bpm,
-        artist: music.artist,
-        cursorList: [],
-        measureList: [],
-        sheetSvg: music.sheetSvg,
-        type: music.type,
-        lengthInSec: TimeUtils.getTotalDurationInSec(music.bpm, 0),
-      ));
+          title: music.title,
+          bpm: music.bpm,
+          artist: music.artist,
+          cursorList: [],
+          measureList: [],
+          sheetSvg: music.sheetSvg,
+          type: music.type,
+          lengthInSec: TimeUtils.getTotalDurationInSec(
+            music.bpm,
+            0,
+          ),
+          sourceCount: {
+            for (var v in DrumComponent.values) v.name: 0,
+          }));
 
   Future<void> deleteProject(String id) =>
       (delete(projectInfos)..where((tbl) => tbl.id.equals(id))).go();
+
+  Future<PracticeReportViewData> getPracticeReport() =>
+      (select(practiceReportView)..limit(1)).getSingle();
 }

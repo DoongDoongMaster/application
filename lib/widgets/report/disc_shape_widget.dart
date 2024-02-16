@@ -15,10 +15,20 @@ class DiscShapeWidget extends StatelessWidget {
 
   final double width;
   final double circleSize;
+  final String title, artist;
+  final int sourceBPM, score;
+  final int? bpm;
+  final double? speed;
 
   const DiscShapeWidget({
     super.key,
     required this.width,
+    required this.title,
+    required this.artist,
+    required this.sourceBPM,
+    required this.score,
+    this.bpm,
+    this.speed,
   }) : circleSize = (width + offsetX) * 2;
 
   @override
@@ -76,7 +86,7 @@ class DiscShapeWidget extends StatelessWidget {
                     width: 200,
                     height: 40,
                     child: OneLineTextWithMarquee(
-                      "제공된 우리 악보",
+                      title,
                       style: TextStyles.titleLarge.copyWith(
                         color: ColorStyles.primary,
                         fontWeight: FontWeight.bold,
@@ -97,7 +107,7 @@ class DiscShapeWidget extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "박김배",
+                              artist,
                               style: TextStyles.bodyMedium.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w300,
@@ -105,7 +115,7 @@ class DiscShapeWidget extends StatelessWidget {
                               ),
                             ),
                             Text(
-                              "원곡 BPM 100",
+                              "원곡 BPM $sourceBPM",
                               style: TextStyles.bodysmall.copyWith(
                                 color: Colors.white,
                                 fontWeight: FontWeight.w300,
@@ -117,21 +127,21 @@ class DiscShapeWidget extends StatelessWidget {
                           children: [
                             for (var i = 0; i < 5; i++)
                               _SingleRatedStar(
-                                filled: i < 4,
+                                filled: i < (score ~/ 20),
                               )
                           ],
                         ),
                         Row(
                           children: [
                             Text(
-                              "0.75x ",
+                              bpm == null ? "${speed}x" : bpm.toString(),
                               style: TextStyles.bodyMedium.copyWith(
                                 color: Colors.white,
                                 letterSpacing: 1.25,
                               ),
                             ),
                             Text(
-                              "속도",
+                              bpm == null ? " 속도" : " BPM",
                               style: TextStyles.bodysmall.copyWith(
                                 color: Colors.white,
                                 letterSpacing: 1.25,
