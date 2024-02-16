@@ -1,4 +1,4 @@
-import 'package:application/screens/complete_screen.dart';
+import 'package:application/screens/report_screen.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/one_line_text_with_marquee.dart';
@@ -17,8 +17,8 @@ class PromptAppBarWidget extends StatelessWidget {
   });
 
   completePractice(context) {
-    Navigator.push(context,
-        MaterialPageRoute(builder: (context) => const CompleteScreen()));
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => const ReportScreen()));
   }
 
   @override

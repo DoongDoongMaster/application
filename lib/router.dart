@@ -1,4 +1,5 @@
 import 'package:application/models/entity/music_infos.dart';
+import 'package:application/screens/report_screen.dart';
 import 'package:application/screens/home_screen.dart';
 import 'package:application/screens/music_list_screen.dart';
 import 'package:application/screens/project_screen.dart';
@@ -12,9 +13,10 @@ enum RouterPath {
   favoriteList,
   project,
   musicList,
-  prompt,
   musicListDDM,
   musicListUser,
+  prompt,
+  complete,
 }
 
 CustomTransitionPage buildPageWithDefaultTransition<T>(
@@ -30,7 +32,7 @@ CustomTransitionPage buildPageWithDefaultTransition<T>(
 }
 
 final GoRouter goRouter = GoRouter(
-  initialLocation: '/${RouterPath.musicList.name}',
+  initialLocation: '/${RouterPath.list.name}',
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
@@ -86,6 +88,17 @@ final GoRouter goRouter = GoRouter(
             music: state.extra as MusicInfo,
             projectId: state.pathParameters["id"],
           ),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/${RouterPath.complete.name}',
+      name: RouterPath.complete.name,
+      pageBuilder: (context, state) {
+        return buildPageWithDefaultTransition(
+          context,
+          state,
+          const ReportScreen(),
         );
       },
     )

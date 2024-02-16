@@ -30,6 +30,12 @@ class ShadowStyles {
     color: ColorStyles.blackShadow24,
   );
 
+  static const button400 = BoxShadow(
+    blurRadius: 8,
+    offset: Offset(0, 2),
+    color: Color(0xA3000000),
+  );
+
   static const dropShadowSmall = BoxShadow(
     offset: Offset(0, 2),
     blurRadius: 4,

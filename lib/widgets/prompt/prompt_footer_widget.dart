@@ -258,7 +258,7 @@ class _DoubleInfoWidget extends StatelessWidget {
             height: 40,
             child: VerticalDivider(
               thickness: 0.5,
-              color: ColorStyles.miss,
+              color: ColorStyles.graphMiss,
             ),
           ),
           if (currentBPM != null)

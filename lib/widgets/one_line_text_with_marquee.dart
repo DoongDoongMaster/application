@@ -2,6 +2,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
 
+/// 상단에 반드시 size가 있는 위젯으로 감싸주어야 함. (width & height)
 class OneLineTextWithMarquee extends StatelessWidget {
   final String text;
   final TextStyle style;
@@ -24,7 +25,6 @@ class OneLineTextWithMarquee extends StatelessWidget {
         style: style,
         maxLines: 1,
         minFontSize: style.fontSize!.toDouble(),
-        textScaleFactor: MediaQuery.of(context).textScaleFactor,
         overflowReplacement: Marquee(
           text: text,
           style: style,

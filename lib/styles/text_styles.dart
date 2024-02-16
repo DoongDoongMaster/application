@@ -6,6 +6,9 @@ class TextStyles {
   /// fontSize: 64
   static const TextStyle displayLarge = TextStyle(fontSize: 64);
 
+  /// fontSise: 45
+  static const TextStyle displayMedium = TextStyle(fontSize: 45);
+
   /// fontSize: 28
   static const TextStyle headlineMedium = TextStyle(fontSize: 28);
 
