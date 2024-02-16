@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:application/main.dart';
+import 'package:application/models/convertors/accuracy_count_convertor.dart';
+import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
@@ -39,17 +43,35 @@ class ReportScreen extends StatelessWidget {
       body: FutureBuilder<PracticeReportViewData>(
         future: database.getPracticeReport(),
         builder: (context, snapshot) {
-          if (!snapshot.hasData) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Container(
                 height: headerHeight,
                 color: ColorStyles.background,
-                child: ReportHeader(snapshot.data!),
+                child: ReportHeader(
+                  snapshot.hasData
+                      ? snapshot.data!
+                      : PracticeReportViewData(
+                          id: "",
+                          musicTitle: "",
+                          musicArtist: "",
+                          accuracyCount: {
+                            for (var k in AccuracyType.values) k.name: 0
+                          },
+                          componentCount: {
+                            for (var k in DrumComponent.values) k.name: 0
+                          },
+                          sourceCount: {
+                            for (var k in DrumComponent.values) k.name: 0
+                          },
+                          score: 0,
+                          bestScore: 0,
+                          sourceBPM: 0,
+                          bpm: 0,
+                          sheetSvg: Uint8List(0),
+                        ),
+                ),
               ),
               SizedBox(
                 height: MediaQuery.of(context).size.height - headerHeight,
@@ -61,21 +83,32 @@ class ReportScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         const SizedBox(height: headerHeight),
-                        Stack(
-                          children: [
-                            Container(
-                              decoration: const BoxDecoration(
-                                  color: Colors.white,
-                                  boxShadow: [ShadowStyles.shadow200]),
-                              child: Center(
-                                child: SvgPicture.memory(
-                                  snapshot.data!.sheetSvg,
-                                  width: 1024,
-                                  allowDrawingOutsideViewBox: true,
+                        DecoratedBox(
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            boxShadow: [ShadowStyles.shadow200],
+                          ),
+                          child: snapshot.hasData
+                              ? Stack(
+                                  children: [
+                                    Center(
+                                      child: SvgPicture.memory(
+                                        snapshot.data!.sheetSvg,
+                                        width: 1024,
+                                        allowDrawingOutsideViewBox: true,
+                                      ),
+                                    ),
+                                  ],
+                                )
+                              : Center(
+                                  child: SizedBox(
+                                    height: MediaQuery.of(context).size.height -
+                                        headerHeight,
+                                    child: const UnconstrainedBox(
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  ),
                                 ),
-                              ),
-                            ),
-                          ],
                         )
                       ],
                     ),

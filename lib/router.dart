@@ -16,7 +16,7 @@ enum RouterPath {
   musicListDDM,
   musicListUser,
   prompt,
-  complete,
+  report,
 }
 
 CustomTransitionPage buildPageWithDefaultTransition<T>(
@@ -32,7 +32,7 @@ CustomTransitionPage buildPageWithDefaultTransition<T>(
 }
 
 final GoRouter goRouter = GoRouter(
-  initialLocation: '/${RouterPath.list.name}',
+  initialLocation: '/${RouterPath.report.name}',
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
@@ -92,8 +92,8 @@ final GoRouter goRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/${RouterPath.complete.name}',
-      name: RouterPath.complete.name,
+      path: '/${RouterPath.report.name}',
+      name: RouterPath.report.name,
       pageBuilder: (context, state) {
         return buildPageWithDefaultTransition(
           context,

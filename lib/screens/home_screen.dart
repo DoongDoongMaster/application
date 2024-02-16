@@ -21,6 +21,9 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // (database.select(database.projectInfos)..limit(1)).getSingle().then(
+    //     (value) => context.goNamed(RouterPath.project.name,
+    //         pathParameters: {'id': value.id}));
     return Scaffold(
       body: Row(
         children: [

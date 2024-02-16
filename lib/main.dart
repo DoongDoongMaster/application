@@ -99,74 +99,73 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       theme: ThemeData(
-          useMaterial3: true,
-          // primaryColor: ColorStyles.primary,
-          // scaffoldBackgroundColor: ColorStyles.background,
-          canvasColor: Colors.transparent,
-          fontFamily: 'NanumBarunGothic',
-          appBarTheme: const AppBarTheme(
-            backgroundColor: Colors.transparent,
-            surfaceTintColor: Colors.transparent,
-            titleSpacing: 0,
+        useMaterial3: true,
+        // primaryColor: ColorStyles.primary,
+        // scaffoldBackgroundColor: ColorStyles.background,
+        canvasColor: Colors.transparent,
+        fontFamily: 'NanumBarunGothic',
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          titleSpacing: 0,
+        ),
+        colorScheme: const ColorScheme(
+          primary: ColorStyles.primary,
+          onPrimary: Colors.white,
+          background: ColorStyles.background,
+          onBackground: Colors.black,
+          brightness: Brightness.light,
+          secondary: ColorStyles.secondary,
+          onSecondary: Colors.white,
+          error: ColorStyles.primary,
+          onError: Colors.white,
+          surface: Colors.white,
+          onSurface: Colors.black,
+          outlineVariant: Color(0xFFCAC4D0),
+        ),
+        iconTheme: const IconThemeData(color: ColorStyles.primary),
+        buttonTheme: ButtonThemeData(
+          buttonColor: Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
           ),
-          colorScheme: const ColorScheme(
-            primary: ColorStyles.primary,
-            onPrimary: Colors.white,
-            background: ColorStyles.background,
-            onBackground: Colors.black,
-            brightness: Brightness.light,
-            secondary: ColorStyles.secondary,
-            onSecondary: Colors.white,
-            error: ColorStyles.primary,
-            onError: Colors.white,
-            surface: Colors.white,
-            onSurface: Colors.black,
-            outlineVariant: Color(0xFFCAC4D0),
-          ),
-          iconTheme: const IconThemeData(color: ColorStyles.primary),
-          buttonTheme: ButtonThemeData(
-            buttonColor: Colors.transparent,
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(8),
             ),
           ),
-          textButtonTheme: TextButtonThemeData(
-            style: TextButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+            style: ElevatedButton.styleFrom(
+          surfaceTintColor: Colors.transparent,
+          foregroundColor: ColorStyles.primary,
+        )),
+        chipTheme: const ChipThemeData(
+          selectedColor: ColorStyles.primary,
+          side: BorderSide.none,
+          showCheckmark: false,
+        ),
+        dialogTheme: const DialogTheme(
+          surfaceTintColor: Colors.transparent,
+        ),
+        dialogBackgroundColor: Colors.transparent,
+        listTileTheme: ListTileThemeData(
+          visualDensity: const VisualDensity(vertical: -3, horizontal: 3),
+          dense: true,
+          minLeadingWidth: 150,
+          leadingAndTrailingTextStyle: TextStyles.bodyMedium.copyWith(
+            color: Colors.black,
           ),
-          elevatedButtonTheme: ElevatedButtonThemeData(
-              style: ElevatedButton.styleFrom(
-            surfaceTintColor: Colors.transparent,
-            foregroundColor: ColorStyles.primary,
-          )),
-          chipTheme: const ChipThemeData(
-            selectedColor: ColorStyles.primary,
-            side: BorderSide.none,
-            showCheckmark: false,
-          ),
-          dialogTheme: const DialogTheme(
-            surfaceTintColor: Colors.transparent,
-          ),
-          dialogBackgroundColor: Colors.transparent,
-          listTileTheme: ListTileThemeData(
-            visualDensity: const VisualDensity(vertical: -3),
-            dense: true,
-            minLeadingWidth: 200,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16),
-            leadingAndTrailingTextStyle: TextStyles.bodyMedium.copyWith(
-              color: Colors.black,
-            ),
-            iconColor: Colors.black,
-          ),
-          popupMenuTheme: PopupMenuThemeData(
-            position: PopupMenuPosition.under,
-            surfaceTintColor: Colors.transparent,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-          )),
+          iconColor: Colors.black,
+        ),
+        popupMenuTheme: PopupMenuThemeData(
+          position: PopupMenuPosition.under,
+          surfaceTintColor: Colors.transparent,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+        ),
+      ),
       color: ColorStyles.primary,
       routerConfig: goRouter,
       // home: const Scaffold(body: MusicListScreen()),

@@ -38,4 +38,5 @@ class ColorStyles {
   static const graphWrongTiming = Color(0xFFFFA049);
   static const graphWrong = Color(0xFFFF4848);
   static const graphMiss = Color(0xFF8A8A8A);
+  static const graphLegend = Color(0xFF77757A);
 }
