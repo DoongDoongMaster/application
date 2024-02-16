@@ -5,7 +5,6 @@ import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
-import 'package:application/widgets/panel_card.dart';
 import 'package:application/widgets/report/disc_shape_widget.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +37,7 @@ class ReportHeader extends StatelessWidget {
           speed: report.speed,
         ),
         SizedBox(width: spaceUnit * 2),
-        PanelCard(
+        _ResultCard(
           label: "정확도 분석",
           size: panelSize,
           child: Row(
@@ -61,7 +60,7 @@ class ReportHeader extends StatelessWidget {
           ),
         ),
         SizedBox(width: spaceUnit + 3),
-        PanelCard(
+        _ResultCard(
           label: "음정 분석",
           size: panelSize,
           child: Row(
@@ -439,6 +438,43 @@ class _OverAllScoreInfo extends StatelessWidget {
             ),
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _ResultCard extends StatelessWidget {
+  final String label;
+  final Widget? child;
+  final Size size;
+  const _ResultCard({
+    required this.label,
+    this.child,
+    required this.size,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Spacer(flex: 2),
+        Text(
+          label,
+          style: TextStyles.bodyLarge,
+        ),
+        const SizedBox(height: 10),
+        SizedBox.fromSize(
+          size: size,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6),
+              color: ColorStyles.panelCard.withOpacity(0.6),
+            ),
+            child: child,
+          ),
+        ),
+        const Spacer(flex: 1),
       ],
     );
   }
