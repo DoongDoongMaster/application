@@ -50,13 +50,13 @@ class ReportHeader extends StatelessWidget {
                   bestScore: report.bestScore!,
                 ),
               ),
-              Expanded(
-                child: AccuracyAnalysisChartLegend(
-                  accuracyCnt: report.accuracyCount!,
-                  totalCount: report.sourceCount![DrumComponent.total.name]!,
-                ),
+              const Spacer(),
+              AccuracyAnalysisChartLegend(
+                accuracyCnt: report.accuracyCount!,
+                totalCount: report.sourceCount![DrumComponent.total.name]!,
               ),
-              const SizedBox(width: 20),
+              const Spacer(),
+              const SizedBox(width: 15),
             ],
           ),
         ),
@@ -214,6 +214,7 @@ class _AnalysisPerComponent extends StatelessWidget {
 }
 
 class AccuracyAnalysisChartLegend extends StatelessWidget {
+  static const double width = 130;
   const AccuracyAnalysisChartLegend({
     super.key,
     required this.accuracyCnt,
@@ -225,19 +226,22 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 항목 라벨
-        ...AccuracyType.values.map(
-          (data) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 0),
-            child: Row(
+    final AutoSizeGroup autoSizeGroup = AutoSizeGroup();
+    return SizedBox(
+      width: width,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 항목 라벨
+          ...AccuracyType.values.map(
+            (data) => Row(
+              // alignment: WrapAlignment.spaceBetween,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Transform.rotate(
                       angle: data.shouldRotate ? pi / 4 : 0,
@@ -248,34 +252,53 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(width: 3),
-                    Text(
-                      data.label,
-                      style: TextStyles.bodyMedium.copyWith(
-                        color: ColorStyles.graphLegend,
+                    ConstrainedBox(
+                      constraints:
+                          const BoxConstraints(maxWidth: (width - 23) * 0.7),
+                      child: AutoSizeText(
+                        data.label,
+                        style: const TextStyle(color: ColorStyles.graphLegend),
+                        minFontSize: 1,
+                        maxFontSize: TextStyles.bodyMedium.fontSize!,
+                        maxLines: 1,
+                        group: autoSizeGroup,
                       ),
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    Text(
-                      "${accuracyCnt[data.name]}",
-                      style: TextStyles.bodyLarge,
-                    ),
-                    if (data == AccuracyType.correct)
-                      Text(
-                        "/$totalCount",
-                        style: TextStyles.bodyMedium.copyWith(
-                          color: ColorStyles.graphMiss,
+                // const Spacer(),
+                ConstrainedBox(
+                  constraints:
+                      const BoxConstraints(maxWidth: (width - 23) * 0.7),
+                  child: AutoSizeText.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "${accuracyCnt[data.name]}",
+                          style: TextStyle(
+                              fontWeight: data == AccuracyType.correct
+                                  ? FontWeight.bold
+                                  : FontWeight.normal),
                         ),
-                      ),
-                  ],
+                        if (data == AccuracyType.correct)
+                          TextSpan(
+                            text: "/$totalCount",
+                            style:
+                                const TextStyle(color: ColorStyles.graphMiss),
+                          ),
+                      ],
+                    ),
+                    group: autoSizeGroup,
+                    minFontSize: 1,
+                    maxFontSize: TextStyles.bodyLarge.fontSize!,
+                    maxLines: 1,
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

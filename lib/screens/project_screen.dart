@@ -40,8 +40,6 @@ class _ProjectScreenState extends State<ProjectScreen> {
     musicLength: 0,
   );
 
-  static const int analysisPreviewSize = 8;
-
   @override
   void initState() {
     super.initState();
@@ -122,7 +120,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                       ),
                       FutureBuilder<AnalysisSummaryData?>(
                           future: database.getAnalysisSummaryData(
-                              widget.projectId!, analysisPreviewSize),
+                              widget.projectId!, AnalysisSummary.previewSize),
                           builder: (context, snapshot) {
                             if (!snapshot.hasData) {
                               return const SliverToBoxAdapter(

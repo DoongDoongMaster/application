@@ -8,6 +8,7 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class AnalysisSummary extends StatelessWidget {
+  static const int previewSize = 8;
   final AnalysisSummaryData data;
   const AnalysisSummary({
     super.key,
@@ -64,30 +65,26 @@ class _AccuracyChart extends StatelessWidget {
 
     return Row(
       children: [
-        const SizedBox(width: 15),
-        Expanded(
-          flex: 2,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "최고 기록",
-                style: TextStyles.bodyMedium
-                    .copyWith(color: ColorStyles.graphLegend),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              AccuracyAnalysisChartLegend(
-                accuracyCnt: accuracyCount,
-                totalCount: 250,
-              ),
-            ],
-          ),
+        const SizedBox(width: 10),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              "최고 기록",
+              style: TextStyles.bodyMedium
+                  .copyWith(color: ColorStyles.graphLegend),
+            ),
+            const SizedBox(
+              height: 10,
+            ),
+            AccuracyAnalysisChartLegend(
+              accuracyCnt: accuracyCount,
+              totalCount: 250,
+            ),
+          ],
         ),
         Expanded(
-          flex: 5,
           child: _ChartContainer(
             drawVerticalLine: true,
             lineBarData: [
@@ -96,13 +93,18 @@ class _AccuracyChart extends StatelessWidget {
                   spots: [
                     for (var (i, v) in accuracyList.indexed)
                       FlSpot(
-                        i.toDouble(),
+                        AnalysisSummary.previewSize -
+                            accuracyList.length +
+                            i.toDouble(),
                         v == null ? 0 : v[line.name]!.toDouble(),
                       )
                   ],
                   color: line.color,
-                  dotData:
-                      _DotData(isNotReady: isNotReady, showDefaultDot: false),
+                  dotData: _DotData(
+                    isNotReady: isNotReady,
+                    color: line.color,
+                    showDefaultDot: accuracyList.length == 1,
+                  ),
                 )
             ],
           ),
@@ -192,7 +194,11 @@ class _ScoreChart extends StatelessWidget {
               LineChartBarData(
                 spots: [
                   for (var (i, v) in scoreList.indexed)
-                    FlSpot(i.toDouble(), v ?? 0)
+                    FlSpot(
+                        AnalysisSummary.previewSize -
+                            scoreList.length +
+                            i.toDouble(),
+                        v ?? 0)
                 ],
                 color: ColorStyles.primary,
                 belowBarData: BarAreaData(
@@ -206,7 +212,8 @@ class _ScoreChart extends StatelessWidget {
                     ],
                   ),
                 ),
-                dotData: _DotData(isNotReady: isNotReady),
+                dotData: _DotData(
+                    isNotReady: isNotReady, color: ColorStyles.primary),
               )
             ],
           ),
@@ -217,8 +224,11 @@ class _ScoreChart extends StatelessWidget {
 }
 
 class _DotData extends FlDotData {
-  _DotData({required List<bool> isNotReady, bool showDefaultDot = true})
-      : super(
+  _DotData({
+    required List<bool> isNotReady,
+    required Color color,
+    bool showDefaultDot = true,
+  }) : super(
           getDotPainter: (p0, p1, p2, index) {
             return isNotReady[index]
                 ? FlDotCirclePainter(
@@ -228,7 +238,7 @@ class _DotData extends FlDotData {
                     strokeWidth: 2,
                   )
                 : FlDotCirclePainter(
-                    color: ColorStyles.primary,
+                    color: color,
                     radius: showDefaultDot ? 4 : 0,
                   );
           },
@@ -264,15 +274,16 @@ class _ChartContainer extends Container {
               lineBarsData: lineBarData,
               backgroundColor: ColorStyles.background,
               minX: 0,
+              maxX: AnalysisSummary.previewSize.toDouble() - 1,
               minY: 0,
               maxY: drawVerticalLine ? null : 100,
               gridData: FlGridData(
                 drawHorizontalLine: !drawVerticalLine,
-                verticalInterval: 1,
-                getDrawingVerticalLine: _getLine,
-                drawVerticalLine: drawVerticalLine,
-                horizontalInterval: 10,
                 getDrawingHorizontalLine: _getLine,
+                horizontalInterval: 10,
+                drawVerticalLine: drawVerticalLine,
+                getDrawingVerticalLine: _getLine,
+                verticalInterval: 1,
               ),
               borderData: FlBorderData(
                 border: Border.symmetric(
@@ -281,6 +292,15 @@ class _ChartContainer extends Container {
                 ),
               ),
               titlesData: const FlTitlesData(show: false),
+              lineTouchData: const LineTouchData(
+                enabled: true,
+                touchTooltipData: LineTouchTooltipData(
+                  fitInsideVertically: true,
+                  tooltipHorizontalAlignment: FLHorizontalAlignment.left,
+                  tooltipHorizontalOffset: -15,
+                  tooltipBgColor: ColorStyles.secondary,
+                ),
+              ),
             ),
           ),
         );
