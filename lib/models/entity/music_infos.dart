@@ -40,16 +40,22 @@ class MusicInfos extends DefaultTable {
   /// 3. S3 bucket [x]
   /// 4. firebase 저장소
 
-  TextColumn get title => text()();
-  IntColumn get bpm => integer()();
+  TextColumn get title => text().withDefault(const Constant("이름 없는 악보"))();
+  IntColumn get bpm => integer().withDefault(const Constant(90))();
   IntColumn get lengthInSec => integer()();
-  TextColumn get artist => text()();
+  TextColumn get artist => text().withDefault(const Constant("이름 없는 아티스트"))();
 
   // BlobColumn get infoJson => blob()();
-  TextColumn get cursorList => text().map(const CursorListConvertor())();
-  TextColumn get measureList => text().map(const CursorListConvertor())();
-  BlobColumn get sheetSvg => blob()();
-  IntColumn get type => intEnum<MusicType>()();
+  TextColumn get cursorList => text()
+      .map(const CursorListConvertor())
+      .withDefault(Constant(const CursorListConvertor().toSql([])))();
+  TextColumn get measureList => text()
+      .map(const CursorListConvertor())
+      .withDefault(Constant(const CursorListConvertor().toSql([])))();
+  BlobColumn get sheetSvg => blob().clientDefault(() => Uint8List(0))();
+  IntColumn get type => intEnum<MusicType>().clientDefault(() => 0)();
 
-  TextColumn get sourceCount => text().map(const ComponentCountConvertor())();
+  TextColumn get sourceCount => text()
+      .map(const ComponentCountConvertor())
+      .withDefault(Constant(const ComponentCountConvertor().toSql({})))();
 }

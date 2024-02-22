@@ -54,5 +54,6 @@ class AnalysisSummaryData {
   })  : sourceCount = projectInfo.sourceCount,
         bestScore = projectInfo.bestScore,
         scoreList = practiceList.map((d) => d.score?.toDouble()).toList(),
-        accuracyList = practiceList.map((d) => d.accuracyCount).toList();
+        accuracyList =
+            practiceList.map((d) => d.accuracyCount as AccuracyCount).toList();
 }

@@ -1,9 +1,12 @@
+import 'package:application/main.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class ReportListItem extends StatelessWidget {
   final PracticeListViewData data;
@@ -15,7 +18,10 @@ class ReportListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return TextButton(
-      onPressed: () {}, //TODO: report 페이지 연결하기
+      onPressed: data.score == null
+          ? null
+          : () => context.pushNamed(RouterPath.report.name,
+              pathParameters: {"id": data.id}),
       style: TextButton.styleFrom(
         shape: const LinearBorder(
           side: BorderSide(color: ColorStyles.gray),
@@ -89,7 +95,10 @@ class ReportListItem extends StatelessWidget {
               onSelected: (value) {
                 switch (value) {
                   case 0:
-                  // TODO: 연습 삭제 함수 만들기.
+                    // TODO: 연습 삭제 함수 만들기.
+                    database.deletePractice(data.id).then((value) => context
+                        .pushReplacementNamed(RouterPath.project.name,
+                            pathParameters: {'id': data.projectId}));
                 }
               },
               itemBuilder: (context) => [
@@ -121,9 +130,7 @@ class ReportListItem extends StatelessWidget {
 }
 
 class _ProcessingFlag extends StatelessWidget {
-  const _ProcessingFlag({
-    super.key,
-  });
+  const _ProcessingFlag();
 
   @override
   Widget build(BuildContext context) {

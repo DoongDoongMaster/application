@@ -88,6 +88,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                 ),
                 Expanded(
                   child: CustomScrollView(
+                    key: PageStorageKey<String>('project${widget.projectId}'),
                     slivers: [
                       SliverAppBar(
                         automaticallyImplyLeading: false,

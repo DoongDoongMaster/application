@@ -217,10 +217,10 @@ class PromptScreenState extends State<PromptScreen> {
 
   /// 연습 완료 - 정상 종료
   completePractice() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const ReportScreen()),
-    );
+    // Navigator.pushReplacement(
+    //   context,
+    //   MaterialPageRoute(builder: (context) => const ReportScreen()),
+    // );
   }
 
   @override

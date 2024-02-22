@@ -66,23 +66,25 @@ class _AccuracyChart extends StatelessWidget {
     return Row(
       children: [
         const SizedBox(width: 10),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.end,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              "최고 기록",
-              style: TextStyles.bodyMedium
-                  .copyWith(color: ColorStyles.graphLegend),
-            ),
-            const SizedBox(
-              height: 10,
-            ),
-            AccuracyAnalysisChartLegend(
-              accuracyCnt: accuracyCount,
-              totalCount: 250,
-            ),
-          ],
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            // mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text(
+                "최고 기록",
+                style: TextStyles.bodyMedium
+                    .copyWith(color: ColorStyles.graphLegend),
+              ),
+              const Spacer(),
+              AccuracyAnalysisChartLegend(
+                accuracyCnt: accuracyCount,
+                totalCount: 250,
+              ),
+              const Spacer(),
+            ],
+          ),
         ),
         Expanded(
           child: _ChartContainer(

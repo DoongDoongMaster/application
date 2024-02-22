@@ -111,29 +111,29 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> addNewMusic(MusicInfo music) =>
       into(musicInfos).insert(MusicInfosCompanion.insert(
-          title: music.title,
-          bpm: music.bpm,
-          artist: music.artist,
-          cursorList: [],
-          measureList: [],
-          sheetSvg: music.sheetSvg,
-          type: music.type,
-          lengthInSec: TimeUtils.getTotalDurationInSec(
-            music.bpm,
-            0,
-          ),
-          sourceCount: {
-            for (var v in DrumComponent.values) v.name: 0,
-          }));
+        title: Value(music.title),
+        bpm: Value(music.bpm),
+        artist: Value(music.artist),
+        type: Value(music.type),
+        lengthInSec: TimeUtils.getTotalDurationInSec(
+          music.bpm,
+          0,
+        ),
+      ));
 
   Future<void> deleteProject(String id) =>
       (delete(projectInfos)..where((tbl) => tbl.id.equals(id))).go();
 
-  Future<PracticeReportViewData> getPracticeReport() =>
-      (select(practiceReportView)
-            // ..where((tbl) => tbl.pro)
-            ..limit(1))
-          .getSingle();
+  Future<void> deletePractice(String id) =>
+      (delete(practiceInfos)..where((tbl) => tbl.id.equals(id))).go();
+
+  Future<void> readPracticeReport(String practiceId) =>
+      (update(practiceInfos)..where((tbl) => tbl.id.equals(practiceId)))
+          .write(const PracticeInfosCompanion(isNew: Value(false)));
+
+  Future<List<PracticeReportViewData>> getPracticeReport(String practiceId) =>
+      (select(practiceReportView)..where((tbl) => tbl.id.equals(practiceId)))
+          .get();
 
   Future<List<PracticeListViewData>> getPracticeList(String projectId) =>
       (select(practiceListView)

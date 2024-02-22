@@ -27,29 +27,30 @@ void main() async {
   for (var i = 0; i < 25; i++) {
     MusicInfo music = await database.into(database.musicInfos).insertReturning(
           MusicInfosCompanion.insert(
-              title: '이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!',
-              bpm: 240,
-              artist: '아티스트 $i',
-              sheetSvg: (await rootBundle.load('assets/music/stay-with-me.svg'))
-                  .buffer
-                  .asUint8List(),
-              cursorList: List<Cursors>.from(
-                  sheetInfo["cursorList"].map((v) => Cursors.fromJson(v))),
-              measureList: List<Cursors>.from(
+              title: Value('이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!'),
+              bpm: const Value(240),
+              artist: Value('아티스트 $i'),
+              sheetSvg: Value(
+                  (await rootBundle.load('assets/music/stay-with-me.svg'))
+                      .buffer
+                      .asUint8List()),
+              cursorList: Value(List<Cursors>.from(
+                  sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))),
+              measureList: Value(List<Cursors>.from(
                       sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
-                  .sublist(0, 10),
-              type: MusicType.values[random.nextInt(2)],
+                  .sublist(0, 10)),
+              type: Value(MusicType.values[random.nextInt(2)]),
               lengthInSec: TimeUtils.getTotalDurationInSec(
                 240,
                 10,
               ),
-              sourceCount: {
+              sourceCount: Value({
                 DrumComponent.hihat.name: random.nextInt(101),
                 DrumComponent.snareDrum.name: random.nextInt(40),
                 DrumComponent.smallTom.name: random.nextInt(20),
                 DrumComponent.kick.name: random.nextInt(10),
                 DrumComponent.total.name: random.nextInt(300) + 100,
-              }),
+              })),
         );
 
     ProjectInfo project = await database
@@ -68,7 +69,7 @@ void main() async {
             speed: Value([0.5, 0.75, 1.0, 1.25, 1.5][random.nextInt(5)]),
             projectId: project.id,
             accuracyCount: isNull
-                ? const Value(null)
+                ? const Value.absent()
                 : Value({
                     AccuracyType.correct.name: random
                         .nextInt(music.sourceCount[DrumComponent.total.name]!),
@@ -78,11 +79,12 @@ void main() async {
                     AccuracyType.miss.name: random.nextInt(10),
                   }),
             componentCount: isNull
-                ? const Value(null)
+                ? const Value.absent()
                 : Value({
-                    for (var k in DrumComponent.values
-                        .sublist(DrumComponent.values.length - 1))
-                      k.name: random.nextInt(music.sourceCount[k.name]!)
+                    for (var k in DrumComponent.values)
+                      k.name: music.sourceCount[k.name]! == 0
+                          ? 0
+                          : random.nextInt(music.sourceCount[k.name]!)
                   }),
           ));
     }

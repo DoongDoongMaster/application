@@ -17,8 +17,9 @@ class PromptAppBarWidget extends StatelessWidget {
   });
 
   completePractice(context) {
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => const ReportScreen()));
+    // Navigator.push(
+    //     context, MaterialPageRoute(builder: (context) => const ReportScreen()));
+    // TODO: 완료 됐을 때 페이지 전환!!!
   }
 
   @override

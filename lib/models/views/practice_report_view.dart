@@ -26,6 +26,7 @@ abstract class PracticeReportView extends View {
         practice.score,
         practice.accuracyCount,
         practice.componentCount,
+        practice.isNew,
         musicInfo.sourceCount,
         musicInfo.sheetSvg,
         musicId,
@@ -39,5 +40,6 @@ abstract class PracticeReportView extends View {
         innerJoin(musicInfo, musicInfo.id.equalsExp(projectInfo.musicId)),
         leftOuterJoin(
             practiceList, practiceList.projectId.equalsExp(practice.projectId)),
-      ]);
+      ])
+        ..groupBy([practice.id]);
 }

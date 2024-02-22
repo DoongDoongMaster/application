@@ -13,12 +13,16 @@ import 'package:go_router/go_router.dart';
 
 class ReportScreen extends StatelessWidget {
   static const double headerHeight = 312;
-  const ReportScreen({super.key});
+  final String? practiceId;
+  const ReportScreen({super.key, required this.practiceId});
 
   @override
   Widget build(BuildContext context) {
+    if (practiceId == null) {
+      Future.microtask(() => context.pop());
+    }
     return Scaffold(
-      floatingActionButton: context.canPop()
+      floatingActionButton: !context.canPop()
           ? TextButton(
               onPressed: () {}, // TODO: 다시 시작 버튼 로직 구현
               style: TextButton.styleFrom(
@@ -40,9 +44,14 @@ class ReportScreen extends StatelessWidget {
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      body: FutureBuilder<PracticeReportViewData>(
-        future: database.getPracticeReport(),
+      body: FutureBuilder<List<PracticeReportViewData>>(
+        future: database.getPracticeReport(practiceId!),
         builder: (context, snapshot) {
+          if (snapshot.hasData && snapshot.data!.isEmpty) {
+            Future.microtask(() => context.pop());
+          } else if (snapshot.hasData && snapshot.data![0].isNew) {
+            database.readPracticeReport(practiceId!);
+          }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
@@ -50,12 +59,13 @@ class ReportScreen extends StatelessWidget {
                 height: headerHeight,
                 color: ColorStyles.background,
                 child: ReportHeader(
-                  snapshot.hasData
-                      ? snapshot.data!
+                  snapshot.hasData && snapshot.data!.isNotEmpty
+                      ? snapshot.data![0]
                       : PracticeReportViewData(
                           id: "",
                           musicTitle: "",
                           musicArtist: "",
+                          isNew: false,
                           accuracyCount: {
                             for (var k in AccuracyType.values) k.name: 0
                           },
@@ -88,12 +98,12 @@ class ReportScreen extends StatelessWidget {
                             color: Colors.white,
                             boxShadow: [ShadowStyles.shadow200],
                           ),
-                          child: snapshot.hasData
+                          child: snapshot.hasData && snapshot.data!.isNotEmpty
                               ? Stack(
                                   children: [
                                     Center(
                                       child: SvgPicture.memory(
-                                        snapshot.data!.sheetSvg,
+                                        snapshot.data![0].sheetSvg,
                                         width: 1024,
                                         allowDrawingOutsideViewBox: true,
                                       ),

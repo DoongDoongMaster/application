@@ -24,7 +24,7 @@ class ProjectPreview extends StatelessWidget {
       alignment: Alignment.topRight,
       offset: Offset(
           5 * max(-2, 2 - data.unreadCount.toString().length.toDouble()), -5),
-      isLabelVisible: data.unreadCount != 0,
+      isLabelVisible: (data.unreadCount ?? 0) > 0,
       child: ElevatedButton(
         onPressed: () {
           if (data.id.isNotEmpty) {

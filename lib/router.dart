@@ -22,9 +22,10 @@ enum RouterPath {
 CustomTransitionPage buildPageWithDefaultTransition<T>(
     BuildContext context, GoRouterState state, Widget child) {
   return CustomTransitionPage<T>(
-    key: state.uri.queryParameters.containsKey('refresh')
-        ? UniqueKey()
-        : state.pageKey,
+    // key: state.uri.queryParameters.containsKey('refresh')
+    //     ? UniqueKey()
+    //     : state.pageKey,
+    key: state.pageKey,
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) =>
         FadeTransition(opacity: animation, child: child),
@@ -92,13 +93,15 @@ final GoRouter goRouter = GoRouter(
       },
     ),
     GoRoute(
-      path: '/${RouterPath.report.name}',
+      path: '/${RouterPath.report.name}/:id',
       name: RouterPath.report.name,
       pageBuilder: (context, state) {
         return buildPageWithDefaultTransition(
           context,
           state,
-          const ReportScreen(),
+          ReportScreen(
+            practiceId: state.pathParameters["id"],
+          ),
         );
       },
     )

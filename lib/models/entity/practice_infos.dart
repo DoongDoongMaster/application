@@ -14,15 +14,15 @@ class PracticeInfo {
   final AccuracyCount? accuracyCount;
 
   PracticeInfo({
-    required this.id,
-    required this.projectId,
-    required this.title,
+    this.id = "",
+    this.projectId = "",
+    this.title = "",
     this.score,
     this.bpm,
     this.speed,
-    required this.isNew,
-    required this.accuracyCount,
-    required this.componentCount,
+    this.isNew = false,
+    this.accuracyCount = const {},
+    this.componentCount = const {},
   });
 }
 
@@ -41,9 +41,11 @@ class PracticeInfos extends DefaultTable {
   TextColumn get projectId =>
       text().references(ProjectInfos, #id, onDelete: KeyAction.cascade)();
 
-  TextColumn get componentCount =>
-      text().map(const ComponentCountConvertor()).nullable()();
+  TextColumn get componentCount => text()
+      .map(const ComponentCountConvertor())
+      .withDefault(Constant(const ComponentCountConvertor().toSql({})))();
 
-  TextColumn get accuracyCount =>
-      text().map(const AccuracyCountConvertor()).nullable()();
+  TextColumn get accuracyCount => text()
+      .map(const AccuracyCountConvertor())
+      .withDefault(Constant(const AccuracyCountConvertor().toSql({})))();
 }
