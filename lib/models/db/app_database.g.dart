@@ -1609,7 +1609,7 @@ class $ProjectThumbnailViewView
           .withConverter<MusicType>($MusicInfosTable.$convertertype);
   late final GeneratedColumn<int> unreadCount = GeneratedColumn<int>(
       'unread_count', aliasedName, true,
-      generatedAs: GeneratedAs(practices.id.count(), false),
+      generatedAs: GeneratedAs(practices.isNew.dartCast<int>().sum(), false),
       type: DriftSqlType.int);
   @override
   $ProjectThumbnailViewView createAlias(String alias) {

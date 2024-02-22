@@ -63,7 +63,7 @@ void main() async {
           .into(database.practiceInfos)
           .insert(PracticeInfosCompanion.insert(
             score: isNull ? const Value(null) : Value(random.nextInt(101)),
-            isNew: isNull ? const Value(true) : Value(random.nextBool()),
+            isNew: isNull ? const Value(false) : Value(random.nextBool()),
             // bpm: const Value(100),
             speed: Value([0.5, 0.75, 1.0, 1.25, 1.5][random.nextInt(5)]),
             projectId: project.id,

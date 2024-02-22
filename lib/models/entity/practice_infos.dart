@@ -36,7 +36,7 @@ class PracticeInfos extends DefaultTable {
   IntColumn get score => integer().nullable()();
   IntColumn get bpm => integer().nullable()();
   RealColumn get speed => real().nullable()();
-  BoolColumn get isNew => boolean().withDefault(const Constant(true))();
+  BoolColumn get isNew => boolean().withDefault(const Constant(false))();
 
   TextColumn get projectId =>
       text().references(ProjectInfos, #id, onDelete: KeyAction.cascade)();

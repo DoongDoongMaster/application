@@ -20,7 +20,7 @@ class ProjectPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Badge.count(
-      count: data.unreadCount!,
+      count: data.unreadCount ?? 0,
       alignment: Alignment.topRight,
       offset: Offset(
           5 * max(-2, 2 - data.unreadCount.toString().length.toDouble()), -5),

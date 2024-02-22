@@ -8,7 +8,7 @@ abstract class ProjectThumbnailView extends View {
   MusicInfos get musicInfos;
   ProjectInfos get projects;
 
-  Expression<int> get unreadCount => practices.id.count();
+  Expression<int> get unreadCount => practices.isNew.dartCast<int>().sum();
 
   @override
   Query as() => select([
