@@ -45,14 +45,14 @@ class ReportHeader extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: _AccuracyAnalysisChart(
-                  accuracyData: report.accuracyCount,
+                  accuracyData: report.accuracyCount!,
                   score: report.score!,
                   bestScore: report.bestScore!,
                 ),
               ),
               Expanded(
-                child: _AccuracyAnalysisChartLegend(
-                  pieChartData: report.accuracyCount,
+                child: AccuracyAnalysisChartLegend(
+                  accuracyCnt: report.accuracyCount!,
                   totalCount: report.sourceCount![DrumComponent.total.name]!,
                 ),
               ),
@@ -72,7 +72,7 @@ class ReportHeader extends StatelessWidget {
                   .map(
                     (data) => _AnalysisPerComponent(
                       label: data.label,
-                      hitCnt: report.componentCount[data.name],
+                      hitCnt: report.componentCount![data.name]!,
                       sourceCnt: report.sourceCount![data.name]!,
                     ),
                   ),
@@ -213,13 +213,14 @@ class _AnalysisPerComponent extends StatelessWidget {
   }
 }
 
-class _AccuracyAnalysisChartLegend extends StatelessWidget {
-  const _AccuracyAnalysisChartLegend({
-    required this.pieChartData,
+class AccuracyAnalysisChartLegend extends StatelessWidget {
+  const AccuracyAnalysisChartLegend({
+    super.key,
+    required this.accuracyCnt,
     required this.totalCount,
   });
 
-  final AccuracyCount pieChartData;
+  final AccuracyCount accuracyCnt;
   final int totalCount;
 
   @override
@@ -258,7 +259,7 @@ class _AccuracyAnalysisChartLegend extends StatelessWidget {
                 Row(
                   children: [
                     Text(
-                      "${pieChartData[data.name]}",
+                      "${accuracyCnt[data.name]}",
                       style: TextStyles.bodyLarge,
                     ),
                     if (data == AccuracyType.correct)

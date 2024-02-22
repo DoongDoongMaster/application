@@ -32,7 +32,7 @@ CustomTransitionPage buildPageWithDefaultTransition<T>(
 }
 
 final GoRouter goRouter = GoRouter(
-  initialLocation: '/${RouterPath.report.name}',
+  initialLocation: '/${RouterPath.list.name}',
   debugLogDiagnostics: true,
   routes: [
     GoRoute(

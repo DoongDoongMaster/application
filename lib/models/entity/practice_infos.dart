@@ -10,8 +10,8 @@ class PracticeInfo {
   final double? speed;
   final int? score;
   final bool isNew;
-  final ComponentCount componentCount;
-  final AccuracyCount accuracyCount;
+  final ComponentCount? componentCount;
+  final AccuracyCount? accuracyCount;
 
   PracticeInfo({
     required this.id,
@@ -28,8 +28,10 @@ class PracticeInfo {
 
 @UseRowClass(PracticeInfo)
 class PracticeInfos extends DefaultTable {
-  TextColumn get title =>
-      text().clientDefault(() => DateTime.now().toIso8601String())();
+  TextColumn get title => text().clientDefault(() => DateTime.now()
+      .toString()
+      .replaceAll(RegExp(r':\d\d\.\d+'), '')
+      .replaceAll('-', '.'))();
 
   IntColumn get score => integer().nullable()();
   IntColumn get bpm => integer().nullable()();
@@ -39,14 +41,9 @@ class PracticeInfos extends DefaultTable {
   TextColumn get projectId =>
       text().references(ProjectInfos, #id, onDelete: KeyAction.cascade)();
 
-  IntColumn get correctCnt => integer().nullable()();
-  IntColumn get wrongComponentCnt => integer().nullable()();
-  IntColumn get wrongTimingCnt => integer().nullable()();
-  IntColumn get wrongCnt => integer().nullable()();
-  IntColumn get missCnt => integer().nullable()();
-
   TextColumn get componentCount =>
-      text().map(const ComponentCountConvertor())();
+      text().map(const ComponentCountConvertor()).nullable()();
 
-  TextColumn get accuracyCount => text().map(const AccuracyCountConvertor())();
+  TextColumn get accuracyCount =>
+      text().map(const AccuracyCountConvertor()).nullable()();
 }

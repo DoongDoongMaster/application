@@ -1,11 +1,15 @@
 import 'package:application/main.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
+import 'package:application/models/views/project_summary_view.dart';
 import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/home/Navigation_panel.dart';
 import 'package:application/widgets/no_content_widget.dart';
+import 'package:application/widgets/project/analysis_summary.dart';
+import 'package:application/widgets/project/panel.dart';
+import 'package:application/widgets/project/report_list_item.dart';
 import 'package:application/widgets/responsive_project_header.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -25,16 +29,18 @@ class ProjectScreen extends StatefulWidget {
 class _ProjectScreenState extends State<ProjectScreen> {
   ProjectDetailViewData projectDetailInfo = ProjectDetailViewData(
     id: '',
-    title: '연습장',
-    musicTitle: '곡 제목',
+    title: '-',
+    musicTitle: '-',
     musicId: '',
     isLiked: false,
     createdAt: DateTime.now(),
-    artist: '이름 없는 아티스트',
-    bpm: 100,
+    artist: '-',
+    bpm: 0,
     type: MusicType.ddm,
     musicLength: 0,
   );
+
+  static const int analysisPreviewSize = 8;
 
   @override
   void initState() {
@@ -45,6 +51,20 @@ class _ProjectScreenState extends State<ProjectScreen> {
         .then((value) => setState(() {
               projectDetailInfo = value;
             }));
+  }
+
+  onClickFavorite() async {
+    projectDetailInfo = projectDetailInfo.copyWith(
+        isLiked: (await database.toggleProjectLike(projectDetailInfo.id) != 0));
+
+    setState(() {});
+  }
+
+  deleteProject() {
+    database.deleteProject(projectDetailInfo.id).then((value) {
+      context.pushReplacementNamed(RouterPath.list.name,
+          queryParameters: {'refresh': ''});
+    });
   }
 
   @override
@@ -63,79 +83,10 @@ class _ProjectScreenState extends State<ProjectScreen> {
             child: Column(
               children: [
                 const SizedBox(height: 40),
-                Row(
-                  children: [
-                    if (context.canPop())
-                      const BackButtonWithText(label: '연습장'),
-                    const Spacer(),
-                    IconButtonWithGrayBackground(
-                      icon: projectDetailInfo.isLiked
-                          ? Icons.favorite_rounded
-                          : Icons.favorite_border_rounded,
-                      color: projectDetailInfo.isLiked ? Colors.red : null,
-                      onPressed: () async {
-                        projectDetailInfo = projectDetailInfo.copyWith(
-                            isLiked: (await database
-                                    .toggleProjectLike(widget.projectId!) !=
-                                0));
-
-                        setState(() {});
-                      },
-                    ),
-                    IconButtonWithGrayBackground(
-                      icon: Icons.more_horiz_rounded,
-                      onPressed: () {
-                        (context) => [
-                              const PopupMenuItem(
-                                child: Text("hi"),
-                              ),
-                            ];
-                      },
-                    ),
-                    Container(
-                      width: 24,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        color: ColorStyles.gray,
-                      ),
-                      child: PopupMenuButton(
-                        iconSize: 20,
-                        icon: const Icon(
-                          Icons.more_horiz_rounded,
-                        ),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        onSelected: (value) {
-                          switch (value) {
-                            case 0:
-                              database
-                                  .deleteProject(widget.projectId!)
-                                  .then((value) {
-                                context.pushReplacementNamed(
-                                    RouterPath.list.name,
-                                    queryParameters: {'refresh': ''});
-                              });
-                          }
-                        },
-                        itemBuilder: (context) => [
-                          const PopupMenuItem(
-                            padding: EdgeInsets.zero,
-                            height: 28,
-                            value: 0,
-                            child: ListTile(
-                              trailing: Icon(
-                                Icons.delete_outline_rounded,
-                                size: 18,
-                              ),
-                              leading: Text("삭제하기"),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 20),
-                  ],
+                _TopHeader(
+                  isLiked: projectDetailInfo.isLiked,
+                  onClickFavorite: onClickFavorite,
+                  deleteProject: deleteProject,
                 ),
                 Expanded(
                   child: CustomScrollView(
@@ -148,7 +99,10 @@ class _ProjectScreenState extends State<ProjectScreen> {
                         collapsedHeight: 112,
                         backgroundColor: ColorStyles.background,
                         flexibleSpace: Padding(
-                          padding: const EdgeInsets.fromLTRB(40, 0, 24, 0),
+                          padding: const EdgeInsets.only(
+                            left: 40,
+                            right: 24,
+                          ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceAround,
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -166,22 +120,138 @@ class _ProjectScreenState extends State<ProjectScreen> {
                           ),
                         ),
                       ),
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 40, right: 24),
-                          child: Container(
-                            height: 400,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(8),
-                              color: ColorStyles.panelCard,
+                      FutureBuilder<AnalysisSummaryData?>(
+                          future: database.getAnalysisSummaryData(
+                              widget.projectId!, analysisPreviewSize),
+                          builder: (context, snapshot) {
+                            if (!snapshot.hasData) {
+                              return const SliverToBoxAdapter(
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(vertical: 30),
+                                  child: Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
+                              );
+                            } else if (snapshot.data!.bestCount == null) {
+                              return const SliverToBoxAdapter(
+                                child: SizedBox(),
+                              );
+                            }
+                            return SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 40, bottom: 15, right: 24),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TextButton(
+                                      style: TextButton.styleFrom(
+                                        padding: const EdgeInsets.all(5),
+                                        foregroundColor: Colors.black,
+                                        minimumSize: const Size(0, 0),
+                                        disabledIconColor:
+                                            ColorStyles.lightGray,
+                                        iconColor: ColorStyles.primary,
+                                      ),
+                                      onPressed: () {}, //TODO: 그래프 자세히 보기
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            '완곡 점수 그래프',
+                                            style:
+                                                TextStyles.bodyLarge.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                              height: 2,
+                                            ),
+                                          ),
+                                          const Icon(
+                                            Icons.keyboard_arrow_right_rounded,
+                                            size: 24,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    if (snapshot.data!.accuracyList.isNotEmpty)
+                                      AnalysisSummary(data: snapshot.data!),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                      FutureBuilder<List<PracticeListViewData>>(
+                        future: database.getPracticeList(widget.projectId!),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData) {
+                            return const SliverToBoxAdapter(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(vertical: 30),
+                                child: Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                              ),
+                            );
+                          }
+                          if (snapshot.data!.isEmpty) {
+                            return SliverToBoxAdapter(
+                              child: Padding(
+                                padding:
+                                    const EdgeInsets.only(left: 40, right: 24),
+                                child: Panel(
+                                  size: const Size(0, 400),
+                                  child: const Center(
+                                    child: NoContentWidget(
+                                      title: '연주 기록이 비어 있음',
+                                      subTitle: '완곡 연주 버튼을 눌러 연주를 시작하세요.',
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          }
+                          return SliverPadding(
+                            padding: const EdgeInsets.only(left: 40),
+                            sliver: DecoratedSliver(
+                              position: DecorationPosition.background,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(8),
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                    color: Colors.transparent.withOpacity(0.08),
+                                    // color: Colors.red,
+                                  ),
+                                ],
+                              ),
+                              sliver: SliverList(
+                                delegate: SliverChildBuilderDelegate(
+                                  (context, index) {
+                                    if (index == 0) {
+                                      return Padding(
+                                        padding: const EdgeInsets.all(15),
+                                        child: Text(
+                                          "완곡 레포트",
+                                          style: TextStyles.bodyLarge.copyWith(
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      );
+                                    }
+                                    return ReportListItem(
+                                        data: snapshot.data![index - 1]);
+                                  },
+                                  childCount: snapshot.data!.length + 1,
+                                ),
+                              ),
                             ),
-                            alignment: Alignment.center,
-                            child: const NoContentWidget(
-                              title: '연주 기록이 비어 있음',
-                              subTitle: '완곡 연주 버튼을 눌러 연주를 시작하세요.',
-                            ),
-                          ),
-                        ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -195,7 +265,76 @@ class _ProjectScreenState extends State<ProjectScreen> {
   }
 }
 
-/// 연습 섬네일 TODO: 사용자 등록 악보 섬네일 따로 처리 필요함.
+class _TopHeader extends StatelessWidget {
+  final bool isLiked;
+  final void Function() onClickFavorite, deleteProject;
+
+  const _TopHeader({
+    required this.isLiked,
+    required this.onClickFavorite,
+    required this.deleteProject,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        if (context.canPop()) const BackButtonWithText(label: '연습장'),
+        const Spacer(),
+        IconButton(
+          icon: Icon(
+              isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded),
+          iconSize: 20,
+          color: isLiked ? Colors.red : null,
+          onPressed: onClickFavorite,
+          style: IconButton.styleFrom(
+            shape: const CircleBorder(),
+            backgroundColor: ColorStyles.gray,
+            padding: EdgeInsets.zero,
+            fixedSize: const Size(24, 24),
+          ),
+          constraints: const BoxConstraints(),
+        ),
+        Container(
+          width: 24,
+          height: 24,
+          decoration: const BoxDecoration(
+            shape: BoxShape.circle,
+            color: ColorStyles.gray,
+          ),
+          child: PopupMenuButton(
+            iconSize: 20,
+            icon: const Icon(Icons.more_horiz_rounded),
+            padding: EdgeInsets.zero,
+            constraints: const BoxConstraints(),
+            onSelected: (value) {
+              switch (value) {
+                case 0:
+                  deleteProject();
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                height: 28,
+                value: 0,
+                child: ListTile(
+                  trailing: Icon(
+                    Icons.delete_outline_rounded,
+                    size: 18,
+                  ),
+                  leading: Text("삭제하기"),
+                ),
+              )
+            ],
+          ),
+        ),
+        const SizedBox(width: 20),
+      ],
+    );
+  }
+}
+
 class _BigThumbnail extends StatelessWidget {
   final MusicType musicType;
   const _BigThumbnail(this.musicType);
@@ -226,36 +365,6 @@ class _BigThumbnail extends StatelessWidget {
         'assets/images/logo.png',
         color: musicType != MusicType.ddm ? Colors.transparent : null,
       ),
-    );
-  }
-}
-
-/// 작은 아이콘 버튼 & 회색 원 배경
-class IconButtonWithGrayBackground extends StatelessWidget {
-  final IconData icon;
-  final Color? color;
-  final void Function() onPressed;
-  const IconButtonWithGrayBackground({
-    super.key,
-    required this.icon,
-    this.color,
-    required this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return IconButton(
-      icon: Icon(icon),
-      iconSize: 20,
-      color: color,
-      onPressed: onPressed,
-      style: IconButton.styleFrom(
-        shape: const CircleBorder(),
-        backgroundColor: ColorStyles.gray,
-        padding: EdgeInsets.zero,
-        fixedSize: const Size(24, 24),
-      ),
-      constraints: const BoxConstraints(),
     );
   }
 }

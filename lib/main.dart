@@ -38,17 +38,17 @@ void main() async {
               measureList: List<Cursors>.from(
                       sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
                   .sublist(0, 10),
-              type: MusicType.ddm,
+              type: MusicType.values[random.nextInt(2)],
               lengthInSec: TimeUtils.getTotalDurationInSec(
                 240,
                 10,
               ),
               sourceCount: {
-                DrumComponent.hihat.name: 100,
-                DrumComponent.snareDrum.name: 10,
-                DrumComponent.smallTom.name: 0,
-                DrumComponent.kick.name: 30,
-                DrumComponent.total.name: 300,
+                DrumComponent.hihat.name: random.nextInt(101),
+                DrumComponent.snareDrum.name: random.nextInt(40),
+                DrumComponent.smallTom.name: random.nextInt(20),
+                DrumComponent.kick.name: random.nextInt(10),
+                DrumComponent.total.name: random.nextInt(300) + 100,
               }),
         );
 
@@ -58,27 +58,32 @@ void main() async {
             title: '이름이 무지막지 굉장히 매우 긴 프로젝트 $i', musicId: music.id));
 
     for (var j = 0; j < i; j++) {
-      var score = random.nextInt(101);
+      final isNull = random.nextBool();
       await database
           .into(database.practiceInfos)
           .insert(PracticeInfosCompanion.insert(
-            score: Value(score),
+            score: isNull ? const Value(null) : Value(random.nextInt(101)),
+            isNew: isNull ? const Value(true) : Value(random.nextBool()),
             // bpm: const Value(100),
-            speed: const Value(0.75),
+            speed: Value([0.5, 0.75, 1.0, 1.25, 1.5][random.nextInt(5)]),
             projectId: project.id,
-            accuracyCount: {
-              AccuracyType.correct.name: 186,
-              AccuracyType.wrongComponent.name: 56,
-              AccuracyType.wrongTiming.name: 48,
-              AccuracyType.wrong.name: 20,
-              AccuracyType.miss.name: 16,
-            },
-            componentCount: {
-              DrumComponent.hihat.name: 80,
-              DrumComponent.snareDrum.name: 9,
-              DrumComponent.smallTom.name: 0,
-              DrumComponent.kick.name: 5
-            },
+            accuracyCount: isNull
+                ? const Value(null)
+                : Value({
+                    AccuracyType.correct.name: random
+                        .nextInt(music.sourceCount[DrumComponent.total.name]!),
+                    AccuracyType.wrongComponent.name: random.nextInt(50),
+                    AccuracyType.wrongTiming.name: random.nextInt(60),
+                    AccuracyType.wrong.name: random.nextInt(20),
+                    AccuracyType.miss.name: random.nextInt(10),
+                  }),
+            componentCount: isNull
+                ? const Value(null)
+                : Value({
+                    for (var k in DrumComponent.values
+                        .sublist(DrumComponent.values.length - 1))
+                      k.name: random.nextInt(music.sourceCount[k.name]!)
+                  }),
           ));
     }
   }
@@ -138,10 +143,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-          surfaceTintColor: Colors.transparent,
-          foregroundColor: ColorStyles.primary,
-        )),
+          style: ElevatedButton.styleFrom(
+            surfaceTintColor: Colors.transparent,
+            foregroundColor: ColorStyles.primary,
+          ),
+        ),
         chipTheme: const ChipThemeData(
           selectedColor: ColorStyles.primary,
           side: BorderSide.none,
@@ -163,7 +169,9 @@ class MyApp extends StatelessWidget {
         popupMenuTheme: PopupMenuThemeData(
           position: PopupMenuPosition.under,
           surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
         ),
       ),
       color: ColorStyles.primary,

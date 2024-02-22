@@ -7,10 +7,13 @@ import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:application/models/views/music_thumbnail_view.dart';
-import 'package:application/models/views/practice_report_veiw.dart';
+import 'package:application/models/views/practice_list_view.dart';
+import 'package:application/models/views/practice_report_view.dart';
 import 'package:application/models/views/project_detail_view.dart';
 import 'package:application/models/views/project_sidebar_view.dart';
+import 'package:application/models/views/project_summary_view.dart';
 import 'package:application/models/views/project_thumbnail_view.dart';
+
 import 'package:application/services/local_storage.dart';
 import 'package:application/time_utils.dart';
 import 'package:drift/drift.dart';
@@ -46,7 +49,10 @@ LazyDatabase _openConnection() {
   ProjectDetailView,
   ProjectSidebarView,
   ProjectThumbnailView,
+  ProjectSummaryView,
   PracticeReportView,
+  PracticeListView,
+  PracticeAnalysisView,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -55,6 +61,7 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
           if (true) {
+            print("recreating database...");
             final m = Migrator(this);
             for (final table in allTables) {
               await m.deleteTable(table.actualTableName);
@@ -123,5 +130,48 @@ class AppDatabase extends _$AppDatabase {
       (delete(projectInfos)..where((tbl) => tbl.id.equals(id))).go();
 
   Future<PracticeReportViewData> getPracticeReport() =>
-      (select(practiceReportView)..limit(1)).getSingle();
+      (select(practiceReportView)
+            // ..where((tbl) => tbl.pro)
+            ..limit(1))
+          .getSingle();
+
+  Future<List<PracticeListViewData>> getPracticeList(String projectId) =>
+      (select(practiceListView)
+            ..where((tbl) => tbl.projectId.equals(projectId)))
+          .get();
+
+  Future<AnalysisSummaryData?> getAnalysisSummaryData(
+      String projectId, int size) async {
+    final projectInfo = await (select(projectSummaryView)
+          ..where((tbl) => tbl.id.equals(projectId)))
+        .getSingleOrNull();
+
+    if (projectInfo == null) {
+      return null;
+    }
+
+    final bestCount = await (select(practiceInfos)
+          ..where((tbl) => tbl.projectId.equals(projectInfo.id))
+          ..orderBy([
+            (u) => OrderingTerm.desc(u.score),
+            (u) => OrderingTerm.desc(u.createdAt)
+          ])
+          ..limit(1))
+        .getSingleOrNull();
+
+    final practiceList = await (select(practiceAnalysisView)
+          ..where((tbl) => tbl.projectId.equals(projectId))
+          ..orderBy([
+            (u) =>
+                OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
+          ])
+          ..limit(size))
+        .get();
+
+    return AnalysisSummaryData(
+      projectInfo: projectInfo,
+      practiceList: practiceList,
+      bestCount: bestCount?.accuracyCount,
+    );
+  }
 }
