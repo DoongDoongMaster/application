@@ -27,7 +27,7 @@ class AnalysisSummary extends StatelessWidget {
               child: Panel(
                 size: const Size(0, 200),
                 child: _ScoreChart(
-                  bestScore: data.bestScore!,
+                  bestScore: data.bestScore?.toString() ?? '-',
                   scoreList: data.scoreList,
                 ),
               ),
@@ -38,7 +38,7 @@ class AnalysisSummary extends StatelessWidget {
               child: Panel(
                 size: const Size(0, 200),
                 child: _AccuracyChart(
-                    accuracyCount: data.bestCount!,
+                    accuracyCount: data.bestCount,
                     accuracyList: data.accuracyList),
               ),
             ),
@@ -55,14 +55,13 @@ class _AccuracyChart extends StatelessWidget {
     required this.accuracyList,
   });
 
-  final AccuracyCount accuracyCount;
+  final AccuracyCount? accuracyCount;
   final List<AccuracyCount?> accuracyList;
 
   @override
   Widget build(BuildContext context) {
     final isNotReady =
         accuracyList.map((v) => v == null ? true : false).toList();
-
     return Row(
       children: [
         const SizedBox(width: 10),
@@ -122,7 +121,7 @@ class _ScoreChart extends StatelessWidget {
     required this.scoreList,
   });
 
-  final int bestScore;
+  final String bestScore;
   final List<double?> scoreList;
 
   @override
@@ -147,7 +146,7 @@ class _ScoreChart extends StatelessWidget {
                           ),
                         ),
                         TextSpan(
-                          text: bestScore.toString(),
+                          text: bestScore,
                           style: TextStyles.headlineMedium.copyWith(
                             color: ColorStyles.primary,
                             fontWeight: FontWeight.bold,

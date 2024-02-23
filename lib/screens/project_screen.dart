@@ -132,7 +132,7 @@ class _ProjectScreenState extends State<ProjectScreen> {
                                   ),
                                 ),
                               );
-                            } else if (snapshot.data!.bestCount == null) {
+                            } else if (snapshot.data!.accuracyList.isEmpty) {
                               return const SliverToBoxAdapter(
                                 child: SizedBox(),
                               );

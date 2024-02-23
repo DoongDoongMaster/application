@@ -694,25 +694,21 @@ class $PracticeInfosTable extends PracticeInfos
   static const VerificationMeta _componentCountMeta =
       const VerificationMeta('componentCount');
   @override
-  late final GeneratedColumnWithTypeConverter<ComponentCount, String>
+  late final GeneratedColumnWithTypeConverter<ComponentCount?, String>
       componentCount = GeneratedColumn<String>(
-              'component_count', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              defaultValue: Constant(const ComponentCountConvertor().toSql({})))
-          .withConverter<ComponentCount>(
-              $PracticeInfosTable.$convertercomponentCount);
+              'component_count', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<ComponentCount?>(
+              $PracticeInfosTable.$convertercomponentCountn);
   static const VerificationMeta _accuracyCountMeta =
       const VerificationMeta('accuracyCount');
   @override
-  late final GeneratedColumnWithTypeConverter<AccuracyCount, String>
+  late final GeneratedColumnWithTypeConverter<AccuracyCount?, String>
       accuracyCount = GeneratedColumn<String>(
-              'accuracy_count', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              defaultValue: Constant(const AccuracyCountConvertor().toSql({})))
-          .withConverter<AccuracyCount>(
-              $PracticeInfosTable.$converteraccuracyCount);
+              'accuracy_count', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<AccuracyCount?>(
+              $PracticeInfosTable.$converteraccuracyCountn);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -799,12 +795,12 @@ class $PracticeInfosTable extends PracticeInfos
           .read(DriftSqlType.double, data['${effectivePrefix}speed']),
       isNew: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_new'])!,
-      accuracyCount: $PracticeInfosTable.$converteraccuracyCount.fromSql(
+      accuracyCount: $PracticeInfosTable.$converteraccuracyCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])!),
-      componentCount: $PracticeInfosTable.$convertercomponentCount.fromSql(
+              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])),
+      componentCount: $PracticeInfosTable.$convertercomponentCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}component_count'])!),
+              DriftSqlType.string, data['${effectivePrefix}component_count'])),
     );
   }
 
@@ -815,8 +811,12 @@ class $PracticeInfosTable extends PracticeInfos
 
   static TypeConverter<ComponentCount, String> $convertercomponentCount =
       const ComponentCountConvertor();
+  static TypeConverter<ComponentCount?, String?> $convertercomponentCountn =
+      NullAwareTypeConverter.wrap($convertercomponentCount);
   static TypeConverter<AccuracyCount, String> $converteraccuracyCount =
       const AccuracyCountConvertor();
+  static TypeConverter<AccuracyCount?, String?> $converteraccuracyCountn =
+      NullAwareTypeConverter.wrap($converteraccuracyCount);
 }
 
 class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
@@ -829,8 +829,8 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
   final Value<double?> speed;
   final Value<bool> isNew;
   final Value<String> projectId;
-  final Value<ComponentCount> componentCount;
-  final Value<AccuracyCount> accuracyCount;
+  final Value<ComponentCount?> componentCount;
+  final Value<AccuracyCount?> accuracyCount;
   final Value<int> rowid;
   const PracticeInfosCompanion({
     this.id = const Value.absent(),
@@ -900,8 +900,8 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
       Value<double?>? speed,
       Value<bool>? isNew,
       Value<String>? projectId,
-      Value<ComponentCount>? componentCount,
-      Value<AccuracyCount>? accuracyCount,
+      Value<ComponentCount?>? componentCount,
+      Value<AccuracyCount?>? accuracyCount,
       Value<int>? rowid}) {
     return PracticeInfosCompanion(
       id: id ?? this.id,
@@ -951,12 +951,12 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
     }
     if (componentCount.present) {
       map['component_count'] = Variable<String>($PracticeInfosTable
-          .$convertercomponentCount
+          .$convertercomponentCountn
           .toSql(componentCount.value));
     }
     if (accuracyCount.present) {
       map['accuracy_count'] = Variable<String>($PracticeInfosTable
-          .$converteraccuracyCount
+          .$converteraccuracyCountn
           .toSql(accuracyCount.value));
     }
     if (rowid.present) {
@@ -1757,8 +1757,8 @@ class PracticeReportViewData extends DataClass {
   final int? bpm;
   final double? speed;
   final int? score;
-  final accuracyCount;
-  final componentCount;
+  final AccuracyCount? accuracyCount;
+  final ComponentCount? componentCount;
   final bool isNew;
   final sourceCount;
   final Uint8List sheetSvg;
@@ -1773,8 +1773,8 @@ class PracticeReportViewData extends DataClass {
       this.bpm,
       this.speed,
       this.score,
-      required this.accuracyCount,
-      required this.componentCount,
+      this.accuracyCount,
+      this.componentCount,
       required this.isNew,
       required this.sourceCount,
       required this.sheetSvg,
@@ -1792,9 +1792,9 @@ class PracticeReportViewData extends DataClass {
       bpm: serializer.fromJson<int?>(json['bpm']),
       speed: serializer.fromJson<double?>(json['speed']),
       score: serializer.fromJson<int?>(json['score']),
-      accuracyCount: serializer.fromJson<AccuracyCount>(json['accuracyCount']),
+      accuracyCount: serializer.fromJson<AccuracyCount?>(json['accuracyCount']),
       componentCount:
-          serializer.fromJson<ComponentCount>(json['componentCount']),
+          serializer.fromJson<ComponentCount?>(json['componentCount']),
       isNew: serializer.fromJson<bool>(json['isNew']),
       sourceCount: serializer.fromJson<ComponentCount>(json['sourceCount']),
       sheetSvg: serializer.fromJson<Uint8List>(json['sheetSvg']),
@@ -1814,8 +1814,8 @@ class PracticeReportViewData extends DataClass {
       'bpm': serializer.toJson<int?>(bpm),
       'speed': serializer.toJson<double?>(speed),
       'score': serializer.toJson<int?>(score),
-      'accuracyCount': serializer.toJson<AccuracyCount>(accuracyCount),
-      'componentCount': serializer.toJson<ComponentCount>(componentCount),
+      'accuracyCount': serializer.toJson<AccuracyCount?>(accuracyCount),
+      'componentCount': serializer.toJson<ComponentCount?>(componentCount),
       'isNew': serializer.toJson<bool>(isNew),
       'sourceCount': serializer.toJson<ComponentCount>(sourceCount),
       'sheetSvg': serializer.toJson<Uint8List>(sheetSvg),
@@ -1833,8 +1833,8 @@ class PracticeReportViewData extends DataClass {
           Value<int?> bpm = const Value.absent(),
           Value<double?> speed = const Value.absent(),
           Value<int?> score = const Value.absent(),
-          AccuracyCount? accuracyCount,
-          ComponentCount? componentCount,
+          Value<AccuracyCount?> accuracyCount = const Value.absent(),
+          Value<ComponentCount?> componentCount = const Value.absent(),
           bool? isNew,
           ComponentCount? sourceCount,
           Uint8List? sheetSvg,
@@ -1849,8 +1849,10 @@ class PracticeReportViewData extends DataClass {
         bpm: bpm.present ? bpm.value : this.bpm,
         speed: speed.present ? speed.value : this.speed,
         score: score.present ? score.value : this.score,
-        accuracyCount: accuracyCount ?? this.accuracyCount,
-        componentCount: componentCount ?? this.componentCount,
+        accuracyCount:
+            accuracyCount.present ? accuracyCount.value : this.accuracyCount,
+        componentCount:
+            componentCount.present ? componentCount.value : this.componentCount,
         isNew: isNew ?? this.isNew,
         sourceCount: sourceCount ?? this.sourceCount,
         sheetSvg: sheetSvg ?? this.sheetSvg,
@@ -1974,12 +1976,12 @@ class $PracticeReportViewView
           .read(DriftSqlType.double, data['${effectivePrefix}speed']),
       score: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}score']),
-      accuracyCount: $PracticeInfosTable.$converteraccuracyCount.fromSql(
+      accuracyCount: $PracticeInfosTable.$converteraccuracyCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])!),
-      componentCount: $PracticeInfosTable.$convertercomponentCount.fromSql(
+              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])),
+      componentCount: $PracticeInfosTable.$convertercomponentCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}component_count'])!),
+              DriftSqlType.string, data['${effectivePrefix}component_count'])),
       isNew: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_new'])!,
       sourceCount: $MusicInfosTable.$convertersourceCount.fromSql(
@@ -2015,20 +2017,20 @@ class $PracticeReportViewView
   late final GeneratedColumn<int> score = GeneratedColumn<int>(
       'score', aliasedName, true,
       generatedAs: GeneratedAs(practice.score, false), type: DriftSqlType.int);
-  late final GeneratedColumnWithTypeConverter<AccuracyCount, String>
+  late final GeneratedColumnWithTypeConverter<AccuracyCount?, String>
       accuracyCount = GeneratedColumn<String>(
-              'accuracy_count', aliasedName, false,
+              'accuracy_count', aliasedName, true,
               generatedAs: GeneratedAs(practice.accuracyCount, false),
               type: DriftSqlType.string)
-          .withConverter<AccuracyCount>(
-              $PracticeInfosTable.$converteraccuracyCount);
-  late final GeneratedColumnWithTypeConverter<ComponentCount, String>
+          .withConverter<AccuracyCount?>(
+              $PracticeInfosTable.$converteraccuracyCountn);
+  late final GeneratedColumnWithTypeConverter<ComponentCount?, String>
       componentCount = GeneratedColumn<String>(
-              'component_count', aliasedName, false,
+              'component_count', aliasedName, true,
               generatedAs: GeneratedAs(practice.componentCount, false),
               type: DriftSqlType.string)
-          .withConverter<ComponentCount>(
-              $PracticeInfosTable.$convertercomponentCount);
+          .withConverter<ComponentCount?>(
+              $PracticeInfosTable.$convertercomponentCountn);
   late final GeneratedColumn<bool> isNew = GeneratedColumn<bool>(
       'is_new', aliasedName, false,
       generatedAs: GeneratedAs(practice.isNew, false),
@@ -2273,13 +2275,13 @@ class $PracticeListViewView
 class PracticeAnalysisViewData extends DataClass {
   final String id;
   final String projectId;
-  final accuracyCount;
+  final AccuracyCount? accuracyCount;
   final int? score;
   final DateTime createdAt;
   const PracticeAnalysisViewData(
       {required this.id,
       required this.projectId,
-      required this.accuracyCount,
+      this.accuracyCount,
       this.score,
       required this.createdAt});
   factory PracticeAnalysisViewData.fromJson(Map<String, dynamic> json,
@@ -2288,7 +2290,7 @@ class PracticeAnalysisViewData extends DataClass {
     return PracticeAnalysisViewData(
       id: serializer.fromJson<String>(json['id']),
       projectId: serializer.fromJson<String>(json['projectId']),
-      accuracyCount: serializer.fromJson<AccuracyCount>(json['accuracyCount']),
+      accuracyCount: serializer.fromJson<AccuracyCount?>(json['accuracyCount']),
       score: serializer.fromJson<int?>(json['score']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
@@ -2299,7 +2301,7 @@ class PracticeAnalysisViewData extends DataClass {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'projectId': serializer.toJson<String>(projectId),
-      'accuracyCount': serializer.toJson<AccuracyCount>(accuracyCount),
+      'accuracyCount': serializer.toJson<AccuracyCount?>(accuracyCount),
       'score': serializer.toJson<int?>(score),
       'createdAt': serializer.toJson<DateTime>(createdAt),
     };
@@ -2308,13 +2310,14 @@ class PracticeAnalysisViewData extends DataClass {
   PracticeAnalysisViewData copyWith(
           {String? id,
           String? projectId,
-          AccuracyCount? accuracyCount,
+          Value<AccuracyCount?> accuracyCount = const Value.absent(),
           Value<int?> score = const Value.absent(),
           DateTime? createdAt}) =>
       PracticeAnalysisViewData(
         id: id ?? this.id,
         projectId: projectId ?? this.projectId,
-        accuracyCount: accuracyCount ?? this.accuracyCount,
+        accuracyCount:
+            accuracyCount.present ? accuracyCount.value : this.accuracyCount,
         score: score.present ? score.value : this.score,
         createdAt: createdAt ?? this.createdAt,
       );
@@ -2373,9 +2376,9 @@ class $PracticeAnalysisViewView
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       projectId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}project_id'])!,
-      accuracyCount: $PracticeInfosTable.$converteraccuracyCount.fromSql(
+      accuracyCount: $PracticeInfosTable.$converteraccuracyCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])!),
+              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])),
       score: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}score']),
       createdAt: attachedDatabase.typeMapping
@@ -2391,13 +2394,13 @@ class $PracticeAnalysisViewView
       'project_id', aliasedName, false,
       generatedAs: GeneratedAs(practiceList.projectId, false),
       type: DriftSqlType.string);
-  late final GeneratedColumnWithTypeConverter<AccuracyCount, String>
+  late final GeneratedColumnWithTypeConverter<AccuracyCount?, String>
       accuracyCount = GeneratedColumn<String>(
-              'accuracy_count', aliasedName, false,
+              'accuracy_count', aliasedName, true,
               generatedAs: GeneratedAs(practiceList.accuracyCount, false),
               type: DriftSqlType.string)
-          .withConverter<AccuracyCount>(
-              $PracticeInfosTable.$converteraccuracyCount);
+          .withConverter<AccuracyCount?>(
+              $PracticeInfosTable.$converteraccuracyCountn);
   late final GeneratedColumn<int> score = GeneratedColumn<int>(
       'score', aliasedName, true,
       generatedAs: GeneratedAs(practiceList.score, false),

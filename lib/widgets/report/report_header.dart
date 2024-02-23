@@ -221,7 +221,7 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
     required this.totalCount,
   });
 
-  final AccuracyCount accuracyCnt;
+  final AccuracyCount? accuracyCnt;
   final int totalCount;
 
   @override
@@ -274,7 +274,7 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: "${accuracyCnt[data.name]}",
+                          text: "${accuracyCnt?[data.name] ?? '-'}",
                           style: TextStyle(
                               fontWeight: data == AccuracyType.correct
                                   ? FontWeight.bold

@@ -27,30 +27,33 @@ void main() async {
   for (var i = 0; i < 25; i++) {
     MusicInfo music = await database.into(database.musicInfos).insertReturning(
           MusicInfosCompanion.insert(
-              title: Value('이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!'),
-              bpm: const Value(240),
-              artist: Value('아티스트 $i'),
-              sheetSvg: Value(
-                  (await rootBundle.load('assets/music/stay-with-me.svg'))
-                      .buffer
-                      .asUint8List()),
-              cursorList: Value(List<Cursors>.from(
-                  sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))),
-              measureList: Value(List<Cursors>.from(
-                      sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
-                  .sublist(0, 10)),
-              type: Value(MusicType.values[random.nextInt(2)]),
-              lengthInSec: TimeUtils.getTotalDurationInSec(
-                240,
-                10,
-              ),
-              sourceCount: Value({
+            title: Value('이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!'),
+            bpm: const Value(240),
+            artist: Value('아티스트 $i'),
+            sheetSvg: Value(
+                (await rootBundle.load('assets/music/stay-with-me.svg'))
+                    .buffer
+                    .asUint8List()),
+            cursorList: Value(List<Cursors>.from(
+                sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))),
+            measureList: Value(List<Cursors>.from(
+                    sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
+                .sublist(0, 10)),
+            type: Value(MusicType.values[random.nextInt(2)]),
+            lengthInSec: TimeUtils.getTotalDurationInSec(
+              240,
+              10,
+            ),
+            sourceCount: Value(
+              {
                 DrumComponent.hihat.name: random.nextInt(101),
                 DrumComponent.snareDrum.name: random.nextInt(40),
                 DrumComponent.smallTom.name: random.nextInt(20),
                 DrumComponent.kick.name: random.nextInt(10),
                 DrumComponent.total.name: random.nextInt(300) + 100,
-              })),
+              },
+            ),
+          ),
         );
 
     ProjectInfo project = await database

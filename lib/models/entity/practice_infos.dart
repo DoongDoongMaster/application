@@ -41,11 +41,9 @@ class PracticeInfos extends DefaultTable {
   TextColumn get projectId =>
       text().references(ProjectInfos, #id, onDelete: KeyAction.cascade)();
 
-  TextColumn get componentCount => text()
-      .map(const ComponentCountConvertor())
-      .withDefault(Constant(const ComponentCountConvertor().toSql({})))();
+  TextColumn get componentCount =>
+      text().map(const ComponentCountConvertor()).nullable()();
 
-  TextColumn get accuracyCount => text()
-      .map(const AccuracyCountConvertor())
-      .withDefault(Constant(const AccuracyCountConvertor().toSql({})))();
+  TextColumn get accuracyCount =>
+      text().map(const AccuracyCountConvertor()).nullable()();
 }
