@@ -9,9 +9,11 @@ class PrecountWidget extends StatefulWidget {
   final int usPerSixteenth;
   final Future<void> Function() startPractice;
 
-  const PrecountWidget(
-      {super.key, required this.usPerBeat, required this.startPractice})
-      : usPerSixteenth = usPerBeat ~/ 4;
+  const PrecountWidget({
+    super.key,
+    required this.usPerBeat,
+    required this.startPractice,
+  }) : usPerSixteenth = usPerBeat ~/ 4;
 
   @override
   State<PrecountWidget> createState() => _PrecountWidgetState();
@@ -30,6 +32,7 @@ class _PrecountWidgetState extends State<PrecountWidget> {
   @override
   void initState() {
     super.initState();
+
     _ticker = Ticker((Duration elapsed) {
       if (elapsed.inMicroseconds - usCounter >= widget.usPerSixteenth) {
         usCounter = elapsed.inMicroseconds;
@@ -44,7 +47,6 @@ class _PrecountWidgetState extends State<PrecountWidget> {
         }
       }
     });
-
     startPrecount();
   }
 

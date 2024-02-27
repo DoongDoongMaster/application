@@ -1,14 +1,10 @@
 class TimeUtils {
-  static const int timeUnit = 60;
-  static const int convertToMilli = 1000;
-  static const int convertToMicro = 1000000;
-
   static int getUsPerBeat(int bpm) {
-    return (timeUnit * convertToMicro) ~/ bpm;
+    return (Duration.secondsPerMinute * Duration.microsecondsPerSecond) ~/ bpm;
   }
 
   static int getSecPerBeat(int bpm) {
-    return timeUnit ~/ bpm;
+    return Duration.secondsPerMinute ~/ bpm;
   }
 
   static Duration getTotalDuration(int bpm, int measureLength) {

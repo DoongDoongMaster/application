@@ -10,11 +10,11 @@ class Metronome {
   final void Function(Cursors) updateCursor;
   final void Function(int) updateTime;
   final void Function() onComplete;
-  double volume = 1;
+  double volume;
 
   /// 사용자가 선택한 속도
-  late final int currentBPM;
-  late final int usPerBeat;
+  late int currentBPM;
+  late int usPerBeat;
   late int offset;
 
   /// 현재 상태 변수
@@ -37,13 +37,8 @@ class Metronome {
     required this.music,
     required this.updateCursor,
     required this.onComplete,
+    this.volume = 1,
   });
-
-  setBPM(int bpm) {
-    currentBPM = bpm;
-    usPerBeat = TimeUtils.getUsPerBeat(currentBPM);
-    offset = usPerBeat * 4;
-  }
 
   _onTick(Duration elasped) {
     // 1. play metronome
@@ -76,11 +71,21 @@ class Metronome {
     }
 
     // update time
-    updateTime((elasped.inMicroseconds - offset) ~/ TimeUtils.convertToMicro);
+    updateTime(
+        (elasped.inMicroseconds - offset) ~/ Duration.microsecondsPerSecond);
   }
 
   /// initialize player for metronome sound
-  initialize() async {
+  Future<void> initialize(int bpm) async {
+    currentBPM = bpm;
+    usPerBeat = TimeUtils.getUsPerBeat(currentBPM);
+    offset = usPerBeat * 4;
+
+    usCounter = usPerBeat;
+    nextCursorTimestamp = 0;
+    nextCursorIdx = 0;
+    _currentAudioIdx = 0;
+
     _ticker = Ticker(_onTick);
 
     for (int i = 0; i < _audioPlayerSize; i++) {
@@ -104,21 +109,16 @@ class Metronome {
     if (_ticker.isActive) {
       throw Exception('already started');
     }
-    usCounter = usPerBeat;
-    nextCursorTimestamp = 0;
-    nextCursorIdx = 0;
-    _currentAudioIdx = 0;
-
     _ticker.start();
   }
 
-  stop() {
+  Future<void> stop() async {
     if (_ticker.isActive) {
       _ticker.stop();
       _ticker.dispose();
     }
     for (int i = 0; i < _audioPlayerSize; i++) {
-      _audioPlayers[i].dispose();
+      await _audioPlayers[i].dispose();
     }
   }
 

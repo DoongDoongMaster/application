@@ -46,12 +46,14 @@ class $MusicInfosTable extends MusicInfos
       type: DriftSqlType.int,
       requiredDuringInsert: false,
       defaultValue: const Constant(90));
-  static const VerificationMeta _lengthInSecMeta =
-      const VerificationMeta('lengthInSec');
+  static const VerificationMeta _measureCountMeta =
+      const VerificationMeta('measureCount');
   @override
-  late final GeneratedColumn<int> lengthInSec = GeneratedColumn<int>(
-      'length_in_sec', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+  late final GeneratedColumn<int> measureCount = GeneratedColumn<int>(
+      'measure_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   static const VerificationMeta _artistMeta = const VerificationMeta('artist');
   @override
   late final GeneratedColumn<String> artist = GeneratedColumn<String>(
@@ -110,7 +112,7 @@ class $MusicInfosTable extends MusicInfos
         updatedAt,
         title,
         bpm,
-        lengthInSec,
+        measureCount,
         artist,
         cursorList,
         measureList,
@@ -147,13 +149,11 @@ class $MusicInfosTable extends MusicInfos
       context.handle(
           _bpmMeta, bpm.isAcceptableOrUnknown(data['bpm']!, _bpmMeta));
     }
-    if (data.containsKey('length_in_sec')) {
+    if (data.containsKey('measure_count')) {
       context.handle(
-          _lengthInSecMeta,
-          lengthInSec.isAcceptableOrUnknown(
-              data['length_in_sec']!, _lengthInSecMeta));
-    } else if (isInserting) {
-      context.missing(_lengthInSecMeta);
+          _measureCountMeta,
+          measureCount.isAcceptableOrUnknown(
+              data['measure_count']!, _measureCountMeta));
     }
     if (data.containsKey('artist')) {
       context.handle(_artistMeta,
@@ -221,7 +221,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
   final Value<DateTime> updatedAt;
   final Value<String> title;
   final Value<int> bpm;
-  final Value<int> lengthInSec;
+  final Value<int> measureCount;
   final Value<String> artist;
   final Value<List<Cursors>> cursorList;
   final Value<List<Cursors>> measureList;
@@ -235,7 +235,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.updatedAt = const Value.absent(),
     this.title = const Value.absent(),
     this.bpm = const Value.absent(),
-    this.lengthInSec = const Value.absent(),
+    this.measureCount = const Value.absent(),
     this.artist = const Value.absent(),
     this.cursorList = const Value.absent(),
     this.measureList = const Value.absent(),
@@ -250,7 +250,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.updatedAt = const Value.absent(),
     this.title = const Value.absent(),
     this.bpm = const Value.absent(),
-    required int lengthInSec,
+    this.measureCount = const Value.absent(),
     this.artist = const Value.absent(),
     this.cursorList = const Value.absent(),
     this.measureList = const Value.absent(),
@@ -258,14 +258,14 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.type = const Value.absent(),
     this.sourceCount = const Value.absent(),
     this.rowid = const Value.absent(),
-  }) : lengthInSec = Value(lengthInSec);
+  });
   static Insertable<MusicInfo> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? title,
     Expression<int>? bpm,
-    Expression<int>? lengthInSec,
+    Expression<int>? measureCount,
     Expression<String>? artist,
     Expression<String>? cursorList,
     Expression<String>? measureList,
@@ -280,7 +280,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (title != null) 'title': title,
       if (bpm != null) 'bpm': bpm,
-      if (lengthInSec != null) 'length_in_sec': lengthInSec,
+      if (measureCount != null) 'measure_count': measureCount,
       if (artist != null) 'artist': artist,
       if (cursorList != null) 'cursor_list': cursorList,
       if (measureList != null) 'measure_list': measureList,
@@ -297,7 +297,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       Value<DateTime>? updatedAt,
       Value<String>? title,
       Value<int>? bpm,
-      Value<int>? lengthInSec,
+      Value<int>? measureCount,
       Value<String>? artist,
       Value<List<Cursors>>? cursorList,
       Value<List<Cursors>>? measureList,
@@ -311,7 +311,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       updatedAt: updatedAt ?? this.updatedAt,
       title: title ?? this.title,
       bpm: bpm ?? this.bpm,
-      lengthInSec: lengthInSec ?? this.lengthInSec,
+      measureCount: measureCount ?? this.measureCount,
       artist: artist ?? this.artist,
       cursorList: cursorList ?? this.cursorList,
       measureList: measureList ?? this.measureList,
@@ -340,8 +340,8 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     if (bpm.present) {
       map['bpm'] = Variable<int>(bpm.value);
     }
-    if (lengthInSec.present) {
-      map['length_in_sec'] = Variable<int>(lengthInSec.value);
+    if (measureCount.present) {
+      map['measure_count'] = Variable<int>(measureCount.value);
     }
     if (artist.present) {
       map['artist'] = Variable<String>(artist.value);
@@ -379,7 +379,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
           ..write('updatedAt: $updatedAt, ')
           ..write('title: $title, ')
           ..write('bpm: $bpm, ')
-          ..write('lengthInSec: $lengthInSec, ')
+          ..write('measureCount: $measureCount, ')
           ..write('artist: $artist, ')
           ..write('cursorList: $cursorList, ')
           ..write('measureList: $measureList, ')
@@ -1140,7 +1140,7 @@ class ProjectDetailViewData extends DataClass {
   final String artist;
   final int bpm;
   final MusicType type;
-  final int? musicLength;
+  final int measureCount;
   const ProjectDetailViewData(
       {required this.id,
       required this.title,
@@ -1151,7 +1151,7 @@ class ProjectDetailViewData extends DataClass {
       required this.artist,
       required this.bpm,
       required this.type,
-      this.musicLength});
+      required this.measureCount});
   factory ProjectDetailViewData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
@@ -1166,7 +1166,7 @@ class ProjectDetailViewData extends DataClass {
       bpm: serializer.fromJson<int>(json['bpm']),
       type: $MusicInfosTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
-      musicLength: serializer.fromJson<int?>(json['musicLength']),
+      measureCount: serializer.fromJson<int>(json['measureCount']),
     );
   }
   @override
@@ -1183,7 +1183,7 @@ class ProjectDetailViewData extends DataClass {
       'bpm': serializer.toJson<int>(bpm),
       'type':
           serializer.toJson<int>($MusicInfosTable.$convertertype.toJson(type)),
-      'musicLength': serializer.toJson<int?>(musicLength),
+      'measureCount': serializer.toJson<int>(measureCount),
     };
   }
 
@@ -1197,7 +1197,7 @@ class ProjectDetailViewData extends DataClass {
           String? artist,
           int? bpm,
           MusicType? type,
-          Value<int?> musicLength = const Value.absent()}) =>
+          int? measureCount}) =>
       ProjectDetailViewData(
         id: id ?? this.id,
         title: title ?? this.title,
@@ -1208,7 +1208,7 @@ class ProjectDetailViewData extends DataClass {
         artist: artist ?? this.artist,
         bpm: bpm ?? this.bpm,
         type: type ?? this.type,
-        musicLength: musicLength.present ? musicLength.value : this.musicLength,
+        measureCount: measureCount ?? this.measureCount,
       );
   @override
   String toString() {
@@ -1222,14 +1222,14 @@ class ProjectDetailViewData extends DataClass {
           ..write('artist: $artist, ')
           ..write('bpm: $bpm, ')
           ..write('type: $type, ')
-          ..write('musicLength: $musicLength')
+          ..write('measureCount: $measureCount')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, title, isLiked, createdAt, musicId,
-      musicTitle, artist, bpm, type, musicLength);
+      musicTitle, artist, bpm, type, measureCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1243,7 +1243,7 @@ class ProjectDetailViewData extends DataClass {
           other.artist == this.artist &&
           other.bpm == this.bpm &&
           other.type == this.type &&
-          other.musicLength == this.musicLength);
+          other.measureCount == this.measureCount);
 }
 
 class $ProjectDetailViewView
@@ -1268,7 +1268,7 @@ class $ProjectDetailViewView
         artist,
         bpm,
         type,
-        musicLength
+        measureCount
       ];
   @override
   String get aliasedName => _alias ?? entityName;
@@ -1300,8 +1300,8 @@ class $ProjectDetailViewView
           .read(DriftSqlType.int, data['${effectivePrefix}bpm'])!,
       type: $MusicInfosTable.$convertertype.fromSql(attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
-      musicLength: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}music_length']),
+      measureCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}measure_count'])!,
     );
   }
 
@@ -1342,9 +1342,9 @@ class $ProjectDetailViewView
               generatedAs: GeneratedAs(musicInfos.type, false),
               type: DriftSqlType.int)
           .withConverter<MusicType>($MusicInfosTable.$convertertype);
-  late final GeneratedColumn<int> musicLength = GeneratedColumn<int>(
-      'music_length', aliasedName, true,
-      generatedAs: GeneratedAs(musicInfos.lengthInSec, false),
+  late final GeneratedColumn<int> measureCount = GeneratedColumn<int>(
+      'measure_count', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.measureCount, false),
       type: DriftSqlType.int);
   @override
   $ProjectDetailViewView createAlias(String alias) {

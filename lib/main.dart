@@ -28,22 +28,20 @@ void main() async {
     MusicInfo music = await database.into(database.musicInfos).insertReturning(
           MusicInfosCompanion.insert(
             title: Value('이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!'),
-            bpm: const Value(240),
+            bpm: const Value(90),
             artist: Value('아티스트 $i'),
             sheetSvg: Value(
                 (await rootBundle.load('assets/music/stay-with-me.svg'))
                     .buffer
                     .asUint8List()),
             cursorList: Value(List<Cursors>.from(
-                sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))),
-            measureList: Value(List<Cursors>.from(
                     sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
                 .sublist(0, 10)),
+            measureList: Value(List<Cursors>.from(
+                    sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
+                .sublist(0, 3)),
+            measureCount: const Value(3),
             type: Value(MusicType.values[random.nextInt(2)]),
-            lengthInSec: TimeUtils.getTotalDurationInSec(
-              240,
-              10,
-            ),
             sourceCount: Value(
               {
                 DrumComponent.hihat.name: random.nextInt(101),

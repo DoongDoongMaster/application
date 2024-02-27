@@ -12,9 +12,9 @@ enum MusicType {
 
 class MusicInfo {
   final String id, title, artist;
-  final int bpm, lengthInSec;
+  final int bpm, measureCount;
   final List<Cursors> cursorList;
-  final Uint8List sheetSvg;
+  final Uint8List? sheetSvg;
   final List<Cursors> measureList;
   final MusicType type;
   final ComponentCount sourceCount;
@@ -23,14 +23,13 @@ class MusicInfo {
     this.id = "",
     this.title = "",
     this.artist = "",
-    this.bpm = 0,
+    this.bpm = 90,
     this.cursorList = const [],
     this.measureList = const [],
     this.type = MusicType.user,
-    required this.sheetSvg,
-    required this.sourceCount,
-  }) : lengthInSec =
-            TimeUtils.getTotalDuration(bpm, measureList.length).inSeconds;
+    this.sheetSvg,
+    this.sourceCount = const {},
+  }) : measureCount = measureList.length;
 }
 
 @UseRowClass(MusicInfo)
@@ -42,7 +41,7 @@ class MusicInfos extends DefaultTable {
 
   TextColumn get title => text().withDefault(const Constant("이름 없는 악보"))();
   IntColumn get bpm => integer().withDefault(const Constant(90))();
-  IntColumn get lengthInSec => integer()();
+  IntColumn get measureCount => integer().withDefault(const Constant(0))();
   TextColumn get artist => text().withDefault(const Constant("이름 없는 아티스트"))();
 
   // BlobColumn get infoJson => blob()();

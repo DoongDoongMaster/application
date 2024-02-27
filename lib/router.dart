@@ -1,9 +1,10 @@
 import 'package:application/models/entity/music_infos.dart';
+import 'package:application/screens/prompt_screen.dart';
 import 'package:application/screens/report_screen.dart';
 import 'package:application/screens/home_screen.dart';
 import 'package:application/screens/music_list_screen.dart';
 import 'package:application/screens/project_screen.dart';
-import 'package:application/screens/prompt_screen.dart';
+import 'package:application/screens/prev_prompt_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -25,7 +26,8 @@ CustomTransitionPage buildPageWithDefaultTransition<T>(
     // key: state.uri.queryParameters.containsKey('refresh')
     //     ? UniqueKey()
     //     : state.pageKey,
-    key: state.pageKey,
+    // key: state.pageKey,
+    key: UniqueKey(),
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) =>
         FadeTransition(opacity: animation, child: child),
@@ -37,10 +39,10 @@ final GoRouter goRouter = GoRouter(
   debugLogDiagnostics: true,
   routes: [
     GoRoute(
-        path: '/${RouterPath.list.name}',
-        name: RouterPath.list.name,
-        pageBuilder: (context, state) =>
-            buildPageWithDefaultTransition(context, state, const HomeScreen())),
+      path: '/${RouterPath.list.name}',
+      name: RouterPath.list.name,
+      pageBuilder: (context, state) => goHome(context, state),
+    ),
     GoRoute(
         path: '/${RouterPath.favoriteList.name}',
         name: RouterPath.favoriteList.name,
@@ -62,33 +64,38 @@ final GoRouter goRouter = GoRouter(
       path: '/${RouterPath.musicList.name}/${MusicType.ddm.name}',
       name: RouterPath.musicListDDM.name,
       pageBuilder: (context, state) => buildPageWithDefaultTransition(
-          context,
-          state,
-          const MusicListScreen(
-            filter: MusicType.ddm,
-          )),
+        context,
+        state,
+        const MusicListScreen(filter: MusicType.ddm),
+      ),
     ),
     GoRoute(
       path: '/${RouterPath.musicList.name}/${MusicType.user.name}',
       name: RouterPath.musicListUser.name,
       pageBuilder: (context, state) => buildPageWithDefaultTransition(
-          context,
-          state,
-          const MusicListScreen(
-            filter: MusicType.user,
-          )),
+        context,
+        state,
+        const MusicListScreen(filter: MusicType.user),
+      ),
     ),
     GoRoute(
-      path: '/${RouterPath.prompt.name}/:id',
+      path: '/${RouterPath.prompt.name}/:musicId/:projectId',
       name: RouterPath.prompt.name,
       pageBuilder: (context, state) {
+        if (state.pathParameters["musicId"] == null ||
+            state.pathParameters["projectId"] == null) {
+          return goHome(context, state);
+        }
         return buildPageWithDefaultTransition(
           context,
           state,
+          // PrevPromptScreen(
+          //   musicId: state.pathParameters["musicId"],
+          //   projectId: state.pathParameters["projectId"],
+          // ),
           PromptScreen(
-            music: state.extra as MusicInfo,
-            projectId: state.pathParameters["id"],
-          ),
+              musicId: state.pathParameters["musicId"],
+              projectId: state.pathParameters["projectId"]),
         );
       },
     ),
@@ -107,3 +114,8 @@ final GoRouter goRouter = GoRouter(
     )
   ],
 );
+
+CustomTransitionPage<dynamic> goHome(
+    BuildContext context, GoRouterState state) {
+  return buildPageWithDefaultTransition(context, state, const HomeScreen());
+}

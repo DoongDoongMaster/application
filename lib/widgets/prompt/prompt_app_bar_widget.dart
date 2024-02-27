@@ -7,13 +7,13 @@ import 'package:flutter/material.dart';
 class PromptAppBarWidget extends StatelessWidget {
   final String title;
   final String artist;
-  final void Function()? testFunction;
+  final void Function() exitPractice;
 
   const PromptAppBarWidget({
     super.key,
     required this.title,
     required this.artist,
-    this.testFunction,
+    required this.exitPractice,
   });
 
   completePractice(context) {
@@ -37,31 +37,32 @@ class PromptAppBarWidget extends StatelessWidget {
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: exitPractice,
                       icon: const Icon(Icons.arrow_back_ios_rounded),
                       color: ColorStyles.primary,
                     ),
                   ),
                 ),
                 _MusicTitleWidget(musicTitle: title),
-                Expanded(
-                  child: Align(
-                    alignment: Alignment.centerRight,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        IconButton(
-                          onPressed: () => completePractice(context),
-                          icon: const Icon(Icons.stop_circle),
-                        ),
-                        IconButton(
-                          onPressed: testFunction,
-                          icon: const Icon(Icons.play_circle),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
+                // Expanded(
+                //   child: Align(
+                //     alignment: Alignment.centerRight,
+                //     child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.end,
+                //       children: [
+                //         IconButton(
+                //           onPressed: () => completePractice(context),
+                //           icon: const Icon(Icons.stop_circle),
+                //         ),
+                //         IconButton(
+                //           onPressed: testFunction,
+                //           icon: const Icon(Icons.play_circle),
+                //         ),
+                //       ],
+                //     ),
+                //   ),
+                // ),
+                const Spacer(),
               ],
             ),
             Text(

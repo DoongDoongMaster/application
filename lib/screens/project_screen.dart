@@ -35,9 +35,9 @@ class _ProjectScreenState extends State<ProjectScreen> {
     isLiked: false,
     createdAt: DateTime.now(),
     artist: '-',
-    bpm: 0,
+    bpm: 90,
     type: MusicType.ddm,
-    musicLength: 0,
+    measureCount: 0,
   );
 
   @override
@@ -45,10 +45,20 @@ class _ProjectScreenState extends State<ProjectScreen> {
     super.initState();
     (database.select(database.projectDetailView)
           ..where((tbl) => tbl.id.equals(widget.projectId!)))
-        .getSingle()
-        .then((value) => setState(() {
-              projectDetailInfo = value;
-            }));
+        .getSingleOrNull()
+        .then((value) {
+      setState(() {
+        if (value == null) {
+          if (context.canPop()) {
+            context.pop();
+          } else {
+            context.goNamed(RouterPath.list.name);
+          }
+          return;
+        }
+        projectDetailInfo = value;
+      });
+    });
   }
 
   onClickFavorite() async {
@@ -88,7 +98,6 @@ class _ProjectScreenState extends State<ProjectScreen> {
                 ),
                 Expanded(
                   child: CustomScrollView(
-                    key: PageStorageKey<String>('project${widget.projectId}'),
                     slivers: [
                       SliverAppBar(
                         automaticallyImplyLeading: false,

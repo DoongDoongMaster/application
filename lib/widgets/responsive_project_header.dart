@@ -3,6 +3,7 @@ import 'package:application/models/db/app_database.dart';
 import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:application/time_utils.dart';
 import 'package:application/widgets/one_line_text_with_marquee.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +25,7 @@ class ResponsiveProjectHeader extends StatelessWidget {
         return constraints.maxHeight >= threshold
             ? _VerticalContent(
                 maxHeight: constraints.maxHeight,
-                projectDetailInfo: projectDetailInfo,
+                data: projectDetailInfo,
               )
             : _HorizontalContent(
                 musicId: projectDetailInfo.musicId!,
@@ -72,11 +73,11 @@ class _HorizontalContent extends StatelessWidget {
 class _VerticalContent extends StatelessWidget {
   static const double heightThresh = 220;
   final double maxHeight;
-  final ProjectDetailViewData projectDetailInfo;
+  final ProjectDetailViewData data;
 
   const _VerticalContent({
     required this.maxHeight,
-    required this.projectDetailInfo,
+    required this.data,
   });
 
   @override
@@ -95,7 +96,7 @@ class _VerticalContent extends StatelessWidget {
                 Expanded(
                   flex: 3,
                   child: OneLineTextWithMarquee(
-                    projectDetailInfo.title,
+                    data.title,
                     alignment: Alignment.centerLeft,
                     style: TextStyles.headlineMedium
                         .copyWith(fontWeight: FontWeight.bold, height: 1),
@@ -111,7 +112,7 @@ class _VerticalContent extends StatelessWidget {
                       Expanded(
                         flex: 4,
                         child: OneLineTextWithMarquee(
-                          projectDetailInfo.musicTitle!,
+                          data.musicTitle!,
                           alignment: Alignment.bottomLeft,
                           style: TextStyles.headlineSmall.copyWith(height: 1.5),
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -120,7 +121,7 @@ class _VerticalContent extends StatelessWidget {
                       Expanded(
                         flex: 3,
                         child: Text(
-                          projectDetailInfo.artist,
+                          data.artist,
                           style: TextStyles.titleMedium.copyWith(
                             color: ColorStyles.darkGray,
                             height: 1,
@@ -142,17 +143,18 @@ class _VerticalContent extends StatelessWidget {
                 if (maxHeight > heightThresh)
                   Expanded(
                     child: _InfoText(
-                      artist: projectDetailInfo.artist,
-                      bpm: projectDetailInfo.bpm,
-                      length: projectDetailInfo.musicLength!,
-                      createdAt: projectDetailInfo.createdAt,
+                      artist: data.artist,
+                      bpm: data.bpm,
+                      length: TimeUtils.getTotalDurationInSec(
+                          data.bpm, data.measureCount),
+                      createdAt: data.createdAt,
                     ),
                   ),
                 Expanded(
                   child: _StartButtonSet(
                     flexNum: const [3, 2],
-                    musicId: projectDetailInfo.musicId!,
-                    projectId: projectDetailInfo.id,
+                    musicId: data.musicId!,
+                    projectId: data.id,
                   ),
                 ),
               ],
@@ -189,13 +191,8 @@ class _StartButtonSet extends StatelessWidget {
               if (musicId.isEmpty) {
                 return;
               }
-              (database.select(database.musicInfos)
-                    ..where((tbl) => tbl.id.equals(musicId)))
-                  .getSingle()
-                  .then((value) {
-                context.pushNamed(RouterPath.prompt.name,
-                    extra: value, pathParameters: {"id": projectId});
-              });
+              context.pushNamed(RouterPath.prompt.name,
+                  pathParameters: {"projectId": projectId, "musicId": musicId});
             },
           ),
         ),
