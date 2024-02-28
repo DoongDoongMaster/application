@@ -26,7 +26,7 @@ void main() async {
   for (var i = 0; i < 25; i++) {
     MusicInfo music = await database.into(database.musicInfos).insertReturning(
           MusicInfosCompanion.insert(
-            title: Value('이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!'),
+            title: Value('악보 $i'),
             bpm: const Value(90),
             artist: Value('아티스트 $i'),
             sheetSvg: Value(
@@ -55,8 +55,8 @@ void main() async {
 
     ProjectInfo project = await database
         .into(database.projectInfos)
-        .insertReturning(ProjectInfosCompanion.insert(
-            title: '이름이 무지막지 굉장히 매우 긴 프로젝트 $i', musicId: music.id));
+        .insertReturning(
+            ProjectInfosCompanion.insert(title: '프로젝트 $i', musicId: music.id));
 
     for (var j = 0; j < i; j++) {
       final isNull = random.nextBool();

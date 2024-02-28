@@ -4,12 +4,14 @@ import 'package:application/models/entity/music_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 class ProjectPreview extends StatelessWidget {
   /// 연습 미리보기 카드 크기
   static const Size size = Size(154, 154);
+  static final AutoSizeGroup _autoSizeGroup = AutoSizeGroup();
   final ProjectThumbnailViewData data;
 
   const ProjectPreview({
@@ -95,15 +97,24 @@ class ProjectPreview extends StatelessWidget {
                 ),
               ),
               const Spacer(),
-              Padding(
-                padding: const EdgeInsets.all(2),
-                child: Text(
-                  data.title,
-                  style: TextStyles.bodyMedium.copyWith(
-                    color: Colors.black,
-                    overflow: TextOverflow.ellipsis,
+              SizedBox(
+                height: 48,
+                child: Padding(
+                  padding: const EdgeInsets.all(2),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: AutoSizeText(
+                      data.title,
+                      // "dsafd",
+                      style: TextStyles.bodyMedium.copyWith(
+                        color: Colors.black,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      minFontSize: 12,
+                      group: _autoSizeGroup,
+                    ),
                   ),
-                  maxLines: 2,
                 ),
               ),
               const Spacer(),

@@ -4,6 +4,7 @@ import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/project/panel.dart';
 import 'package:application/widgets/report/report_header.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -57,6 +58,7 @@ class _AccuracyChart extends StatelessWidget {
 
   final AccuracyCount? accuracyCount;
   final List<AccuracyCount?> accuracyList;
+  static final AutoSizeGroup _autoSizeGroup = AutoSizeGroup();
 
   @override
   Widget build(BuildContext context) {
@@ -69,17 +71,19 @@ class _AccuracyChart extends StatelessWidget {
           padding: const EdgeInsets.symmetric(vertical: 20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.end,
-            // mainAxisAlignment: MainAxisAlignment.spaceAround,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
+              AutoSizeText(
                 "최고 기록",
                 style: TextStyles.bodyMedium
                     .copyWith(color: ColorStyles.graphLegend),
+                group: _autoSizeGroup,
               ),
               const Spacer(),
               AccuracyAnalysisChartLegend(
                 accuracyCnt: accuracyCount,
                 totalCount: 250,
+                autoSizeGroup: _autoSizeGroup,
               ),
               const Spacer(),
             ],

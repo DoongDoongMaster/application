@@ -10,6 +10,7 @@ import 'package:application/widgets/home/n_column_grid_view.dart';
 import 'package:application/widgets/home/navigation_panel.dart';
 import 'package:application/widgets/home/home_header.dart';
 import 'package:application/widgets/no_content_widget.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
@@ -173,30 +174,44 @@ class MusicPreview extends StatelessWidget {
               fit: BoxFit.cover,
             ),
           ),
-          const Spacer(),
           Padding(
-            padding: const EdgeInsets.all(2),
-            child: Text(
-              music.title,
-              style: TextStyles.bodyMedium.copyWith(
-                color: Colors.black,
-                overflow: TextOverflow.ellipsis,
-              ),
-              maxLines: 1,
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  height: 28,
+                  child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: AutoSizeText(
+                      music.title,
+                      style: TextStyles.bodyMedium.copyWith(
+                        color: Colors.black,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      minFontSize: 12,
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 18,
+                  child: Align(
+                    alignment: Alignment.topCenter,
+                    child: AutoSizeText(
+                      music.artist,
+                      style: TextStyles.bodysmall.copyWith(
+                        color: ColorStyles.darkGray,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      minFontSize: 10,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(2),
-            child: Text(
-              music.artist,
-              style: TextStyles.bodysmall.copyWith(
-                color: ColorStyles.darkGray,
-                overflow: TextOverflow.ellipsis,
-              ),
-              maxLines: 1,
-            ),
-          ),
-          const Spacer(),
         ],
       ),
     );

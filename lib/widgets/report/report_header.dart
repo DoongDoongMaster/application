@@ -54,6 +54,7 @@ class ReportHeader extends StatelessWidget {
               AccuracyAnalysisChartLegend(
                 accuracyCnt: report.accuracyCount!,
                 totalCount: report.sourceCount![DrumComponent.total.name]!,
+                autoSizeGroup: AutoSizeGroup(),
               ),
               const Spacer(),
               const SizedBox(width: 15),
@@ -219,14 +220,15 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
     super.key,
     required this.accuracyCnt,
     required this.totalCount,
+    required this.autoSizeGroup,
   });
 
   final AccuracyCount? accuracyCnt;
   final int totalCount;
+  final AutoSizeGroup autoSizeGroup;
 
   @override
   Widget build(BuildContext context) {
-    final AutoSizeGroup autoSizeGroup = AutoSizeGroup();
     return SizedBox(
       width: width,
       child: Column(
@@ -253,8 +255,11 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                     ),
                     const SizedBox(width: 3),
                     ConstrainedBox(
-                      constraints:
-                          const BoxConstraints(maxWidth: (width - 23) * 0.7),
+                      constraints: const BoxConstraints(
+                        maxWidth: (width - 23) * 0.7,
+                        maxHeight: 25,
+                        minHeight: 25,
+                      ),
                       child: AutoSizeText(
                         data.label,
                         style: const TextStyle(color: ColorStyles.graphLegend),
