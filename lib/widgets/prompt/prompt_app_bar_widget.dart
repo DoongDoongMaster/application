@@ -1,4 +1,3 @@
-import 'package:application/screens/report_screen.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/one_line_text_with_marquee.dart';
@@ -15,12 +14,6 @@ class PromptAppBarWidget extends StatelessWidget {
     required this.artist,
     required this.exitPractice,
   });
-
-  completePractice(context) {
-    // Navigator.push(
-    //     context, MaterialPageRoute(builder: (context) => const ReportScreen()));
-    // TODO: 완료 됐을 때 페이지 전환!!!
-  }
 
   @override
   Widget build(BuildContext context) {

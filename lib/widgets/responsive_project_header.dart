@@ -1,4 +1,3 @@
-import 'package:application/main.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
