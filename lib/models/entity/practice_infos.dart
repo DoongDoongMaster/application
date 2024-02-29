@@ -10,43 +10,40 @@ class PracticeInfo {
   final double? speed;
   final int? score;
   final bool isNew;
-  final ComponentCount componentCount;
-  final AccuracyCount accuracyCount;
+  final ComponentCount? componentCount;
+  final AccuracyCount? accuracyCount;
 
   PracticeInfo({
-    required this.id,
-    required this.projectId,
-    required this.title,
+    this.id = "",
+    this.projectId = "",
+    this.title = "",
     this.score,
     this.bpm,
     this.speed,
-    required this.isNew,
-    required this.accuracyCount,
-    required this.componentCount,
+    this.isNew = false,
+    this.accuracyCount = const {},
+    this.componentCount = const {},
   });
 }
 
 @UseRowClass(PracticeInfo)
 class PracticeInfos extends DefaultTable {
-  TextColumn get title =>
-      text().clientDefault(() => DateTime.now().toIso8601String())();
+  TextColumn get title => text().clientDefault(() => DateTime.now()
+      .toString()
+      .replaceAll(RegExp(r':\d\d\.\d+'), '')
+      .replaceAll('-', '.'))();
 
   IntColumn get score => integer().nullable()();
   IntColumn get bpm => integer().nullable()();
   RealColumn get speed => real().nullable()();
-  BoolColumn get isNew => boolean().withDefault(const Constant(true))();
+  BoolColumn get isNew => boolean().withDefault(const Constant(false))();
 
   TextColumn get projectId =>
       text().references(ProjectInfos, #id, onDelete: KeyAction.cascade)();
 
-  IntColumn get correctCnt => integer().nullable()();
-  IntColumn get wrongComponentCnt => integer().nullable()();
-  IntColumn get wrongTimingCnt => integer().nullable()();
-  IntColumn get wrongCnt => integer().nullable()();
-  IntColumn get missCnt => integer().nullable()();
-
   TextColumn get componentCount =>
-      text().map(const ComponentCountConvertor())();
+      text().map(const ComponentCountConvertor()).nullable()();
 
-  TextColumn get accuracyCount => text().map(const AccuracyCountConvertor())();
+  TextColumn get accuracyCount =>
+      text().map(const AccuracyCountConvertor()).nullable()();
 }

@@ -7,12 +7,14 @@ import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:application/models/views/music_thumbnail_view.dart';
-import 'package:application/models/views/practice_report_veiw.dart';
+import 'package:application/models/views/practice_list_view.dart';
+import 'package:application/models/views/practice_report_view.dart';
 import 'package:application/models/views/project_detail_view.dart';
 import 'package:application/models/views/project_sidebar_view.dart';
+import 'package:application/models/views/project_summary_view.dart';
 import 'package:application/models/views/project_thumbnail_view.dart';
+
 import 'package:application/services/local_storage.dart';
-import 'package:application/time_utils.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
@@ -46,7 +48,10 @@ LazyDatabase _openConnection() {
   ProjectDetailView,
   ProjectSidebarView,
   ProjectThumbnailView,
+  ProjectSummaryView,
   PracticeReportView,
+  PracticeListView,
+  PracticeAnalysisView,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -55,6 +60,7 @@ class AppDatabase extends _$AppDatabase {
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
           if (true) {
+            print("recreating database...");
             final m = Migrator(this);
             for (final table in allTables) {
               await m.deleteTable(table.actualTableName);
@@ -76,6 +82,17 @@ class AppDatabase extends _$AppDatabase {
     });
   }
 
+////////////////////////////////////////////////
+  /// MUSIC - CREATE
+  Future<void> addNewMusic(MusicInfo music) =>
+      into(musicInfos).insert(MusicInfosCompanion.insert(
+        title: Value(music.title),
+        bpm: Value(music.bpm),
+        artist: Value(music.artist),
+        type: Value(music.type),
+      ));
+
+  /// MUSIC - READ
   Future<List<MusicThumbnailViewData>> getTopMusicsByType(
       MusicType type, int count) {
     return (select(musicThumbnailView)
@@ -84,6 +101,12 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
+//////////////////////////////////////////////
+  /// PROJECT - CREATE
+  Future<void> addNewProject(String title, String musicId) => into(projectInfos)
+      .insert(ProjectInfosCompanion.insert(title: title, musicId: musicId));
+
+  /// PROJECT - UPDATE
   Future<int> toggleProjectLike(String projectId) async {
     final result = await customWriteReturning(
       'UPDATE project_infos SET is_liked = 1 - is_liked WHERE id = ? RETURNING is_liked',
@@ -99,29 +122,64 @@ class AppDatabase extends _$AppDatabase {
     return result[0].data["is_liked"];
   }
 
-  Future<void> addNewProject(String title, String musicId) => into(projectInfos)
-      .insert(ProjectInfosCompanion.insert(title: title, musicId: musicId));
-
-  Future<void> addNewMusic(MusicInfo music) =>
-      into(musicInfos).insert(MusicInfosCompanion.insert(
-          title: music.title,
-          bpm: music.bpm,
-          artist: music.artist,
-          cursorList: [],
-          measureList: [],
-          sheetSvg: music.sheetSvg,
-          type: music.type,
-          lengthInSec: TimeUtils.getTotalDurationInSec(
-            music.bpm,
-            0,
-          ),
-          sourceCount: {
-            for (var v in DrumComponent.values) v.name: 0,
-          }));
-
+  /// PROJECT - DELETE
   Future<void> deleteProject(String id) =>
       (delete(projectInfos)..where((tbl) => tbl.id.equals(id))).go();
 
-  Future<PracticeReportViewData> getPracticeReport() =>
-      (select(practiceReportView)..limit(1)).getSingle();
+//////////////////////////////////////////////
+  /// PRACTICE - READ
+  Future<void> readPracticeReport(String practiceId) =>
+      (update(practiceInfos)..where((tbl) => tbl.id.equals(practiceId)))
+          .write(const PracticeInfosCompanion(isNew: Value(false)));
+  Future<List<PracticeListViewData>> getPracticeList(String projectId) =>
+      (select(practiceListView)
+            ..where((tbl) => tbl.projectId.equals(projectId)))
+          .get();
+
+  /// PRACTICE - DELETE
+  Future<void> deletePractice(String id) =>
+      (delete(practiceInfos)..where((tbl) => tbl.id.equals(id))).go();
+
+//////////////////////////////////////////////
+  /// PROJECT&PRACTICE - READ
+  Future<AnalysisSummaryData?> getAnalysisSummaryData(
+      String projectId, int size) async {
+    final projectInfo = await (select(projectSummaryView)
+          ..where((tbl) => tbl.id.equals(projectId)))
+        .getSingleOrNull();
+
+    if (projectInfo == null) {
+      return null;
+    }
+
+    final bestCount = await (select(practiceInfos)
+          ..where((tbl) => tbl.projectId.equals(projectInfo.id))
+          ..orderBy([
+            (u) => OrderingTerm.desc(u.score),
+            (u) => OrderingTerm.desc(u.createdAt)
+          ])
+          ..limit(1))
+        .getSingleOrNull();
+
+    final practiceList = await (select(practiceAnalysisView)
+          ..where((tbl) => tbl.projectId.equals(projectId))
+          ..orderBy([
+            (u) =>
+                OrderingTerm(expression: u.createdAt, mode: OrderingMode.desc)
+          ])
+          ..limit(size))
+        .get();
+
+    return AnalysisSummaryData(
+      projectInfo: projectInfo,
+      practiceList: practiceList,
+      bestCount: bestCount?.accuracyCount,
+    );
+  }
+
+  Future<List<PracticeReportViewData>> getPracticeReport(String practiceId) =>
+      (select(practiceReportView)..where((tbl) => tbl.id.equals(practiceId)))
+          .get();
+
+//////////////////////////////////////////////
 }

@@ -36,55 +36,73 @@ class $MusicInfosTable extends MusicInfos
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
       'title', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant("이름 없는 악보"));
   static const VerificationMeta _bpmMeta = const VerificationMeta('bpm');
   @override
   late final GeneratedColumn<int> bpm = GeneratedColumn<int>(
       'bpm', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
-  static const VerificationMeta _lengthInSecMeta =
-      const VerificationMeta('lengthInSec');
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(90));
+  static const VerificationMeta _measureCountMeta =
+      const VerificationMeta('measureCount');
   @override
-  late final GeneratedColumn<int> lengthInSec = GeneratedColumn<int>(
-      'length_in_sec', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+  late final GeneratedColumn<int> measureCount = GeneratedColumn<int>(
+      'measure_count', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
   static const VerificationMeta _artistMeta = const VerificationMeta('artist');
   @override
   late final GeneratedColumn<String> artist = GeneratedColumn<String>(
       'artist', aliasedName, false,
-      type: DriftSqlType.string, requiredDuringInsert: true);
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant("이름 없는 아티스트"));
   static const VerificationMeta _cursorListMeta =
       const VerificationMeta('cursorList');
   @override
   late final GeneratedColumnWithTypeConverter<List<Cursors>, String>
       cursorList = GeneratedColumn<String>('cursor_list', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: Constant(const CursorListConvertor().toSql([])))
           .withConverter<List<Cursors>>($MusicInfosTable.$convertercursorList);
   static const VerificationMeta _measureListMeta =
       const VerificationMeta('measureList');
   @override
   late final GeneratedColumnWithTypeConverter<List<Cursors>, String>
       measureList = GeneratedColumn<String>('measure_list', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: Constant(const CursorListConvertor().toSql([])))
           .withConverter<List<Cursors>>($MusicInfosTable.$convertermeasureList);
   static const VerificationMeta _sheetSvgMeta =
       const VerificationMeta('sheetSvg');
   @override
   late final GeneratedColumn<Uint8List> sheetSvg = GeneratedColumn<Uint8List>(
       'sheet_svg', aliasedName, false,
-      type: DriftSqlType.blob, requiredDuringInsert: true);
+      type: DriftSqlType.blob,
+      requiredDuringInsert: false,
+      clientDefault: () => Uint8List(0));
   static const VerificationMeta _typeMeta = const VerificationMeta('type');
   @override
   late final GeneratedColumnWithTypeConverter<MusicType, int> type =
       GeneratedColumn<int>('type', aliasedName, false,
-              type: DriftSqlType.int, requiredDuringInsert: true)
+              type: DriftSqlType.int,
+              requiredDuringInsert: false,
+              clientDefault: () => 0)
           .withConverter<MusicType>($MusicInfosTable.$convertertype);
   static const VerificationMeta _sourceCountMeta =
       const VerificationMeta('sourceCount');
   @override
   late final GeneratedColumnWithTypeConverter<ComponentCount, String>
       sourceCount = GeneratedColumn<String>('source_count', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
+              type: DriftSqlType.string,
+              requiredDuringInsert: false,
+              defaultValue: Constant(const ComponentCountConvertor().toSql({})))
           .withConverter<ComponentCount>(
               $MusicInfosTable.$convertersourceCount);
   @override
@@ -94,7 +112,7 @@ class $MusicInfosTable extends MusicInfos
         updatedAt,
         title,
         bpm,
-        lengthInSec,
+        measureCount,
         artist,
         cursorList,
         measureList,
@@ -126,36 +144,26 @@ class $MusicInfosTable extends MusicInfos
     if (data.containsKey('title')) {
       context.handle(
           _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
-    } else if (isInserting) {
-      context.missing(_titleMeta);
     }
     if (data.containsKey('bpm')) {
       context.handle(
           _bpmMeta, bpm.isAcceptableOrUnknown(data['bpm']!, _bpmMeta));
-    } else if (isInserting) {
-      context.missing(_bpmMeta);
     }
-    if (data.containsKey('length_in_sec')) {
+    if (data.containsKey('measure_count')) {
       context.handle(
-          _lengthInSecMeta,
-          lengthInSec.isAcceptableOrUnknown(
-              data['length_in_sec']!, _lengthInSecMeta));
-    } else if (isInserting) {
-      context.missing(_lengthInSecMeta);
+          _measureCountMeta,
+          measureCount.isAcceptableOrUnknown(
+              data['measure_count']!, _measureCountMeta));
     }
     if (data.containsKey('artist')) {
       context.handle(_artistMeta,
           artist.isAcceptableOrUnknown(data['artist']!, _artistMeta));
-    } else if (isInserting) {
-      context.missing(_artistMeta);
     }
     context.handle(_cursorListMeta, const VerificationResult.success());
     context.handle(_measureListMeta, const VerificationResult.success());
     if (data.containsKey('sheet_svg')) {
       context.handle(_sheetSvgMeta,
           sheetSvg.isAcceptableOrUnknown(data['sheet_svg']!, _sheetSvgMeta));
-    } else if (isInserting) {
-      context.missing(_sheetSvgMeta);
     }
     context.handle(_typeMeta, const VerificationResult.success());
     context.handle(_sourceCountMeta, const VerificationResult.success());
@@ -213,7 +221,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
   final Value<DateTime> updatedAt;
   final Value<String> title;
   final Value<int> bpm;
-  final Value<int> lengthInSec;
+  final Value<int> measureCount;
   final Value<String> artist;
   final Value<List<Cursors>> cursorList;
   final Value<List<Cursors>> measureList;
@@ -227,7 +235,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.updatedAt = const Value.absent(),
     this.title = const Value.absent(),
     this.bpm = const Value.absent(),
-    this.lengthInSec = const Value.absent(),
+    this.measureCount = const Value.absent(),
     this.artist = const Value.absent(),
     this.cursorList = const Value.absent(),
     this.measureList = const Value.absent(),
@@ -240,32 +248,24 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.id = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
-    required String title,
-    required int bpm,
-    required int lengthInSec,
-    required String artist,
-    required List<Cursors> cursorList,
-    required List<Cursors> measureList,
-    required Uint8List sheetSvg,
-    required MusicType type,
-    required sourceCount,
+    this.title = const Value.absent(),
+    this.bpm = const Value.absent(),
+    this.measureCount = const Value.absent(),
+    this.artist = const Value.absent(),
+    this.cursorList = const Value.absent(),
+    this.measureList = const Value.absent(),
+    this.sheetSvg = const Value.absent(),
+    this.type = const Value.absent(),
+    this.sourceCount = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : title = Value(title),
-        bpm = Value(bpm),
-        lengthInSec = Value(lengthInSec),
-        artist = Value(artist),
-        cursorList = Value(cursorList),
-        measureList = Value(measureList),
-        sheetSvg = Value(sheetSvg),
-        type = Value(type),
-        sourceCount = Value(sourceCount);
+  });
   static Insertable<MusicInfo> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? title,
     Expression<int>? bpm,
-    Expression<int>? lengthInSec,
+    Expression<int>? measureCount,
     Expression<String>? artist,
     Expression<String>? cursorList,
     Expression<String>? measureList,
@@ -280,7 +280,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (title != null) 'title': title,
       if (bpm != null) 'bpm': bpm,
-      if (lengthInSec != null) 'length_in_sec': lengthInSec,
+      if (measureCount != null) 'measure_count': measureCount,
       if (artist != null) 'artist': artist,
       if (cursorList != null) 'cursor_list': cursorList,
       if (measureList != null) 'measure_list': measureList,
@@ -297,7 +297,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       Value<DateTime>? updatedAt,
       Value<String>? title,
       Value<int>? bpm,
-      Value<int>? lengthInSec,
+      Value<int>? measureCount,
       Value<String>? artist,
       Value<List<Cursors>>? cursorList,
       Value<List<Cursors>>? measureList,
@@ -311,7 +311,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       updatedAt: updatedAt ?? this.updatedAt,
       title: title ?? this.title,
       bpm: bpm ?? this.bpm,
-      lengthInSec: lengthInSec ?? this.lengthInSec,
+      measureCount: measureCount ?? this.measureCount,
       artist: artist ?? this.artist,
       cursorList: cursorList ?? this.cursorList,
       measureList: measureList ?? this.measureList,
@@ -340,8 +340,8 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     if (bpm.present) {
       map['bpm'] = Variable<int>(bpm.value);
     }
-    if (lengthInSec.present) {
-      map['length_in_sec'] = Variable<int>(lengthInSec.value);
+    if (measureCount.present) {
+      map['measure_count'] = Variable<int>(measureCount.value);
     }
     if (artist.present) {
       map['artist'] = Variable<String>(artist.value);
@@ -379,7 +379,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
           ..write('updatedAt: $updatedAt, ')
           ..write('title: $title, ')
           ..write('bpm: $bpm, ')
-          ..write('lengthInSec: $lengthInSec, ')
+          ..write('measureCount: $measureCount, ')
           ..write('artist: $artist, ')
           ..write('cursorList: $cursorList, ')
           ..write('measureList: $measureList, ')
@@ -433,8 +433,8 @@ class $ProjectInfosTable extends ProjectInfos
       'music_id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES music_infos (id)'));
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES music_infos (id) ON DELETE RESTRICT'));
   static const VerificationMeta _isLikedMeta =
       const VerificationMeta('isLiked');
   @override
@@ -654,7 +654,10 @@ class $PracticeInfosTable extends PracticeInfos
       'title', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
-      clientDefault: () => DateTime.now().toIso8601String());
+      clientDefault: () => DateTime.now()
+          .toString()
+          .replaceAll(RegExp(r':\d\d\.\d+'), '')
+          .replaceAll('-', '.'));
   static const VerificationMeta _scoreMeta = const VerificationMeta('score');
   @override
   late final GeneratedColumn<int> score = GeneratedColumn<int>(
@@ -678,7 +681,7 @@ class $PracticeInfosTable extends PracticeInfos
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_new" IN (0, 1))'),
-      defaultValue: const Constant(true));
+      defaultValue: const Constant(false));
   static const VerificationMeta _projectIdMeta =
       const VerificationMeta('projectId');
   @override
@@ -688,54 +691,24 @@ class $PracticeInfosTable extends PracticeInfos
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES project_infos (id) ON DELETE CASCADE'));
-  static const VerificationMeta _correctCntMeta =
-      const VerificationMeta('correctCnt');
-  @override
-  late final GeneratedColumn<int> correctCnt = GeneratedColumn<int>(
-      'correct_cnt', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _wrongComponentCntMeta =
-      const VerificationMeta('wrongComponentCnt');
-  @override
-  late final GeneratedColumn<int> wrongComponentCnt = GeneratedColumn<int>(
-      'wrong_component_cnt', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _wrongTimingCntMeta =
-      const VerificationMeta('wrongTimingCnt');
-  @override
-  late final GeneratedColumn<int> wrongTimingCnt = GeneratedColumn<int>(
-      'wrong_timing_cnt', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _wrongCntMeta =
-      const VerificationMeta('wrongCnt');
-  @override
-  late final GeneratedColumn<int> wrongCnt = GeneratedColumn<int>(
-      'wrong_cnt', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
-  static const VerificationMeta _missCntMeta =
-      const VerificationMeta('missCnt');
-  @override
-  late final GeneratedColumn<int> missCnt = GeneratedColumn<int>(
-      'miss_cnt', aliasedName, true,
-      type: DriftSqlType.int, requiredDuringInsert: false);
   static const VerificationMeta _componentCountMeta =
       const VerificationMeta('componentCount');
   @override
-  late final GeneratedColumnWithTypeConverter<ComponentCount, String>
+  late final GeneratedColumnWithTypeConverter<ComponentCount?, String>
       componentCount = GeneratedColumn<String>(
-              'component_count', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
-          .withConverter<ComponentCount>(
-              $PracticeInfosTable.$convertercomponentCount);
+              'component_count', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<ComponentCount?>(
+              $PracticeInfosTable.$convertercomponentCountn);
   static const VerificationMeta _accuracyCountMeta =
       const VerificationMeta('accuracyCount');
   @override
-  late final GeneratedColumnWithTypeConverter<AccuracyCount, String>
+  late final GeneratedColumnWithTypeConverter<AccuracyCount?, String>
       accuracyCount = GeneratedColumn<String>(
-              'accuracy_count', aliasedName, false,
-              type: DriftSqlType.string, requiredDuringInsert: true)
-          .withConverter<AccuracyCount>(
-              $PracticeInfosTable.$converteraccuracyCount);
+              'accuracy_count', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<AccuracyCount?>(
+              $PracticeInfosTable.$converteraccuracyCountn);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -747,11 +720,6 @@ class $PracticeInfosTable extends PracticeInfos
         speed,
         isNew,
         projectId,
-        correctCnt,
-        wrongComponentCnt,
-        wrongTimingCnt,
-        wrongCnt,
-        missCnt,
         componentCount,
         accuracyCount
       ];
@@ -802,32 +770,6 @@ class $PracticeInfosTable extends PracticeInfos
     } else if (isInserting) {
       context.missing(_projectIdMeta);
     }
-    if (data.containsKey('correct_cnt')) {
-      context.handle(
-          _correctCntMeta,
-          correctCnt.isAcceptableOrUnknown(
-              data['correct_cnt']!, _correctCntMeta));
-    }
-    if (data.containsKey('wrong_component_cnt')) {
-      context.handle(
-          _wrongComponentCntMeta,
-          wrongComponentCnt.isAcceptableOrUnknown(
-              data['wrong_component_cnt']!, _wrongComponentCntMeta));
-    }
-    if (data.containsKey('wrong_timing_cnt')) {
-      context.handle(
-          _wrongTimingCntMeta,
-          wrongTimingCnt.isAcceptableOrUnknown(
-              data['wrong_timing_cnt']!, _wrongTimingCntMeta));
-    }
-    if (data.containsKey('wrong_cnt')) {
-      context.handle(_wrongCntMeta,
-          wrongCnt.isAcceptableOrUnknown(data['wrong_cnt']!, _wrongCntMeta));
-    }
-    if (data.containsKey('miss_cnt')) {
-      context.handle(_missCntMeta,
-          missCnt.isAcceptableOrUnknown(data['miss_cnt']!, _missCntMeta));
-    }
     context.handle(_componentCountMeta, const VerificationResult.success());
     context.handle(_accuracyCountMeta, const VerificationResult.success());
     return context;
@@ -853,12 +795,12 @@ class $PracticeInfosTable extends PracticeInfos
           .read(DriftSqlType.double, data['${effectivePrefix}speed']),
       isNew: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_new'])!,
-      accuracyCount: $PracticeInfosTable.$converteraccuracyCount.fromSql(
+      accuracyCount: $PracticeInfosTable.$converteraccuracyCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])!),
-      componentCount: $PracticeInfosTable.$convertercomponentCount.fromSql(
+              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])),
+      componentCount: $PracticeInfosTable.$convertercomponentCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}component_count'])!),
+              DriftSqlType.string, data['${effectivePrefix}component_count'])),
     );
   }
 
@@ -869,8 +811,12 @@ class $PracticeInfosTable extends PracticeInfos
 
   static TypeConverter<ComponentCount, String> $convertercomponentCount =
       const ComponentCountConvertor();
+  static TypeConverter<ComponentCount?, String?> $convertercomponentCountn =
+      NullAwareTypeConverter.wrap($convertercomponentCount);
   static TypeConverter<AccuracyCount, String> $converteraccuracyCount =
       const AccuracyCountConvertor();
+  static TypeConverter<AccuracyCount?, String?> $converteraccuracyCountn =
+      NullAwareTypeConverter.wrap($converteraccuracyCount);
 }
 
 class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
@@ -883,13 +829,8 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
   final Value<double?> speed;
   final Value<bool> isNew;
   final Value<String> projectId;
-  final Value<int?> correctCnt;
-  final Value<int?> wrongComponentCnt;
-  final Value<int?> wrongTimingCnt;
-  final Value<int?> wrongCnt;
-  final Value<int?> missCnt;
-  final Value<ComponentCount> componentCount;
-  final Value<AccuracyCount> accuracyCount;
+  final Value<ComponentCount?> componentCount;
+  final Value<AccuracyCount?> accuracyCount;
   final Value<int> rowid;
   const PracticeInfosCompanion({
     this.id = const Value.absent(),
@@ -901,11 +842,6 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
     this.speed = const Value.absent(),
     this.isNew = const Value.absent(),
     this.projectId = const Value.absent(),
-    this.correctCnt = const Value.absent(),
-    this.wrongComponentCnt = const Value.absent(),
-    this.wrongTimingCnt = const Value.absent(),
-    this.wrongCnt = const Value.absent(),
-    this.missCnt = const Value.absent(),
     this.componentCount = const Value.absent(),
     this.accuracyCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -920,17 +856,10 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
     this.speed = const Value.absent(),
     this.isNew = const Value.absent(),
     required String projectId,
-    this.correctCnt = const Value.absent(),
-    this.wrongComponentCnt = const Value.absent(),
-    this.wrongTimingCnt = const Value.absent(),
-    this.wrongCnt = const Value.absent(),
-    this.missCnt = const Value.absent(),
-    required componentCount,
-    required accuracyCount,
+    this.componentCount = const Value.absent(),
+    this.accuracyCount = const Value.absent(),
     this.rowid = const Value.absent(),
-  })  : projectId = Value(projectId),
-        componentCount = Value(componentCount),
-        accuracyCount = Value(accuracyCount);
+  }) : projectId = Value(projectId);
   static Insertable<PracticeInfo> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
@@ -941,11 +870,6 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
     Expression<double>? speed,
     Expression<bool>? isNew,
     Expression<String>? projectId,
-    Expression<int>? correctCnt,
-    Expression<int>? wrongComponentCnt,
-    Expression<int>? wrongTimingCnt,
-    Expression<int>? wrongCnt,
-    Expression<int>? missCnt,
     Expression<String>? componentCount,
     Expression<String>? accuracyCount,
     Expression<int>? rowid,
@@ -960,11 +884,6 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
       if (speed != null) 'speed': speed,
       if (isNew != null) 'is_new': isNew,
       if (projectId != null) 'project_id': projectId,
-      if (correctCnt != null) 'correct_cnt': correctCnt,
-      if (wrongComponentCnt != null) 'wrong_component_cnt': wrongComponentCnt,
-      if (wrongTimingCnt != null) 'wrong_timing_cnt': wrongTimingCnt,
-      if (wrongCnt != null) 'wrong_cnt': wrongCnt,
-      if (missCnt != null) 'miss_cnt': missCnt,
       if (componentCount != null) 'component_count': componentCount,
       if (accuracyCount != null) 'accuracy_count': accuracyCount,
       if (rowid != null) 'rowid': rowid,
@@ -981,13 +900,8 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
       Value<double?>? speed,
       Value<bool>? isNew,
       Value<String>? projectId,
-      Value<int?>? correctCnt,
-      Value<int?>? wrongComponentCnt,
-      Value<int?>? wrongTimingCnt,
-      Value<int?>? wrongCnt,
-      Value<int?>? missCnt,
-      Value<ComponentCount>? componentCount,
-      Value<AccuracyCount>? accuracyCount,
+      Value<ComponentCount?>? componentCount,
+      Value<AccuracyCount?>? accuracyCount,
       Value<int>? rowid}) {
     return PracticeInfosCompanion(
       id: id ?? this.id,
@@ -999,11 +913,6 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
       speed: speed ?? this.speed,
       isNew: isNew ?? this.isNew,
       projectId: projectId ?? this.projectId,
-      correctCnt: correctCnt ?? this.correctCnt,
-      wrongComponentCnt: wrongComponentCnt ?? this.wrongComponentCnt,
-      wrongTimingCnt: wrongTimingCnt ?? this.wrongTimingCnt,
-      wrongCnt: wrongCnt ?? this.wrongCnt,
-      missCnt: missCnt ?? this.missCnt,
       componentCount: componentCount ?? this.componentCount,
       accuracyCount: accuracyCount ?? this.accuracyCount,
       rowid: rowid ?? this.rowid,
@@ -1040,29 +949,14 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
     if (projectId.present) {
       map['project_id'] = Variable<String>(projectId.value);
     }
-    if (correctCnt.present) {
-      map['correct_cnt'] = Variable<int>(correctCnt.value);
-    }
-    if (wrongComponentCnt.present) {
-      map['wrong_component_cnt'] = Variable<int>(wrongComponentCnt.value);
-    }
-    if (wrongTimingCnt.present) {
-      map['wrong_timing_cnt'] = Variable<int>(wrongTimingCnt.value);
-    }
-    if (wrongCnt.present) {
-      map['wrong_cnt'] = Variable<int>(wrongCnt.value);
-    }
-    if (missCnt.present) {
-      map['miss_cnt'] = Variable<int>(missCnt.value);
-    }
     if (componentCount.present) {
       map['component_count'] = Variable<String>($PracticeInfosTable
-          .$convertercomponentCount
+          .$convertercomponentCountn
           .toSql(componentCount.value));
     }
     if (accuracyCount.present) {
       map['accuracy_count'] = Variable<String>($PracticeInfosTable
-          .$converteraccuracyCount
+          .$converteraccuracyCountn
           .toSql(accuracyCount.value));
     }
     if (rowid.present) {
@@ -1083,11 +977,6 @@ class PracticeInfosCompanion extends UpdateCompanion<PracticeInfo> {
           ..write('speed: $speed, ')
           ..write('isNew: $isNew, ')
           ..write('projectId: $projectId, ')
-          ..write('correctCnt: $correctCnt, ')
-          ..write('wrongComponentCnt: $wrongComponentCnt, ')
-          ..write('wrongTimingCnt: $wrongTimingCnt, ')
-          ..write('wrongCnt: $wrongCnt, ')
-          ..write('missCnt: $missCnt, ')
           ..write('componentCount: $componentCount, ')
           ..write('accuracyCount: $accuracyCount, ')
           ..write('rowid: $rowid')
@@ -1251,7 +1140,7 @@ class ProjectDetailViewData extends DataClass {
   final String artist;
   final int bpm;
   final MusicType type;
-  final int? musicLength;
+  final int measureCount;
   const ProjectDetailViewData(
       {required this.id,
       required this.title,
@@ -1262,7 +1151,7 @@ class ProjectDetailViewData extends DataClass {
       required this.artist,
       required this.bpm,
       required this.type,
-      this.musicLength});
+      required this.measureCount});
   factory ProjectDetailViewData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
@@ -1277,7 +1166,7 @@ class ProjectDetailViewData extends DataClass {
       bpm: serializer.fromJson<int>(json['bpm']),
       type: $MusicInfosTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
-      musicLength: serializer.fromJson<int?>(json['musicLength']),
+      measureCount: serializer.fromJson<int>(json['measureCount']),
     );
   }
   @override
@@ -1294,7 +1183,7 @@ class ProjectDetailViewData extends DataClass {
       'bpm': serializer.toJson<int>(bpm),
       'type':
           serializer.toJson<int>($MusicInfosTable.$convertertype.toJson(type)),
-      'musicLength': serializer.toJson<int?>(musicLength),
+      'measureCount': serializer.toJson<int>(measureCount),
     };
   }
 
@@ -1308,7 +1197,7 @@ class ProjectDetailViewData extends DataClass {
           String? artist,
           int? bpm,
           MusicType? type,
-          Value<int?> musicLength = const Value.absent()}) =>
+          int? measureCount}) =>
       ProjectDetailViewData(
         id: id ?? this.id,
         title: title ?? this.title,
@@ -1319,7 +1208,7 @@ class ProjectDetailViewData extends DataClass {
         artist: artist ?? this.artist,
         bpm: bpm ?? this.bpm,
         type: type ?? this.type,
-        musicLength: musicLength.present ? musicLength.value : this.musicLength,
+        measureCount: measureCount ?? this.measureCount,
       );
   @override
   String toString() {
@@ -1333,14 +1222,14 @@ class ProjectDetailViewData extends DataClass {
           ..write('artist: $artist, ')
           ..write('bpm: $bpm, ')
           ..write('type: $type, ')
-          ..write('musicLength: $musicLength')
+          ..write('measureCount: $measureCount')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, title, isLiked, createdAt, musicId,
-      musicTitle, artist, bpm, type, musicLength);
+      musicTitle, artist, bpm, type, measureCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1354,7 +1243,7 @@ class ProjectDetailViewData extends DataClass {
           other.artist == this.artist &&
           other.bpm == this.bpm &&
           other.type == this.type &&
-          other.musicLength == this.musicLength);
+          other.measureCount == this.measureCount);
 }
 
 class $ProjectDetailViewView
@@ -1379,7 +1268,7 @@ class $ProjectDetailViewView
         artist,
         bpm,
         type,
-        musicLength
+        measureCount
       ];
   @override
   String get aliasedName => _alias ?? entityName;
@@ -1411,8 +1300,8 @@ class $ProjectDetailViewView
           .read(DriftSqlType.int, data['${effectivePrefix}bpm'])!,
       type: $MusicInfosTable.$convertertype.fromSql(attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
-      musicLength: attachedDatabase.typeMapping
-          .read(DriftSqlType.int, data['${effectivePrefix}music_length']),
+      measureCount: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}measure_count'])!,
     );
   }
 
@@ -1453,9 +1342,9 @@ class $ProjectDetailViewView
               generatedAs: GeneratedAs(musicInfos.type, false),
               type: DriftSqlType.int)
           .withConverter<MusicType>($MusicInfosTable.$convertertype);
-  late final GeneratedColumn<int> musicLength = GeneratedColumn<int>(
-      'music_length', aliasedName, true,
-      generatedAs: GeneratedAs(musicInfos.lengthInSec, false),
+  late final GeneratedColumn<int> measureCount = GeneratedColumn<int>(
+      'measure_count', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.measureCount, false),
       type: DriftSqlType.int);
   @override
   $ProjectDetailViewView createAlias(String alias) {
@@ -1720,7 +1609,7 @@ class $ProjectThumbnailViewView
           .withConverter<MusicType>($MusicInfosTable.$convertertype);
   late final GeneratedColumn<int> unreadCount = GeneratedColumn<int>(
       'unread_count', aliasedName, true,
-      generatedAs: GeneratedAs(practices.id.count(), false),
+      generatedAs: GeneratedAs(practices.isNew.dartCast<int>().sum(), false),
       type: DriftSqlType.int);
   @override
   $ProjectThumbnailViewView createAlias(String alias) {
@@ -1739,13 +1628,138 @@ class $ProjectThumbnailViewView
       const {'practice_infos', 'music_infos', 'project_infos'};
 }
 
+class ProjectSummaryViewData extends DataClass {
+  final String id;
+  final sourceCount;
+  final int? bestScore;
+  const ProjectSummaryViewData(
+      {required this.id, required this.sourceCount, this.bestScore});
+  factory ProjectSummaryViewData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProjectSummaryViewData(
+      id: serializer.fromJson<String>(json['id']),
+      sourceCount: serializer.fromJson<ComponentCount>(json['sourceCount']),
+      bestScore: serializer.fromJson<int?>(json['bestScore']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'sourceCount': serializer.toJson<ComponentCount>(sourceCount),
+      'bestScore': serializer.toJson<int?>(bestScore),
+    };
+  }
+
+  ProjectSummaryViewData copyWith(
+          {String? id,
+          ComponentCount? sourceCount,
+          Value<int?> bestScore = const Value.absent()}) =>
+      ProjectSummaryViewData(
+        id: id ?? this.id,
+        sourceCount: sourceCount ?? this.sourceCount,
+        bestScore: bestScore.present ? bestScore.value : this.bestScore,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ProjectSummaryViewData(')
+          ..write('id: $id, ')
+          ..write('sourceCount: $sourceCount, ')
+          ..write('bestScore: $bestScore')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, sourceCount, bestScore);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProjectSummaryViewData &&
+          other.id == this.id &&
+          other.sourceCount == this.sourceCount &&
+          other.bestScore == this.bestScore);
+}
+
+class $ProjectSummaryViewView
+    extends ViewInfo<$ProjectSummaryViewView, ProjectSummaryViewData>
+    implements HasResultSet {
+  final String? _alias;
+  @override
+  final _$AppDatabase attachedDatabase;
+  $ProjectSummaryViewView(this.attachedDatabase, [this._alias]);
+  $MusicInfosTable get musicInfo =>
+      attachedDatabase.musicInfos.createAlias('t0');
+  $ProjectInfosTable get projectInfo =>
+      attachedDatabase.projectInfos.createAlias('t1');
+  $PracticeInfosTable get practiceList =>
+      attachedDatabase.practiceInfos.createAlias('t2');
+  @override
+  List<GeneratedColumn> get $columns => [id, sourceCount, bestScore];
+  @override
+  String get aliasedName => _alias ?? entityName;
+  @override
+  String get entityName => 'project_summary_view';
+  @override
+  Map<SqlDialect, String>? get createViewStatements => null;
+  @override
+  $ProjectSummaryViewView get asDslTable => this;
+  @override
+  ProjectSummaryViewData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProjectSummaryViewData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      sourceCount: $MusicInfosTable.$convertersourceCount.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}source_count'])!),
+      bestScore: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}best_score']),
+    );
+  }
+
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      generatedAs: GeneratedAs(projectInfo.id, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumnWithTypeConverter<ComponentCount, String>
+      sourceCount = GeneratedColumn<String>('source_count', aliasedName, false,
+              generatedAs: GeneratedAs(musicInfo.sourceCount, false),
+              type: DriftSqlType.string)
+          .withConverter<ComponentCount>(
+              $MusicInfosTable.$convertersourceCount);
+  late final GeneratedColumn<int> bestScore = GeneratedColumn<int>(
+      'best_score', aliasedName, true,
+      generatedAs: GeneratedAs(practiceList.score.max(), false),
+      type: DriftSqlType.int);
+  @override
+  $ProjectSummaryViewView createAlias(String alias) {
+    return $ProjectSummaryViewView(attachedDatabase, alias);
+  }
+
+  @override
+  Query? get query =>
+      (attachedDatabase.selectOnly(projectInfo)..addColumns($columns)).join([
+        innerJoin(musicInfo, musicInfo.id.equalsExp(projectInfo.musicId)),
+        leftOuterJoin(
+            practiceList, practiceList.projectId.equalsExp(projectInfo.id))
+      ])
+        ..groupBy([projectInfo.id]);
+  @override
+  Set<String> get readTables =>
+      const {'music_infos', 'project_infos', 'practice_infos'};
+}
+
 class PracticeReportViewData extends DataClass {
   final String id;
   final int? bpm;
   final double? speed;
   final int? score;
-  final accuracyCount;
-  final componentCount;
+  final AccuracyCount? accuracyCount;
+  final ComponentCount? componentCount;
+  final bool isNew;
   final sourceCount;
   final Uint8List sheetSvg;
   final String? musicId;
@@ -1759,8 +1773,9 @@ class PracticeReportViewData extends DataClass {
       this.bpm,
       this.speed,
       this.score,
-      required this.accuracyCount,
-      required this.componentCount,
+      this.accuracyCount,
+      this.componentCount,
+      required this.isNew,
       required this.sourceCount,
       required this.sheetSvg,
       this.musicId,
@@ -1777,9 +1792,10 @@ class PracticeReportViewData extends DataClass {
       bpm: serializer.fromJson<int?>(json['bpm']),
       speed: serializer.fromJson<double?>(json['speed']),
       score: serializer.fromJson<int?>(json['score']),
-      accuracyCount: serializer.fromJson<AccuracyCount>(json['accuracyCount']),
+      accuracyCount: serializer.fromJson<AccuracyCount?>(json['accuracyCount']),
       componentCount:
-          serializer.fromJson<ComponentCount>(json['componentCount']),
+          serializer.fromJson<ComponentCount?>(json['componentCount']),
+      isNew: serializer.fromJson<bool>(json['isNew']),
       sourceCount: serializer.fromJson<ComponentCount>(json['sourceCount']),
       sheetSvg: serializer.fromJson<Uint8List>(json['sheetSvg']),
       musicId: serializer.fromJson<String?>(json['musicId']),
@@ -1798,8 +1814,9 @@ class PracticeReportViewData extends DataClass {
       'bpm': serializer.toJson<int?>(bpm),
       'speed': serializer.toJson<double?>(speed),
       'score': serializer.toJson<int?>(score),
-      'accuracyCount': serializer.toJson<AccuracyCount>(accuracyCount),
-      'componentCount': serializer.toJson<ComponentCount>(componentCount),
+      'accuracyCount': serializer.toJson<AccuracyCount?>(accuracyCount),
+      'componentCount': serializer.toJson<ComponentCount?>(componentCount),
+      'isNew': serializer.toJson<bool>(isNew),
       'sourceCount': serializer.toJson<ComponentCount>(sourceCount),
       'sheetSvg': serializer.toJson<Uint8List>(sheetSvg),
       'musicId': serializer.toJson<String?>(musicId),
@@ -1816,8 +1833,9 @@ class PracticeReportViewData extends DataClass {
           Value<int?> bpm = const Value.absent(),
           Value<double?> speed = const Value.absent(),
           Value<int?> score = const Value.absent(),
-          AccuracyCount? accuracyCount,
-          ComponentCount? componentCount,
+          Value<AccuracyCount?> accuracyCount = const Value.absent(),
+          Value<ComponentCount?> componentCount = const Value.absent(),
+          bool? isNew,
           ComponentCount? sourceCount,
           Uint8List? sheetSvg,
           Value<String?> musicId = const Value.absent(),
@@ -1831,8 +1849,11 @@ class PracticeReportViewData extends DataClass {
         bpm: bpm.present ? bpm.value : this.bpm,
         speed: speed.present ? speed.value : this.speed,
         score: score.present ? score.value : this.score,
-        accuracyCount: accuracyCount ?? this.accuracyCount,
-        componentCount: componentCount ?? this.componentCount,
+        accuracyCount:
+            accuracyCount.present ? accuracyCount.value : this.accuracyCount,
+        componentCount:
+            componentCount.present ? componentCount.value : this.componentCount,
+        isNew: isNew ?? this.isNew,
         sourceCount: sourceCount ?? this.sourceCount,
         sheetSvg: sheetSvg ?? this.sheetSvg,
         musicId: musicId.present ? musicId.value : this.musicId,
@@ -1851,6 +1872,7 @@ class PracticeReportViewData extends DataClass {
           ..write('score: $score, ')
           ..write('accuracyCount: $accuracyCount, ')
           ..write('componentCount: $componentCount, ')
+          ..write('isNew: $isNew, ')
           ..write('sourceCount: $sourceCount, ')
           ..write('sheetSvg: $sheetSvg, ')
           ..write('musicId: $musicId, ')
@@ -1871,6 +1893,7 @@ class PracticeReportViewData extends DataClass {
       score,
       accuracyCount,
       componentCount,
+      isNew,
       sourceCount,
       $driftBlobEquality.hash(sheetSvg),
       musicId,
@@ -1889,6 +1912,7 @@ class PracticeReportViewData extends DataClass {
           other.score == this.score &&
           other.accuracyCount == this.accuracyCount &&
           other.componentCount == this.componentCount &&
+          other.isNew == this.isNew &&
           other.sourceCount == this.sourceCount &&
           $driftBlobEquality.equals(other.sheetSvg, this.sheetSvg) &&
           other.musicId == this.musicId &&
@@ -1922,6 +1946,7 @@ class $PracticeReportViewView
         score,
         accuracyCount,
         componentCount,
+        isNew,
         sourceCount,
         sheetSvg,
         musicId,
@@ -1951,12 +1976,14 @@ class $PracticeReportViewView
           .read(DriftSqlType.double, data['${effectivePrefix}speed']),
       score: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}score']),
-      accuracyCount: $PracticeInfosTable.$converteraccuracyCount.fromSql(
+      accuracyCount: $PracticeInfosTable.$converteraccuracyCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])!),
-      componentCount: $PracticeInfosTable.$convertercomponentCount.fromSql(
+              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])),
+      componentCount: $PracticeInfosTable.$convertercomponentCountn.fromSql(
           attachedDatabase.typeMapping.read(
-              DriftSqlType.string, data['${effectivePrefix}component_count'])!),
+              DriftSqlType.string, data['${effectivePrefix}component_count'])),
+      isNew: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_new'])!,
       sourceCount: $MusicInfosTable.$convertersourceCount.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}source_count'])!),
@@ -1990,20 +2017,26 @@ class $PracticeReportViewView
   late final GeneratedColumn<int> score = GeneratedColumn<int>(
       'score', aliasedName, true,
       generatedAs: GeneratedAs(practice.score, false), type: DriftSqlType.int);
-  late final GeneratedColumnWithTypeConverter<AccuracyCount, String>
+  late final GeneratedColumnWithTypeConverter<AccuracyCount?, String>
       accuracyCount = GeneratedColumn<String>(
-              'accuracy_count', aliasedName, false,
+              'accuracy_count', aliasedName, true,
               generatedAs: GeneratedAs(practice.accuracyCount, false),
               type: DriftSqlType.string)
-          .withConverter<AccuracyCount>(
-              $PracticeInfosTable.$converteraccuracyCount);
-  late final GeneratedColumnWithTypeConverter<ComponentCount, String>
+          .withConverter<AccuracyCount?>(
+              $PracticeInfosTable.$converteraccuracyCountn);
+  late final GeneratedColumnWithTypeConverter<ComponentCount?, String>
       componentCount = GeneratedColumn<String>(
-              'component_count', aliasedName, false,
+              'component_count', aliasedName, true,
               generatedAs: GeneratedAs(practice.componentCount, false),
               type: DriftSqlType.string)
-          .withConverter<ComponentCount>(
-              $PracticeInfosTable.$convertercomponentCount);
+          .withConverter<ComponentCount?>(
+              $PracticeInfosTable.$convertercomponentCountn);
+  late final GeneratedColumn<bool> isNew = GeneratedColumn<bool>(
+      'is_new', aliasedName, false,
+      generatedAs: GeneratedAs(practice.isNew, false),
+      type: DriftSqlType.bool,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_new" IN (0, 1))'));
   late final GeneratedColumnWithTypeConverter<ComponentCount, String>
       sourceCount = GeneratedColumn<String>('source_count', aliasedName, false,
               generatedAs: GeneratedAs(musicInfo.sourceCount, false),
@@ -2048,10 +2081,344 @@ class $PracticeReportViewView
         innerJoin(musicInfo, musicInfo.id.equalsExp(projectInfo.musicId)),
         leftOuterJoin(
             practiceList, practiceList.projectId.equalsExp(practice.projectId))
-      ]);
+      ])
+        ..groupBy([practice.id]);
   @override
   Set<String> get readTables =>
       const {'practice_infos', 'music_infos', 'project_infos'};
+}
+
+class PracticeListViewData extends DataClass {
+  final String id;
+  final String projectId;
+  final String title;
+  final int? bpm;
+  final double? speed;
+  final int? score;
+  final bool isNew;
+  final DateTime createdAt;
+  const PracticeListViewData(
+      {required this.id,
+      required this.projectId,
+      required this.title,
+      this.bpm,
+      this.speed,
+      this.score,
+      required this.isNew,
+      required this.createdAt});
+  factory PracticeListViewData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PracticeListViewData(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      title: serializer.fromJson<String>(json['title']),
+      bpm: serializer.fromJson<int?>(json['bpm']),
+      speed: serializer.fromJson<double?>(json['speed']),
+      score: serializer.fromJson<int?>(json['score']),
+      isNew: serializer.fromJson<bool>(json['isNew']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'title': serializer.toJson<String>(title),
+      'bpm': serializer.toJson<int?>(bpm),
+      'speed': serializer.toJson<double?>(speed),
+      'score': serializer.toJson<int?>(score),
+      'isNew': serializer.toJson<bool>(isNew),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PracticeListViewData copyWith(
+          {String? id,
+          String? projectId,
+          String? title,
+          Value<int?> bpm = const Value.absent(),
+          Value<double?> speed = const Value.absent(),
+          Value<int?> score = const Value.absent(),
+          bool? isNew,
+          DateTime? createdAt}) =>
+      PracticeListViewData(
+        id: id ?? this.id,
+        projectId: projectId ?? this.projectId,
+        title: title ?? this.title,
+        bpm: bpm.present ? bpm.value : this.bpm,
+        speed: speed.present ? speed.value : this.speed,
+        score: score.present ? score.value : this.score,
+        isNew: isNew ?? this.isNew,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PracticeListViewData(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('title: $title, ')
+          ..write('bpm: $bpm, ')
+          ..write('speed: $speed, ')
+          ..write('score: $score, ')
+          ..write('isNew: $isNew, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, projectId, title, bpm, speed, score, isNew, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PracticeListViewData &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.title == this.title &&
+          other.bpm == this.bpm &&
+          other.speed == this.speed &&
+          other.score == this.score &&
+          other.isNew == this.isNew &&
+          other.createdAt == this.createdAt);
+}
+
+class $PracticeListViewView
+    extends ViewInfo<$PracticeListViewView, PracticeListViewData>
+    implements HasResultSet {
+  final String? _alias;
+  @override
+  final _$AppDatabase attachedDatabase;
+  $PracticeListViewView(this.attachedDatabase, [this._alias]);
+  $PracticeInfosTable get practice =>
+      attachedDatabase.practiceInfos.createAlias('t0');
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, projectId, title, bpm, speed, score, isNew, createdAt];
+  @override
+  String get aliasedName => _alias ?? entityName;
+  @override
+  String get entityName => 'practice_list_view';
+  @override
+  Map<SqlDialect, String>? get createViewStatements => null;
+  @override
+  $PracticeListViewView get asDslTable => this;
+  @override
+  PracticeListViewData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PracticeListViewData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      projectId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}project_id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
+      bpm: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}bpm']),
+      speed: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}speed']),
+      score: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}score']),
+      isNew: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_new'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      generatedAs: GeneratedAs(practice.id, false), type: DriftSqlType.string);
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+      'project_id', aliasedName, false,
+      generatedAs: GeneratedAs(practice.projectId, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      generatedAs: GeneratedAs(practice.title, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<int> bpm = GeneratedColumn<int>(
+      'bpm', aliasedName, true,
+      generatedAs: GeneratedAs(practice.bpm, false), type: DriftSqlType.int);
+  late final GeneratedColumn<double> speed = GeneratedColumn<double>(
+      'speed', aliasedName, true,
+      generatedAs: GeneratedAs(practice.speed, false),
+      type: DriftSqlType.double);
+  late final GeneratedColumn<int> score = GeneratedColumn<int>(
+      'score', aliasedName, true,
+      generatedAs: GeneratedAs(practice.score, false), type: DriftSqlType.int);
+  late final GeneratedColumn<bool> isNew = GeneratedColumn<bool>(
+      'is_new', aliasedName, false,
+      generatedAs: GeneratedAs(practice.isNew, false),
+      type: DriftSqlType.bool,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_new" IN (0, 1))'));
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      generatedAs: GeneratedAs(practice.createdAt, false),
+      type: DriftSqlType.dateTime);
+  @override
+  $PracticeListViewView createAlias(String alias) {
+    return $PracticeListViewView(attachedDatabase, alias);
+  }
+
+  @override
+  Query? get query =>
+      (attachedDatabase.selectOnly(practice)..addColumns($columns));
+  @override
+  Set<String> get readTables => const {'practice_infos'};
+}
+
+class PracticeAnalysisViewData extends DataClass {
+  final String id;
+  final String projectId;
+  final AccuracyCount? accuracyCount;
+  final int? score;
+  final DateTime createdAt;
+  const PracticeAnalysisViewData(
+      {required this.id,
+      required this.projectId,
+      this.accuracyCount,
+      this.score,
+      required this.createdAt});
+  factory PracticeAnalysisViewData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PracticeAnalysisViewData(
+      id: serializer.fromJson<String>(json['id']),
+      projectId: serializer.fromJson<String>(json['projectId']),
+      accuracyCount: serializer.fromJson<AccuracyCount?>(json['accuracyCount']),
+      score: serializer.fromJson<int?>(json['score']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'projectId': serializer.toJson<String>(projectId),
+      'accuracyCount': serializer.toJson<AccuracyCount?>(accuracyCount),
+      'score': serializer.toJson<int?>(score),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  PracticeAnalysisViewData copyWith(
+          {String? id,
+          String? projectId,
+          Value<AccuracyCount?> accuracyCount = const Value.absent(),
+          Value<int?> score = const Value.absent(),
+          DateTime? createdAt}) =>
+      PracticeAnalysisViewData(
+        id: id ?? this.id,
+        projectId: projectId ?? this.projectId,
+        accuracyCount:
+            accuracyCount.present ? accuracyCount.value : this.accuracyCount,
+        score: score.present ? score.value : this.score,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('PracticeAnalysisViewData(')
+          ..write('id: $id, ')
+          ..write('projectId: $projectId, ')
+          ..write('accuracyCount: $accuracyCount, ')
+          ..write('score: $score, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(id, projectId, accuracyCount, score, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PracticeAnalysisViewData &&
+          other.id == this.id &&
+          other.projectId == this.projectId &&
+          other.accuracyCount == this.accuracyCount &&
+          other.score == this.score &&
+          other.createdAt == this.createdAt);
+}
+
+class $PracticeAnalysisViewView
+    extends ViewInfo<$PracticeAnalysisViewView, PracticeAnalysisViewData>
+    implements HasResultSet {
+  final String? _alias;
+  @override
+  final _$AppDatabase attachedDatabase;
+  $PracticeAnalysisViewView(this.attachedDatabase, [this._alias]);
+  $PracticeInfosTable get practiceList =>
+      attachedDatabase.practiceInfos.createAlias('t0');
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, projectId, accuracyCount, score, createdAt];
+  @override
+  String get aliasedName => _alias ?? entityName;
+  @override
+  String get entityName => 'practice_analysis_view';
+  @override
+  Map<SqlDialect, String>? get createViewStatements => null;
+  @override
+  $PracticeAnalysisViewView get asDslTable => this;
+  @override
+  PracticeAnalysisViewData map(Map<String, dynamic> data,
+      {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PracticeAnalysisViewData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      projectId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}project_id'])!,
+      accuracyCount: $PracticeInfosTable.$converteraccuracyCountn.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}accuracy_count'])),
+      score: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}score']),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      generatedAs: GeneratedAs(practiceList.id, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
+      'project_id', aliasedName, false,
+      generatedAs: GeneratedAs(practiceList.projectId, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumnWithTypeConverter<AccuracyCount?, String>
+      accuracyCount = GeneratedColumn<String>(
+              'accuracy_count', aliasedName, true,
+              generatedAs: GeneratedAs(practiceList.accuracyCount, false),
+              type: DriftSqlType.string)
+          .withConverter<AccuracyCount?>(
+              $PracticeInfosTable.$converteraccuracyCountn);
+  late final GeneratedColumn<int> score = GeneratedColumn<int>(
+      'score', aliasedName, true,
+      generatedAs: GeneratedAs(practiceList.score, false),
+      type: DriftSqlType.int);
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      generatedAs: GeneratedAs(practiceList.createdAt, false),
+      type: DriftSqlType.dateTime);
+  @override
+  $PracticeAnalysisViewView createAlias(String alias) {
+    return $PracticeAnalysisViewView(attachedDatabase, alias);
+  }
+
+  @override
+  Query? get query =>
+      (attachedDatabase.selectOnly(practiceList)..addColumns($columns));
+  @override
+  Set<String> get readTables => const {'practice_infos'};
 }
 
 abstract class _$AppDatabase extends GeneratedDatabase {
@@ -2067,8 +2434,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ProjectSidebarViewView(this);
   late final $ProjectThumbnailViewView projectThumbnailView =
       $ProjectThumbnailViewView(this);
+  late final $ProjectSummaryViewView projectSummaryView =
+      $ProjectSummaryViewView(this);
   late final $PracticeReportViewView practiceReportView =
       $PracticeReportViewView(this);
+  late final $PracticeListViewView practiceListView =
+      $PracticeListViewView(this);
+  late final $PracticeAnalysisViewView practiceAnalysisView =
+      $PracticeAnalysisViewView(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2081,7 +2454,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         projectDetailView,
         projectSidebarView,
         projectThumbnailView,
-        practiceReportView
+        projectSummaryView,
+        practiceReportView,
+        practiceListView,
+        practiceAnalysisView
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(

@@ -17,6 +17,7 @@ class ProjectInfo {
 @UseRowClass(ProjectInfo)
 class ProjectInfos extends DefaultTable {
   TextColumn get title => text()();
-  TextColumn get musicId => text().references(MusicInfos, #id)();
+  TextColumn get musicId =>
+      text().references(MusicInfos, #id, onDelete: KeyAction.restrict)();
   BoolColumn get isLiked => boolean().withDefault(const Constant(false))();
 }

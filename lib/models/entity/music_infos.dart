@@ -1,6 +1,5 @@
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
-import 'package:application/time_utils.dart';
 import 'package:drift/drift.dart';
 import 'package:application/models/entity/default_table.dart';
 
@@ -12,9 +11,9 @@ enum MusicType {
 
 class MusicInfo {
   final String id, title, artist;
-  final int bpm, lengthInSec;
+  final int bpm, measureCount;
   final List<Cursors> cursorList;
-  final Uint8List sheetSvg;
+  final Uint8List? sheetSvg;
   final List<Cursors> measureList;
   final MusicType type;
   final ComponentCount sourceCount;
@@ -23,14 +22,13 @@ class MusicInfo {
     this.id = "",
     this.title = "",
     this.artist = "",
-    this.bpm = 0,
+    this.bpm = 90,
     this.cursorList = const [],
     this.measureList = const [],
     this.type = MusicType.user,
-    required this.sheetSvg,
-    required this.sourceCount,
-  }) : lengthInSec =
-            TimeUtils.getTotalDuration(bpm, measureList.length).inSeconds;
+    this.sheetSvg,
+    this.sourceCount = const {},
+  }) : measureCount = measureList.length;
 }
 
 @UseRowClass(MusicInfo)
@@ -40,16 +38,22 @@ class MusicInfos extends DefaultTable {
   /// 3. S3 bucket [x]
   /// 4. firebase 저장소
 
-  TextColumn get title => text()();
-  IntColumn get bpm => integer()();
-  IntColumn get lengthInSec => integer()();
-  TextColumn get artist => text()();
+  TextColumn get title => text().withDefault(const Constant("이름 없는 악보"))();
+  IntColumn get bpm => integer().withDefault(const Constant(90))();
+  IntColumn get measureCount => integer().withDefault(const Constant(0))();
+  TextColumn get artist => text().withDefault(const Constant("이름 없는 아티스트"))();
 
   // BlobColumn get infoJson => blob()();
-  TextColumn get cursorList => text().map(const CursorListConvertor())();
-  TextColumn get measureList => text().map(const CursorListConvertor())();
-  BlobColumn get sheetSvg => blob()();
-  IntColumn get type => intEnum<MusicType>()();
+  TextColumn get cursorList => text()
+      .map(const CursorListConvertor())
+      .withDefault(Constant(const CursorListConvertor().toSql([])))();
+  TextColumn get measureList => text()
+      .map(const CursorListConvertor())
+      .withDefault(Constant(const CursorListConvertor().toSql([])))();
+  BlobColumn get sheetSvg => blob().clientDefault(() => Uint8List(0))();
+  IntColumn get type => intEnum<MusicType>().clientDefault(() => 0)();
 
-  TextColumn get sourceCount => text().map(const ComponentCountConvertor())();
+  TextColumn get sourceCount => text()
+      .map(const ComponentCountConvertor())
+      .withDefault(Constant(const ComponentCountConvertor().toSql({})))();
 }

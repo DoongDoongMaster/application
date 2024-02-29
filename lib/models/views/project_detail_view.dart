@@ -8,7 +8,6 @@ abstract class ProjectDetailView extends View {
 
   Expression<String> get musicId => musicInfos.id;
   Expression<String> get musicTitle => musicInfos.title;
-  Expression<int> get musicLength => musicInfos.lengthInSec;
 
   @override
   Query as() => select([
@@ -21,7 +20,7 @@ abstract class ProjectDetailView extends View {
         musicInfos.artist,
         musicInfos.bpm,
         musicInfos.type,
-        musicLength
+        musicInfos.measureCount,
       ]).from(projects).join([
         innerJoin(musicInfos, projects.musicId.equalsExp(musicInfos.id)),
       ]);

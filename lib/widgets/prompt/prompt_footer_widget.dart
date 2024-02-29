@@ -15,9 +15,8 @@ class PromptFooterWidget extends StatelessWidget {
   final bool isMuted;
 
   final void Function() onPressMute;
-
-  final void Function() onPressRestart;
-  final void Function() onPressCancel;
+  final void Function()? onPressRestart;
+  final void Function()? onPressCancel;
 
   const PromptFooterWidget({
     super.key,
@@ -121,7 +120,7 @@ class RestartButtonWithProgressIndicator extends StatelessWidget {
 
   final int lengthInSec;
 
-  final void Function() onPressed;
+  final void Function()? onPressed;
 
   const RestartButtonWithProgressIndicator({
     super.key,
@@ -194,6 +193,7 @@ class RestartButtonWithProgressIndicator extends StatelessWidget {
                   foregroundColor: Colors.black,
                   shape: const CircleBorder(),
                   fixedSize: const Size(circleSize, circleSize),
+                  disabledBackgroundColor: ColorStyles.onSurfaceBlack,
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -371,7 +371,7 @@ class _InfoText extends StatelessWidget {
 class _PromptControlButton extends StatelessWidget {
   final Icon icon;
   final String buttonLabel;
-  final void Function() onPressed;
+  final void Function()? onPressed;
 
   const _PromptControlButton({
     required this.icon,

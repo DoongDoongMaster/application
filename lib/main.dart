@@ -10,7 +10,6 @@ import 'package:application/router.dart';
 import 'package:application/sample_music.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
-import 'package:application/time_utils.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -27,58 +26,66 @@ void main() async {
   for (var i = 0; i < 25; i++) {
     MusicInfo music = await database.into(database.musicInfos).insertReturning(
           MusicInfosCompanion.insert(
-              title: '이름이 엄청나게 무지막지하게 굉장히 긴 악보 $i!!!!',
-              bpm: 240,
-              artist: '아티스트 $i',
-              sheetSvg: (await rootBundle.load('assets/music/stay-with-me.svg'))
-                  .buffer
-                  .asUint8List(),
-              cursorList: List<Cursors>.from(
-                  sheetInfo["cursorList"].map((v) => Cursors.fromJson(v))),
-              measureList: List<Cursors>.from(
-                      sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
-                  .sublist(0, 10),
-              type: MusicType.ddm,
-              lengthInSec: TimeUtils.getTotalDurationInSec(
-                240,
-                10,
-              ),
-              sourceCount: {
-                DrumComponent.hihat.name: 100,
-                DrumComponent.snareDrum.name: 10,
-                DrumComponent.smallTom.name: 0,
-                DrumComponent.kick.name: 30,
-                DrumComponent.total.name: 300,
-              }),
+            title: Value('악보 $i'),
+            bpm: const Value(90),
+            artist: Value('아티스트 $i'),
+            sheetSvg: Value(
+                (await rootBundle.load('assets/music/stay-with-me.svg'))
+                    .buffer
+                    .asUint8List()),
+            cursorList: Value(List<Cursors>.from(
+                    sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
+                .sublist(0, 10)),
+            measureList: Value(List<Cursors>.from(
+                    sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
+                .sublist(0, 3)),
+            measureCount: const Value(3),
+            type: Value(MusicType.values[random.nextInt(2)]),
+            sourceCount: Value(
+              {
+                DrumComponent.hihat.name: random.nextInt(101),
+                DrumComponent.snareDrum.name: random.nextInt(40),
+                DrumComponent.smallTom.name: random.nextInt(20),
+                DrumComponent.kick.name: random.nextInt(10),
+                DrumComponent.total.name: random.nextInt(300) + 100,
+              },
+            ),
+          ),
         );
 
     ProjectInfo project = await database
         .into(database.projectInfos)
-        .insertReturning(ProjectInfosCompanion.insert(
-            title: '이름이 무지막지 굉장히 매우 긴 프로젝트 $i', musicId: music.id));
+        .insertReturning(
+            ProjectInfosCompanion.insert(title: '프로젝트 $i', musicId: music.id));
 
     for (var j = 0; j < i; j++) {
-      var score = random.nextInt(101);
+      final isNull = random.nextBool();
       await database
           .into(database.practiceInfos)
           .insert(PracticeInfosCompanion.insert(
-            score: Value(score),
+            score: isNull ? const Value(null) : Value(random.nextInt(101)),
+            isNew: isNull ? const Value(false) : Value(random.nextBool()),
             // bpm: const Value(100),
-            speed: const Value(0.75),
+            speed: Value([0.5, 0.75, 1.0, 1.25, 1.5][random.nextInt(5)]),
             projectId: project.id,
-            accuracyCount: {
-              AccuracyType.correct.name: 186,
-              AccuracyType.wrongComponent.name: 56,
-              AccuracyType.wrongTiming.name: 48,
-              AccuracyType.wrong.name: 20,
-              AccuracyType.miss.name: 16,
-            },
-            componentCount: {
-              DrumComponent.hihat.name: 80,
-              DrumComponent.snareDrum.name: 9,
-              DrumComponent.smallTom.name: 0,
-              DrumComponent.kick.name: 5
-            },
+            accuracyCount: isNull
+                ? const Value.absent()
+                : Value({
+                    AccuracyType.correct.name: random
+                        .nextInt(music.sourceCount[DrumComponent.total.name]!),
+                    AccuracyType.wrongComponent.name: random.nextInt(50),
+                    AccuracyType.wrongTiming.name: random.nextInt(60),
+                    AccuracyType.wrong.name: random.nextInt(20),
+                    AccuracyType.miss.name: random.nextInt(10),
+                  }),
+            componentCount: isNull
+                ? const Value.absent()
+                : Value({
+                    for (var k in DrumComponent.values)
+                      k.name: music.sourceCount[k.name]! == 0
+                          ? 0
+                          : random.nextInt(music.sourceCount[k.name]!)
+                  }),
           ));
     }
   }
@@ -138,10 +145,11 @@ class MyApp extends StatelessWidget {
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
-            style: ElevatedButton.styleFrom(
-          surfaceTintColor: Colors.transparent,
-          foregroundColor: ColorStyles.primary,
-        )),
+          style: ElevatedButton.styleFrom(
+            surfaceTintColor: Colors.transparent,
+            foregroundColor: ColorStyles.primary,
+          ),
+        ),
         chipTheme: const ChipThemeData(
           selectedColor: ColorStyles.primary,
           side: BorderSide.none,
@@ -163,7 +171,9 @@ class MyApp extends StatelessWidget {
         popupMenuTheme: PopupMenuThemeData(
           position: PopupMenuPosition.under,
           surfaceTintColor: Colors.transparent,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(6),
+          ),
         ),
       ),
       color: ColorStyles.primary,

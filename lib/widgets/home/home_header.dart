@@ -48,7 +48,7 @@ class _ProfileButton extends StatelessWidget {
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
         const PopupMenuItem(
-          padding: EdgeInsets.zero,
+          padding: EdgeInsets.symmetric(horizontal: 16),
           height: 28,
           value: 0,
           child: ListTile(

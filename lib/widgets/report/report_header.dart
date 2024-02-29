@@ -45,18 +45,19 @@ class ReportHeader extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: _AccuracyAnalysisChart(
-                  accuracyData: report.accuracyCount,
+                  accuracyData: report.accuracyCount!,
                   score: report.score!,
                   bestScore: report.bestScore!,
                 ),
               ),
-              Expanded(
-                child: _AccuracyAnalysisChartLegend(
-                  pieChartData: report.accuracyCount,
-                  totalCount: report.sourceCount![DrumComponent.total.name]!,
-                ),
+              const Spacer(),
+              AccuracyAnalysisChartLegend(
+                accuracyCnt: report.accuracyCount!,
+                totalCount: report.sourceCount![DrumComponent.total.name]!,
+                autoSizeGroup: AutoSizeGroup(),
               ),
-              const SizedBox(width: 20),
+              const Spacer(),
+              const SizedBox(width: 15),
             ],
           ),
         ),
@@ -72,7 +73,7 @@ class ReportHeader extends StatelessWidget {
                   .map(
                     (data) => _AnalysisPerComponent(
                       label: data.label,
-                      hitCnt: report.componentCount[data.name],
+                      hitCnt: report.componentCount![data.name]!,
                       sourceCnt: report.sourceCount![data.name]!,
                     ),
                   ),
@@ -213,30 +214,36 @@ class _AnalysisPerComponent extends StatelessWidget {
   }
 }
 
-class _AccuracyAnalysisChartLegend extends StatelessWidget {
-  const _AccuracyAnalysisChartLegend({
-    required this.pieChartData,
+class AccuracyAnalysisChartLegend extends StatelessWidget {
+  static const double width = 130;
+  const AccuracyAnalysisChartLegend({
+    super.key,
+    required this.accuracyCnt,
     required this.totalCount,
+    required this.autoSizeGroup,
   });
 
-  final AccuracyCount pieChartData;
+  final AccuracyCount? accuracyCnt;
   final int totalCount;
+  final AutoSizeGroup autoSizeGroup;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.max,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // 항목 라벨
-        ...AccuracyType.values.map(
-          (data) => Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 0),
-            child: Row(
+    return SizedBox(
+      width: width,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // 항목 라벨
+          ...AccuracyType.values.map(
+            (data) => Row(
+              // alignment: WrapAlignment.spaceBetween,
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              // mainAxisSize: MainAxisSize.min,
               children: [
                 Row(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Transform.rotate(
                       angle: data.shouldRotate ? pi / 4 : 0,
@@ -246,35 +253,57 @@ class _AccuracyAnalysisChartLegend extends StatelessWidget {
                         size: 20,
                       ),
                     ),
-                    const SizedBox(width: 3),
-                    Text(
-                      data.label,
-                      style: TextStyles.bodyMedium.copyWith(
-                        color: ColorStyles.graphLegend,
+                    const SizedBox(width: 3, height: 25),
+                    ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: (width - 23) * 0.7,
+                        maxHeight: 25,
+                      ),
+                      child: AutoSizeText(
+                        data.label,
+                        style: const TextStyle(color: ColorStyles.graphLegend),
+                        minFontSize: 1,
+                        maxFontSize: TextStyles.bodyMedium.fontSize!,
+                        maxLines: 1,
+                        group: autoSizeGroup,
                       ),
                     ),
                   ],
                 ),
-                Row(
-                  children: [
-                    Text(
-                      "${pieChartData[data.name]}",
-                      style: TextStyles.bodyLarge,
-                    ),
-                    if (data == AccuracyType.correct)
-                      Text(
-                        "/$totalCount",
-                        style: TextStyles.bodyMedium.copyWith(
-                          color: ColorStyles.graphMiss,
+                ConstrainedBox(
+                  constraints: const BoxConstraints(
+                    maxWidth: (width - 23) * 0.7,
+                    maxHeight: 25,
+                  ),
+                  child: AutoSizeText.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: "${accuracyCnt?[data.name] ?? '-'}",
+                          style: TextStyle(
+                              fontWeight: data == AccuracyType.correct
+                                  ? FontWeight.bold
+                                  : FontWeight.normal),
                         ),
-                      ),
-                  ],
+                        if (data == AccuracyType.correct)
+                          TextSpan(
+                            text: "/$totalCount",
+                            style:
+                                const TextStyle(color: ColorStyles.graphMiss),
+                          ),
+                      ],
+                    ),
+                    group: autoSizeGroup,
+                    minFontSize: 1,
+                    maxFontSize: TextStyles.bodyLarge.fontSize!,
+                    maxLines: 1,
+                  ),
                 ),
               ],
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
