@@ -253,12 +253,11 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                         size: 20,
                       ),
                     ),
-                    const SizedBox(width: 3),
+                    const SizedBox(width: 3, height: 25),
                     ConstrainedBox(
                       constraints: const BoxConstraints(
                         maxWidth: (width - 23) * 0.7,
                         maxHeight: 25,
-                        minHeight: 25,
                       ),
                       child: AutoSizeText(
                         data.label,
@@ -271,10 +270,11 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                     ),
                   ],
                 ),
-                // const Spacer(),
                 ConstrainedBox(
-                  constraints:
-                      const BoxConstraints(maxWidth: (width - 23) * 0.7),
+                  constraints: const BoxConstraints(
+                    maxWidth: (width - 23) * 0.7,
+                    maxHeight: 25,
+                  ),
                   child: AutoSizeText.rich(
                     TextSpan(
                       children: [
