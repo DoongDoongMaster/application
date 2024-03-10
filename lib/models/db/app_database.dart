@@ -90,6 +90,8 @@ class AppDatabase extends _$AppDatabase {
         bpm: Value(music.bpm),
         artist: Value(music.artist),
         type: Value(music.type),
+        sheetSvg: Value(music.sheetSvg!),
+        sourceCount: Value(music.sourceCount),
       ));
 
   /// MUSIC - READ
@@ -133,7 +135,8 @@ class AppDatabase extends _$AppDatabase {
           .write(const PracticeInfosCompanion(isNew: Value(false)));
   Future<List<PracticeListViewData>> getPracticeList(String projectId) =>
       (select(practiceListView)
-            ..where((tbl) => tbl.projectId.equals(projectId)))
+            ..where((tbl) => tbl.projectId.equals(projectId))
+            ..orderBy([(u) => OrderingTerm.desc(practiceInfos.createdAt)]))
           .get();
 
   /// PRACTICE - DELETE

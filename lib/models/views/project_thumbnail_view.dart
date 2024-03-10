@@ -15,6 +15,7 @@ abstract class ProjectThumbnailView extends View {
         projects.id,
         projects.title,
         projects.isLiked,
+        projects.createdAt,
         musicInfos.type,
         unreadCount,
       ]).from(projects).join([

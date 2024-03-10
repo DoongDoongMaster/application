@@ -29,7 +29,7 @@ class AnalysisSummary extends StatelessWidget {
                 size: const Size(0, 200),
                 child: _ScoreChart(
                   bestScore: data.bestScore?.toString() ?? '-',
-                  scoreList: data.scoreList,
+                  scoreList: data.scoreList.reversed.toList(),
                 ),
               ),
             ),
@@ -40,7 +40,7 @@ class AnalysisSummary extends StatelessWidget {
                 size: const Size(0, 200),
                 child: _AccuracyChart(
                     accuracyCount: data.bestCount,
-                    accuracyList: data.accuracyList),
+                    accuracyList: data.accuracyList.reversed.toList()),
               ),
             ),
           ],

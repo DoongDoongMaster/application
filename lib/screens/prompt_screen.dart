@@ -8,6 +8,7 @@ import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/router.dart';
+import 'package:application/screens/home_screen.dart';
 import 'package:application/services/local_storage.dart';
 import 'package:application/services/metronome.dart';
 import 'package:application/services/recorder_service.dart';
@@ -107,7 +108,6 @@ class _PromptScreenState extends State<PromptScreen> {
         result = await showDialog<double>(
           context: context,
           barrierDismissible: false,
-          // barrierColor: ColorStyles.blackShadow36,
           builder: (BuildContext context) => const PracticeSettingModal(),
         );
       }()
@@ -118,17 +118,20 @@ class _PromptScreenState extends State<PromptScreen> {
         if (context.canPop()) {
           context.pop();
         } else {
-          context.goNamed(RouterPath.project.name,
-              pathParameters: {"id": widget.projectId!});
+          context.pushReplacementNamed(RouterPath.home.name,
+              pathParameters: {"tab": HomeTab.projectList.name, "refresh": ''});
         }
       }
       return;
     }
-    speed = result!;
-    state = PromptState.initializing;
-    currentBPM = (music.bpm * speed).toInt();
-    totalLengthInSec =
-        TimeUtils.getTotalDuration(currentBPM, music.measureCount).inSeconds;
+
+    setState(() {
+      speed = result!;
+      state = PromptState.initializing;
+      currentBPM = (music.bpm * speed).toInt();
+      totalLengthInSec =
+          TimeUtils.getTotalDuration(currentBPM, music.measureCount).inSeconds;
+    });
     _showPrecountWidget();
   }
 
@@ -159,7 +162,7 @@ class _PromptScreenState extends State<PromptScreen> {
         .getSingleOrNull();
 
     if (temp == null && context.mounted) {
-      context.goNamed(RouterPath.list.name);
+      context.goNamed(RouterPath.home.name);
       return;
     }
 
@@ -302,8 +305,7 @@ class _PromptScreenState extends State<PromptScreen> {
     });
 
     if (context.mounted) {
-      context.goNamed(RouterPath.project.name,
-          pathParameters: {"id": widget.projectId!});
+      context.goNamed(RouterPath.home.name);
     }
   }
 
@@ -348,8 +350,7 @@ class _PromptScreenState extends State<PromptScreen> {
               if (context.canPop()) {
                 context.pop();
               } else {
-                context.goNamed(RouterPath.project.name,
-                    pathParameters: {"id": widget.projectId!});
+                context.goNamed(RouterPath.home.name);
               }
             }
           },

@@ -1,93 +1,112 @@
-import 'package:application/main.dart';
-import 'package:application/models/db/app_database.dart';
-import 'package:application/router.dart';
-import 'package:application/widgets/home/add_new_button.dart';
-import 'package:application/widgets/home/n_column_grid_view.dart';
+import 'package:application/widgets/home/music_list_body.dart';
+import 'package:application/widgets/home/project_body.dart';
+import 'package:application/widgets/home/project_list_body.dart';
 import 'package:application/widgets/home/navigation_panel.dart';
-import 'package:application/widgets/home/project_preview.dart';
-import 'package:application/widgets/home/home_header.dart';
-import 'package:application/widgets/no_content_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
-/// 연습장 목록 화면 (모든 연습장 / 즐겨찾는 연습)
-class HomeScreen extends StatelessWidget {
-  final bool favoriteOnly;
-  static const int colCount = 4;
-  const HomeScreen({
+enum HomeTab {
+  favoriteProjectList,
+  projectList,
+  musicList,
+  project,
+}
+
+class HomeScreen extends StatefulWidget {
+  final HomeTab? homeTab;
+  const HomeScreen({super.key, this.homeTab});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+typedef NavigationFunction = void Function(HomeTab tab, {String? selectedId});
+
+class _HomeScreenState extends State<HomeScreen> {
+  late HomeTab currentTab;
+  String? projectId;
+  bool isProjectListOpen = true;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    currentTab = widget.homeTab ?? HomeTab.projectList;
+  }
+
+  void changeTab(HomeTab tab, {String? selectedId}) {
+    setState(() {
+      currentTab = tab;
+      projectId = selectedId;
+    });
+  }
+
+  void toggleProjectList() {
+    setState(() {
+      isProjectListOpen = !isProjectListOpen;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      resizeToAvoidBottomInset: false,
+      body: Row(
+        children: [
+          NavigationPanel(
+            currentTab: currentTab,
+            isProjectListOpen: isProjectListOpen,
+            projectId: projectId,
+            onTab: changeTab,
+            toggleList: toggleProjectList,
+          ),
+          Expanded(
+            key: const ValueKey<String>('home-body'),
+            child: HomeBody(
+              currentTab: currentTab,
+              projectId: projectId,
+              changeTab: changeTab,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
+class HomeBody extends StatelessWidget {
+  final HomeTab currentTab;
+  final String? projectId;
+  final NavigationFunction changeTab;
+
+  const HomeBody({
     super.key,
-    this.favoriteOnly = false,
+    required this.currentTab,
+    required this.projectId,
+    required this.changeTab,
   });
 
   @override
   Widget build(BuildContext context) {
-    // (database.select(database.projectInfos)..limit(1)).getSingle().then(
-    //     (value) => context.goNamed(RouterPath.project.name,
-    //         pathParameters: {'id': value.id}));
-    return Scaffold(
-      body: Row(
-        children: [
-          NavigationPanel(
-              currentPath:
-                  favoriteOnly ? RouterPath.favoriteList : RouterPath.list),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                children: [
-                  const HomeHeader(label: '연습장'),
-                  Expanded(
-                    child: FutureBuilder<List<ProjectThumbnailViewData>>(
-                      future:
-                          database.select(database.projectThumbnailView).get(),
-                      builder: (context, snapshot) {
-                        List<Widget> gridList = [
-                          if (!favoriteOnly)
-                            UnconstrainedBox(
-                              child: AddNewButton(
-                                label: '연습 추가',
-                                size: ProjectPreview.size,
-                                onPressed: () =>
-                                    context.goNamed(RouterPath.musicList.name),
-                              ),
-                            )
-                        ];
-
-                        if (snapshot.hasData) {
-                          if (snapshot.data!.isNotEmpty) {
-                            return NColumnGridView(
-                                colCount: colCount,
-                                gridList: [
-                                  ...gridList,
-                                  ...snapshot.data!
-                                      .where((data) =>
-                                          data.isLiked || !favoriteOnly)
-                                      .map((data) => UnconstrainedBox(
-                                            child: ProjectPreview(data: data),
-                                          ))
-                                ]);
-                          }
-                        }
-                        return Column(
-                          children: [
-                            NColumnGridView(
-                                colCount: colCount, gridList: gridList),
-                            const SizedBox(height: 20),
-                            const NoContentWidget(
-                              title: "연습장이 비어 있음",
-                              subTitle: "새로운 연습을 추가하세요.",
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    switch (currentTab) {
+      case HomeTab.musicList:
+        return const MusicListBody(
+          key: ValueKey<String>('music-list'),
+        );
+      case HomeTab.project:
+        return ProjectBody(
+            key: const ValueKey<String>('project'), projectId: projectId!);
+      case HomeTab.favoriteProjectList:
+        return ProjectListBody(
+          key: const ValueKey<String>('project-list'),
+          favoriteOnly: true,
+          onTab: changeTab,
+        );
+      case HomeTab.projectList:
+        return ProjectListBody(
+          key: const ValueKey<String>('favorite-project-list'),
+          onTab: changeTab,
+        );
+    }
   }
 }
