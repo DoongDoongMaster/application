@@ -26,9 +26,9 @@ void main() async {
   for (var i = 0; i < 4; i++) {
     MusicInfo music = await database.into(database.musicInfos).insertReturning(
           MusicInfosCompanion.insert(
-            title: Value('악보 $i'),
+            title: const Value('Stay with me'),
             bpm: const Value(90),
-            artist: Value('아티스트 $i'),
+            artist: const Value('자우림'),
             sheetSvg: Value(
                 (await rootBundle.load('assets/music/stay-with-me.svg'))
                     .buffer
@@ -58,11 +58,12 @@ void main() async {
           ),
         );
 
+    final projectTitle = ["스테이윗미", "스테이윗미-다시", "한페이지", "항해"];
 
     ProjectInfo project = await database
         .into(database.projectInfos)
-        .insertReturning(
-            ProjectInfosCompanion.insert(title: '프로젝트 $i', musicId: music.id));
+        .insertReturning(ProjectInfosCompanion.insert(
+            title: projectTitle[i], musicId: music.id));
 
     // final scoreList = [48, 56, 57, 60, 65, 68, 77, 80, 82, 89];
     // final list1 = [150, 160, 170, 180, 190, 200, 250, 270, 300, 310];
