@@ -1,44 +1,31 @@
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/main.dart';
-import 'package:application/router.dart';
+import 'package:application/screens/home_screen.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 /// 연습장 화면 왼쪽 패널
-class NavigationPanel extends StatefulWidget {
-  final RouterPath currentPath;
+class NavigationPanel extends StatelessWidget {
+  final HomeTab currentTab;
   final String? projectId;
+  final bool isProjectListOpen;
+  final NavigationFunction onTab;
+  final void Function() toggleList;
+  // final RouterPath currentPath;
+  // final String? projectId;
 
   const NavigationPanel({
     super.key,
-    this.currentPath = RouterPath.list,
-    this.projectId,
+    required this.currentTab,
+    required this.isProjectListOpen,
+    required this.projectId,
+    required this.onTab,
+    required this.toggleList,
+    // this.currentPath = RouterPath.home,
+    // this.projectId,
   });
-
-  @override
-  State<NavigationPanel> createState() => _NavigationPanelState();
-}
-
-class _NavigationPanelState extends State<NavigationPanel> {
-  bool isProjectListOpen = true;
-
-  void changePath(
-    bool isSelected, {
-    required RouterPath path,
-    Map<String, String> params = const <String, String>{},
-  }) {
-    if (!isSelected) {
-      return;
-    }
-    if (path == widget.currentPath) {
-      context.pushReplacementNamed(path.name, pathParameters: params);
-    } else {
-      context.goNamed(path.name, pathParameters: params);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,17 +56,14 @@ class _NavigationPanelState extends State<NavigationPanel> {
           MenuChip(
             label: "즐겨찾는 연습",
             icon: Icons.favorite_border_rounded,
-            isSelected: widget.currentPath == RouterPath.favoriteList,
-            onSelected: (x) => changePath(x, path: RouterPath.favoriteList),
+            // onSelected: (x) => changePath(x, path: RouterPath.favoriteList),
+            isSelected: currentTab == HomeTab.favoriteProjectList,
+            onSelected: (_) => onTab(HomeTab.favoriteProjectList),
           ),
           Padding(
             padding: const EdgeInsets.only(top: 18, bottom: 12),
             child: ActionChip(
-              onPressed: () {
-                setState(() {
-                  isProjectListOpen = !isProjectListOpen;
-                });
-              },
+              onPressed: toggleList,
               labelPadding: const EdgeInsets.symmetric(vertical: 3),
               visualDensity: const VisualDensity(vertical: -3),
               padding: EdgeInsets.zero,
@@ -104,8 +88,8 @@ class _NavigationPanelState extends State<NavigationPanel> {
             MenuChip(
               label: "모든 연습장",
               icon: Icons.apps_rounded,
-              isSelected: widget.currentPath == RouterPath.list,
-              onSelected: (x) => changePath(x, path: RouterPath.list),
+              isSelected: currentTab == HomeTab.projectList,
+              onSelected: (_) => onTab(HomeTab.projectList),
             ),
             const Divider(),
             FutureBuilder<List<ProjectSidebarViewData>>(
@@ -120,12 +104,9 @@ class _NavigationPanelState extends State<NavigationPanel> {
                       children: snapshot.data!
                           .map((data) => MenuChip(
                                 label: data.title,
-                                isSelected: widget.projectId == data.id,
-                                onSelected: (x) => changePath(
-                                  x,
-                                  path: RouterPath.project,
-                                  params: {"id": data.id},
-                                ),
+                                isSelected: projectId == data.id,
+                                onSelected: (_) =>
+                                    onTab(HomeTab.project, selectedId: data.id),
                                 iconBgColor: data.type == MusicType.ddm
                                     ? ColorStyles.primaryLight
                                     : ColorStyles.secondary,
@@ -150,9 +131,9 @@ class _NavigationPanelState extends State<NavigationPanel> {
             const Spacer(),
           MenuChip(
             label: "새로운 연습",
-            isSelected: widget.currentPath == RouterPath.musicList,
-            onSelected: (x) => changePath(x, path: RouterPath.musicList),
-            iconBgColor: widget.currentPath == RouterPath.musicList
+            isSelected: currentTab == HomeTab.musicList,
+            onSelected: (_) => onTab(HomeTab.musicList),
+            iconBgColor: currentTab == HomeTab.musicList
                 ? Colors.transparent
                 : const Color(0xFFE7E7EE),
             icon: Icons.add_rounded,
@@ -187,9 +168,6 @@ class MenuChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChoiceChip(
-      // backgroundColor: Colors.transparent,
-      // surfaceTintColor: Colors.transparent,
-      // shadowColor: Colors.transparent,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       selected: isSelected,
       labelPadding: const EdgeInsets.symmetric(vertical: 3),

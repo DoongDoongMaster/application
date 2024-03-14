@@ -96,9 +96,8 @@ class ReportListItem extends StatelessWidget {
                 switch (value) {
                   case 0:
                     // TODO: 연습 삭제 함수 만들기.
-                    database.deletePractice(data.id).then((value) => context
-                        .pushReplacementNamed(RouterPath.project.name,
-                            pathParameters: {'id': data.projectId}));
+                    database.deletePractice(data.id).then((value) =>
+                        context.pushReplacementNamed(RouterPath.home.name));
                 }
               },
               itemBuilder: (context) => [

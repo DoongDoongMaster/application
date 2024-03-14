@@ -1,22 +1,22 @@
 import 'dart:math';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
-import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 class ProjectPreview extends StatelessWidget {
   /// 연습 미리보기 카드 크기
   static const Size size = Size(154, 154);
   static final AutoSizeGroup _autoSizeGroup = AutoSizeGroup();
   final ProjectThumbnailViewData data;
+  final void Function()? onPressed;
 
   const ProjectPreview({
     super.key,
     required this.data,
+    this.onPressed,
   });
 
   @override
@@ -28,14 +28,7 @@ class ProjectPreview extends StatelessWidget {
           5 * max(-2, 2 - data.unreadCount.toString().length.toDouble()), -5),
       isLabelVisible: (data.unreadCount ?? 0) > 0,
       child: ElevatedButton(
-        onPressed: () {
-          if (data.id.isNotEmpty) {
-            context.pushNamed(
-              RouterPath.project.name,
-              pathParameters: {"id": data.id},
-            );
-          }
-        },
+        onPressed: onPressed,
         style: ElevatedButton.styleFrom(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),

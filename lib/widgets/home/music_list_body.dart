@@ -1,138 +1,161 @@
 import 'package:application/main.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
-import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/home/add_new_button.dart';
 import 'package:application/widgets/home/add_new_modal.dart';
 import 'package:application/widgets/home/n_column_grid_view.dart';
-import 'package:application/widgets/home/navigation_panel.dart';
 import 'package:application/widgets/home/home_header.dart';
 import 'package:application/widgets/no_content_widget.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:go_router/go_router.dart';
 
-class MusicListScreen extends StatefulWidget {
-  final MusicType? filter;
+class MusicListBody extends StatefulWidget {
   static const colCount = 5;
 
-  const MusicListScreen({super.key, this.filter});
+  const MusicListBody({super.key});
 
   @override
-  State<MusicListScreen> createState() => _MusicListScreenState();
+  State<MusicListBody> createState() => _MusicListBodyState();
 }
 
-class _MusicListScreenState extends State<MusicListScreen> {
+class _MusicListBodyState extends State<MusicListBody> {
+  MusicType? selectedType;
+
+  changeType(MusicType type) {
+    setState(() {
+      selectedType = type;
+    });
+  }
+
+  closeMusicList() {
+    setState(() {
+      selectedType = null;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      body: Row(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 30),
+      child: Stack(
         children: [
-          const NavigationPanel(currentPath: RouterPath.musicList),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 30),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (widget.filter == null) ...[
-                    const HomeHeader(label: '악보 목록'),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 10),
-                      child: Text(
-                        "연습하고 싶은 악보를 선택하거나, 추가하세요.",
-                        style: TextStyles.bodyMedium.copyWith(
-                          color: ColorStyles.onSurfaceBlackVariant,
-                          letterSpacing: 0.25,
-                        ),
-                      ),
+          if (selectedType == null)
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const HomeHeader(label: '악보 목록'),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  child: Text(
+                    "연습하고 싶은 악보를 선택하거나, 추가하세요.",
+                    style: TextStyles.bodyMedium.copyWith(
+                      color: ColorStyles.onSurfaceBlackVariant,
+                      letterSpacing: 0.25,
                     ),
-                    const _TopMusicPreview(
-                      musicType: MusicType.ddm,
-                      label: '기본 악보',
-                    ),
-                    const _TopMusicPreview(
-                      musicType: MusicType.user,
-                      label: '나의 악보',
-                    ),
-                  ] else ...[
-                    AppBar(
-                      automaticallyImplyLeading: false,
-                      toolbarHeight: 80,
-                      title: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                            onPressed: () => context.pop(),
-                            icon: const Icon(
-                              Icons.arrow_back_ios_rounded,
-                              size: 24,
-                              color: ColorStyles.primary,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(),
-                            visualDensity: const VisualDensity(horizontal: -4),
-                          ),
-                          Text(
-                            widget.filter == MusicType.ddm ? '기본 악보' : '나의 악보',
-                            style: TextStyles.bodyLarge,
-                          ),
-                          const SizedBox(width: 32),
-                        ],
-                      ),
-                    ),
-                    Expanded(
-                      child: FutureBuilder<List<MusicThumbnailViewData>>(
-                        future:
-                            database.select(database.musicThumbnailView).get(),
-                        builder: (context, snapshot) {
-                          List<Widget> gridList = [
-                            if (widget.filter == MusicType.user)
-                              const UnconstrainedBox(
-                                child: _AddNewMusicButton(),
-                              ),
-                            if (snapshot.hasData)
-                              ...snapshot.data!
-                                  .where((tbl) => tbl.type == widget.filter)
-                                  .map((data) => UnconstrainedBox(
-                                      child: MusicPreview(music: data))),
-                          ];
-
-                          if (gridList.length <= 1) {
-                            return Column(
-                              children: [
-                                NColumnGridView(
-                                  colCount: MusicListScreen.colCount,
-                                  gridList: gridList,
-                                ),
-                                const SizedBox(height: 20),
-                                const NoContentWidget(
-                                  title: "나의 악보가 비어 있음",
-                                  subTitle: "새로운 악보를 추가하세요.",
-                                ),
-                              ],
-                            );
-                          }
-
-                          return NColumnGridView(
-                            colCount: MusicListScreen.colCount,
-                            gridList: gridList,
-                            spacing: 20,
-                          );
-                        },
-                      ),
-                    )
-                  ],
-                ],
-              ),
-            ),
-          ),
+                  ),
+                ),
+                _TopMusicPreview(
+                  musicType: MusicType.ddm,
+                  label: '기본 악보',
+                  onPressed: () => changeType(MusicType.ddm),
+                ),
+                _TopMusicPreview(
+                  musicType: MusicType.user,
+                  label: '나의 악보',
+                  onPressed: () => changeType(MusicType.user),
+                ),
+              ],
+            )
+          else
+            MusicListDetail(
+              filter: selectedType,
+              closeList: closeMusicList,
+            )
         ],
       ),
+    );
+  }
+}
+
+class MusicListDetail extends StatelessWidget {
+  static const colCount = 5;
+  final MusicType? filter;
+  final void Function() closeList;
+
+  const MusicListDetail({super.key, this.filter, required this.closeList});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        AppBar(
+          automaticallyImplyLeading: false,
+          toolbarHeight: 80,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: closeList,
+                icon: const Icon(
+                  Icons.arrow_back_ios_rounded,
+                  size: 24,
+                  color: ColorStyles.primary,
+                ),
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                visualDensity: const VisualDensity(horizontal: -4),
+              ),
+              Text(
+                filter == MusicType.ddm ? '기본 악보' : '나의 악보',
+                style: TextStyles.bodyLarge,
+              ),
+              const SizedBox(width: 32),
+            ],
+          ),
+        ),
+        Expanded(
+          child: FutureBuilder<List<MusicThumbnailViewData>>(
+            future: database.select(database.musicThumbnailView).get(),
+            builder: (context, snapshot) {
+              List<Widget> gridList = [
+                if (filter == MusicType.user)
+                  const UnconstrainedBox(
+                    child: _AddNewMusicButton(),
+                  ),
+                if (snapshot.hasData)
+                  ...snapshot.data!.where((tbl) => tbl.type == filter).map(
+                      (data) =>
+                          UnconstrainedBox(child: MusicPreview(music: data))),
+              ];
+
+              if (gridList.length <= 1) {
+                return Column(
+                  children: [
+                    NColumnGridView(
+                      colCount: colCount,
+                      gridList: gridList,
+                    ),
+                    const SizedBox(height: 20),
+                    const NoContentWidget(
+                      title: "나의 악보가 비어 있음",
+                      subTitle: "새로운 악보를 추가하세요.",
+                    ),
+                  ],
+                );
+              }
+
+              return NColumnGridView(
+                colCount: colCount,
+                gridList: gridList,
+                spacing: 20,
+              );
+            },
+          ),
+        )
+      ],
     );
   }
 }
@@ -252,10 +275,12 @@ class SubClassLabelWithArrow extends StatelessWidget {
 class _TopMusicPreview extends StatelessWidget {
   final MusicType musicType;
   final String label;
+  final void Function() onPressed;
 
   const _TopMusicPreview({
     required this.musicType,
     required this.label,
+    required this.onPressed,
   });
 
   @override
@@ -266,21 +291,15 @@ class _TopMusicPreview extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SubClassLabelWithArrow(
-              label: label,
-              onPressed: () {
-                switch (musicType) {
-                  case MusicType.ddm:
-                    context.pushNamed(RouterPath.musicListDDM.name);
-                  case MusicType.user:
-                    context.pushNamed(RouterPath.musicListUser.name);
-                }
-              }),
+            label: label,
+            onPressed: onPressed,
+          ),
           FutureBuilder<List<MusicThumbnailViewData>>(
             future: database.getTopMusicsByType(
                 musicType,
                 musicType == MusicType.ddm
-                    ? MusicListScreen.colCount
-                    : MusicListScreen.colCount - 1),
+                    ? MusicListBody.colCount
+                    : MusicListBody.colCount - 1),
             builder: (context, snapshot) {
               if (snapshot.hasData) {
                 List<Widget> gridList = [
@@ -288,9 +307,7 @@ class _TopMusicPreview extends StatelessWidget {
                   ...snapshot.data!.map((data) => MusicPreview(music: data))
                 ];
 
-                for (var i = gridList.length;
-                    i < MusicListScreen.colCount;
-                    i++) {
+                for (var i = gridList.length; i < MusicListBody.colCount; i++) {
                   gridList.add(SizedBox.fromSize(size: MusicPreview.size));
                 }
                 return Padding(

@@ -3,7 +3,8 @@ import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/router.dart';
-import 'package:application/screens/music_list_screen.dart';
+import 'package:application/screens/home_screen.dart';
+import 'package:application/widgets/home/music_list_body.dart';
 import 'package:application/widgets/custom_dialog.dart';
 import 'package:application/widgets/home/project_preview.dart';
 import 'package:application/widgets/modal_widget.dart';
@@ -40,7 +41,7 @@ class _NewProjectModalState extends State<NewProjectModal> {
   void onSubmit(BuildContext ctx) {
     database
         .addNewProject(_previewText, widget.music.id)
-        .then((value) => ctx.goNamed(RouterPath.list.name));
+        .then((value) => ctx.pushReplacementNamed(RouterPath.home.name));
   }
 
   @override
@@ -62,6 +63,7 @@ class _NewProjectModalState extends State<NewProjectModal> {
                 isLiked: false,
                 unreadCount: 0,
               ),
+              onPressed: () {},
             ),
           ),
           const Spacer(),
@@ -111,7 +113,11 @@ class _NewMusicModalState extends State<NewMusicModal> {
         .pickFiles(type: FileType.any, withData: true)
         .then((value) {
       setState(() {
-        file = value!.files.single;
+        if (value == null) {
+          context.pop();
+          return;
+        }
+        file = value.files.single;
         RegExp regex = RegExp(r'^(.+?)(\..+)?$');
         title = regex.firstMatch(file.name)?.group(1) ?? "";
         isLoaded = true;
@@ -137,10 +143,13 @@ class _NewMusicModalState extends State<NewMusicModal> {
                           sheetSvg: file.bytes!,
                           type: MusicType.user,
                           sourceCount: {
-                            for (var v in DrumComponent.values) v.name: 0,
-                          }))
-                      .then((value) => context
-                          .pushReplacementNamed(RouterPath.musicList.name));
+                        for (var v in DrumComponent.values) v.name: 0,
+                      }))
+                      .then((value) {
+                    context.pop();
+                    context.pushReplacementNamed(RouterPath.home.name,
+                        queryParameters: {"tab": HomeTab.musicList.name});
+                  });
                 }
               }),
           const Divider(height: 0),
