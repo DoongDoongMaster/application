@@ -79,11 +79,11 @@ class $MusicInfosTable extends MusicInfos
               requiredDuringInsert: false,
               defaultValue: Constant(const CursorListConvertor().toSql([])))
           .withConverter<List<Cursors>>($MusicInfosTable.$convertermeasureList);
-  static const VerificationMeta _sheetSvgMeta =
-      const VerificationMeta('sheetSvg');
+  static const VerificationMeta _sheetImageMeta =
+      const VerificationMeta('sheetImage');
   @override
-  late final GeneratedColumn<Uint8List> sheetSvg = GeneratedColumn<Uint8List>(
-      'sheet_svg', aliasedName, false,
+  late final GeneratedColumn<Uint8List> sheetImage = GeneratedColumn<Uint8List>(
+      'sheet_image', aliasedName, false,
       type: DriftSqlType.blob,
       requiredDuringInsert: false,
       clientDefault: () => Uint8List(0));
@@ -116,7 +116,7 @@ class $MusicInfosTable extends MusicInfos
         artist,
         cursorList,
         measureList,
-        sheetSvg,
+        sheetImage,
         type,
         sourceCount
       ];
@@ -161,9 +161,11 @@ class $MusicInfosTable extends MusicInfos
     }
     context.handle(_cursorListMeta, const VerificationResult.success());
     context.handle(_measureListMeta, const VerificationResult.success());
-    if (data.containsKey('sheet_svg')) {
-      context.handle(_sheetSvgMeta,
-          sheetSvg.isAcceptableOrUnknown(data['sheet_svg']!, _sheetSvgMeta));
+    if (data.containsKey('sheet_image')) {
+      context.handle(
+          _sheetImageMeta,
+          sheetImage.isAcceptableOrUnknown(
+              data['sheet_image']!, _sheetImageMeta));
     }
     context.handle(_typeMeta, const VerificationResult.success());
     context.handle(_sourceCountMeta, const VerificationResult.success());
@@ -192,8 +194,8 @@ class $MusicInfosTable extends MusicInfos
               DriftSqlType.string, data['${effectivePrefix}measure_list'])!),
       type: $MusicInfosTable.$convertertype.fromSql(attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
-      sheetSvg: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}sheet_svg'])!,
+      sheetImage: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}sheet_image'])!,
       sourceCount: $MusicInfosTable.$convertersourceCount.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}source_count'])!),
@@ -225,7 +227,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
   final Value<String> artist;
   final Value<List<Cursors>> cursorList;
   final Value<List<Cursors>> measureList;
-  final Value<Uint8List> sheetSvg;
+  final Value<Uint8List> sheetImage;
   final Value<MusicType> type;
   final Value<ComponentCount> sourceCount;
   final Value<int> rowid;
@@ -239,7 +241,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.artist = const Value.absent(),
     this.cursorList = const Value.absent(),
     this.measureList = const Value.absent(),
-    this.sheetSvg = const Value.absent(),
+    this.sheetImage = const Value.absent(),
     this.type = const Value.absent(),
     this.sourceCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -254,7 +256,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     this.artist = const Value.absent(),
     this.cursorList = const Value.absent(),
     this.measureList = const Value.absent(),
-    this.sheetSvg = const Value.absent(),
+    this.sheetImage = const Value.absent(),
     this.type = const Value.absent(),
     this.sourceCount = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -269,7 +271,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
     Expression<String>? artist,
     Expression<String>? cursorList,
     Expression<String>? measureList,
-    Expression<Uint8List>? sheetSvg,
+    Expression<Uint8List>? sheetImage,
     Expression<int>? type,
     Expression<String>? sourceCount,
     Expression<int>? rowid,
@@ -284,7 +286,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       if (artist != null) 'artist': artist,
       if (cursorList != null) 'cursor_list': cursorList,
       if (measureList != null) 'measure_list': measureList,
-      if (sheetSvg != null) 'sheet_svg': sheetSvg,
+      if (sheetImage != null) 'sheet_image': sheetImage,
       if (type != null) 'type': type,
       if (sourceCount != null) 'source_count': sourceCount,
       if (rowid != null) 'rowid': rowid,
@@ -301,7 +303,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       Value<String>? artist,
       Value<List<Cursors>>? cursorList,
       Value<List<Cursors>>? measureList,
-      Value<Uint8List>? sheetSvg,
+      Value<Uint8List>? sheetImage,
       Value<MusicType>? type,
       Value<ComponentCount>? sourceCount,
       Value<int>? rowid}) {
@@ -315,7 +317,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       artist: artist ?? this.artist,
       cursorList: cursorList ?? this.cursorList,
       measureList: measureList ?? this.measureList,
-      sheetSvg: sheetSvg ?? this.sheetSvg,
+      sheetImage: sheetImage ?? this.sheetImage,
       type: type ?? this.type,
       sourceCount: sourceCount ?? this.sourceCount,
       rowid: rowid ?? this.rowid,
@@ -354,8 +356,8 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
       map['measure_list'] = Variable<String>(
           $MusicInfosTable.$convertermeasureList.toSql(measureList.value));
     }
-    if (sheetSvg.present) {
-      map['sheet_svg'] = Variable<Uint8List>(sheetSvg.value);
+    if (sheetImage.present) {
+      map['sheet_image'] = Variable<Uint8List>(sheetImage.value);
     }
     if (type.present) {
       map['type'] =
@@ -383,7 +385,7 @@ class MusicInfosCompanion extends UpdateCompanion<MusicInfo> {
           ..write('artist: $artist, ')
           ..write('cursorList: $cursorList, ')
           ..write('measureList: $measureList, ')
-          ..write('sheetSvg: $sheetSvg, ')
+          ..write('sheetImage: $sheetImage, ')
           ..write('type: $type, ')
           ..write('sourceCount: $sourceCount, ')
           ..write('rowid: $rowid')
@@ -990,13 +992,13 @@ class MusicThumbnailViewData extends DataClass {
   final MusicType type;
   final String title;
   final String artist;
-  final Uint8List sheetSvg;
+  final Uint8List sheetImage;
   const MusicThumbnailViewData(
       {required this.id,
       required this.type,
       required this.title,
       required this.artist,
-      required this.sheetSvg});
+      required this.sheetImage});
   factory MusicThumbnailViewData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
@@ -1006,7 +1008,7 @@ class MusicThumbnailViewData extends DataClass {
           .fromJson(serializer.fromJson<int>(json['type'])),
       title: serializer.fromJson<String>(json['title']),
       artist: serializer.fromJson<String>(json['artist']),
-      sheetSvg: serializer.fromJson<Uint8List>(json['sheetSvg']),
+      sheetImage: serializer.fromJson<Uint8List>(json['sheetImage']),
     );
   }
   @override
@@ -1018,7 +1020,7 @@ class MusicThumbnailViewData extends DataClass {
           serializer.toJson<int>($MusicInfosTable.$convertertype.toJson(type)),
       'title': serializer.toJson<String>(title),
       'artist': serializer.toJson<String>(artist),
-      'sheetSvg': serializer.toJson<Uint8List>(sheetSvg),
+      'sheetImage': serializer.toJson<Uint8List>(sheetImage),
     };
   }
 
@@ -1027,13 +1029,13 @@ class MusicThumbnailViewData extends DataClass {
           MusicType? type,
           String? title,
           String? artist,
-          Uint8List? sheetSvg}) =>
+          Uint8List? sheetImage}) =>
       MusicThumbnailViewData(
         id: id ?? this.id,
         type: type ?? this.type,
         title: title ?? this.title,
         artist: artist ?? this.artist,
-        sheetSvg: sheetSvg ?? this.sheetSvg,
+        sheetImage: sheetImage ?? this.sheetImage,
       );
   @override
   String toString() {
@@ -1042,14 +1044,14 @@ class MusicThumbnailViewData extends DataClass {
           ..write('type: $type, ')
           ..write('title: $title, ')
           ..write('artist: $artist, ')
-          ..write('sheetSvg: $sheetSvg')
+          ..write('sheetImage: $sheetImage')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, type, title, artist, $driftBlobEquality.hash(sheetSvg));
+      Object.hash(id, type, title, artist, $driftBlobEquality.hash(sheetImage));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1058,7 +1060,7 @@ class MusicThumbnailViewData extends DataClass {
           other.type == this.type &&
           other.title == this.title &&
           other.artist == this.artist &&
-          $driftBlobEquality.equals(other.sheetSvg, this.sheetSvg));
+          $driftBlobEquality.equals(other.sheetImage, this.sheetImage));
 }
 
 class $MusicThumbnailViewView
@@ -1071,7 +1073,7 @@ class $MusicThumbnailViewView
   $MusicInfosTable get musicInfos =>
       attachedDatabase.musicInfos.createAlias('t0');
   @override
-  List<GeneratedColumn> get $columns => [id, type, title, artist, sheetSvg];
+  List<GeneratedColumn> get $columns => [id, type, title, artist, sheetImage];
   @override
   String get aliasedName => _alias ?? entityName;
   @override
@@ -1092,8 +1094,8 @@ class $MusicThumbnailViewView
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       artist: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}artist'])!,
-      sheetSvg: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}sheet_svg'])!,
+      sheetImage: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}sheet_image'])!,
     );
   }
 
@@ -1114,9 +1116,9 @@ class $MusicThumbnailViewView
       'artist', aliasedName, false,
       generatedAs: GeneratedAs(musicInfos.artist, false),
       type: DriftSqlType.string);
-  late final GeneratedColumn<Uint8List> sheetSvg = GeneratedColumn<Uint8List>(
-      'sheet_svg', aliasedName, false,
-      generatedAs: GeneratedAs(musicInfos.sheetSvg, false),
+  late final GeneratedColumn<Uint8List> sheetImage = GeneratedColumn<Uint8List>(
+      'sheet_image', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.sheetImage, false),
       type: DriftSqlType.blob);
   @override
   $MusicThumbnailViewView createAlias(String alias) {
@@ -1477,12 +1479,14 @@ class ProjectThumbnailViewData extends DataClass {
   final String id;
   final String title;
   final bool isLiked;
+  final DateTime createdAt;
   final MusicType type;
   final int? unreadCount;
   const ProjectThumbnailViewData(
       {required this.id,
       required this.title,
       required this.isLiked,
+      required this.createdAt,
       required this.type,
       this.unreadCount});
   factory ProjectThumbnailViewData.fromJson(Map<String, dynamic> json,
@@ -1492,6 +1496,7 @@ class ProjectThumbnailViewData extends DataClass {
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String>(json['title']),
       isLiked: serializer.fromJson<bool>(json['isLiked']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       type: $MusicInfosTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
       unreadCount: serializer.fromJson<int?>(json['unreadCount']),
@@ -1504,6 +1509,7 @@ class ProjectThumbnailViewData extends DataClass {
       'id': serializer.toJson<String>(id),
       'title': serializer.toJson<String>(title),
       'isLiked': serializer.toJson<bool>(isLiked),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
       'type':
           serializer.toJson<int>($MusicInfosTable.$convertertype.toJson(type)),
       'unreadCount': serializer.toJson<int?>(unreadCount),
@@ -1514,12 +1520,14 @@ class ProjectThumbnailViewData extends DataClass {
           {String? id,
           String? title,
           bool? isLiked,
+          DateTime? createdAt,
           MusicType? type,
           Value<int?> unreadCount = const Value.absent()}) =>
       ProjectThumbnailViewData(
         id: id ?? this.id,
         title: title ?? this.title,
         isLiked: isLiked ?? this.isLiked,
+        createdAt: createdAt ?? this.createdAt,
         type: type ?? this.type,
         unreadCount: unreadCount.present ? unreadCount.value : this.unreadCount,
       );
@@ -1529,6 +1537,7 @@ class ProjectThumbnailViewData extends DataClass {
           ..write('id: $id, ')
           ..write('title: $title, ')
           ..write('isLiked: $isLiked, ')
+          ..write('createdAt: $createdAt, ')
           ..write('type: $type, ')
           ..write('unreadCount: $unreadCount')
           ..write(')'))
@@ -1536,7 +1545,8 @@ class ProjectThumbnailViewData extends DataClass {
   }
 
   @override
-  int get hashCode => Object.hash(id, title, isLiked, type, unreadCount);
+  int get hashCode =>
+      Object.hash(id, title, isLiked, createdAt, type, unreadCount);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1544,6 +1554,7 @@ class ProjectThumbnailViewData extends DataClass {
           other.id == this.id &&
           other.title == this.title &&
           other.isLiked == this.isLiked &&
+          other.createdAt == this.createdAt &&
           other.type == this.type &&
           other.unreadCount == this.unreadCount);
 }
@@ -1562,7 +1573,8 @@ class $ProjectThumbnailViewView
   $ProjectInfosTable get projects =>
       attachedDatabase.projectInfos.createAlias('t2');
   @override
-  List<GeneratedColumn> get $columns => [id, title, isLiked, type, unreadCount];
+  List<GeneratedColumn> get $columns =>
+      [id, title, isLiked, createdAt, type, unreadCount];
   @override
   String get aliasedName => _alias ?? entityName;
   @override
@@ -1582,6 +1594,8 @@ class $ProjectThumbnailViewView
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       isLiked: attachedDatabase.typeMapping
           .read(DriftSqlType.bool, data['${effectivePrefix}is_liked'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       type: $MusicInfosTable.$convertertype.fromSql(attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
       unreadCount: attachedDatabase.typeMapping
@@ -1602,6 +1616,10 @@ class $ProjectThumbnailViewView
       type: DriftSqlType.bool,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('CHECK ("is_liked" IN (0, 1))'));
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      generatedAs: GeneratedAs(projects.createdAt, false),
+      type: DriftSqlType.dateTime);
   late final GeneratedColumnWithTypeConverter<MusicType, int> type =
       GeneratedColumn<int>('type', aliasedName, false,
               generatedAs: GeneratedAs(musicInfos.type, false),
@@ -1761,7 +1779,7 @@ class PracticeReportViewData extends DataClass {
   final ComponentCount? componentCount;
   final bool isNew;
   final sourceCount;
-  final Uint8List sheetSvg;
+  final Uint8List sheetImage;
   final String? musicId;
   final String? musicTitle;
   final String? musicArtist;
@@ -1777,7 +1795,7 @@ class PracticeReportViewData extends DataClass {
       this.componentCount,
       required this.isNew,
       required this.sourceCount,
-      required this.sheetSvg,
+      required this.sheetImage,
       this.musicId,
       this.musicTitle,
       this.musicArtist,
@@ -1797,7 +1815,7 @@ class PracticeReportViewData extends DataClass {
           serializer.fromJson<ComponentCount?>(json['componentCount']),
       isNew: serializer.fromJson<bool>(json['isNew']),
       sourceCount: serializer.fromJson<ComponentCount>(json['sourceCount']),
-      sheetSvg: serializer.fromJson<Uint8List>(json['sheetSvg']),
+      sheetImage: serializer.fromJson<Uint8List>(json['sheetImage']),
       musicId: serializer.fromJson<String?>(json['musicId']),
       musicTitle: serializer.fromJson<String?>(json['musicTitle']),
       musicArtist: serializer.fromJson<String?>(json['musicArtist']),
@@ -1818,7 +1836,7 @@ class PracticeReportViewData extends DataClass {
       'componentCount': serializer.toJson<ComponentCount?>(componentCount),
       'isNew': serializer.toJson<bool>(isNew),
       'sourceCount': serializer.toJson<ComponentCount>(sourceCount),
-      'sheetSvg': serializer.toJson<Uint8List>(sheetSvg),
+      'sheetImage': serializer.toJson<Uint8List>(sheetImage),
       'musicId': serializer.toJson<String?>(musicId),
       'musicTitle': serializer.toJson<String?>(musicTitle),
       'musicArtist': serializer.toJson<String?>(musicArtist),
@@ -1837,7 +1855,7 @@ class PracticeReportViewData extends DataClass {
           Value<ComponentCount?> componentCount = const Value.absent(),
           bool? isNew,
           ComponentCount? sourceCount,
-          Uint8List? sheetSvg,
+          Uint8List? sheetImage,
           Value<String?> musicId = const Value.absent(),
           Value<String?> musicTitle = const Value.absent(),
           Value<String?> musicArtist = const Value.absent(),
@@ -1855,7 +1873,7 @@ class PracticeReportViewData extends DataClass {
             componentCount.present ? componentCount.value : this.componentCount,
         isNew: isNew ?? this.isNew,
         sourceCount: sourceCount ?? this.sourceCount,
-        sheetSvg: sheetSvg ?? this.sheetSvg,
+        sheetImage: sheetImage ?? this.sheetImage,
         musicId: musicId.present ? musicId.value : this.musicId,
         musicTitle: musicTitle.present ? musicTitle.value : this.musicTitle,
         musicArtist: musicArtist.present ? musicArtist.value : this.musicArtist,
@@ -1874,7 +1892,7 @@ class PracticeReportViewData extends DataClass {
           ..write('componentCount: $componentCount, ')
           ..write('isNew: $isNew, ')
           ..write('sourceCount: $sourceCount, ')
-          ..write('sheetSvg: $sheetSvg, ')
+          ..write('sheetImage: $sheetImage, ')
           ..write('musicId: $musicId, ')
           ..write('musicTitle: $musicTitle, ')
           ..write('musicArtist: $musicArtist, ')
@@ -1895,7 +1913,7 @@ class PracticeReportViewData extends DataClass {
       componentCount,
       isNew,
       sourceCount,
-      $driftBlobEquality.hash(sheetSvg),
+      $driftBlobEquality.hash(sheetImage),
       musicId,
       musicTitle,
       musicArtist,
@@ -1914,7 +1932,7 @@ class PracticeReportViewData extends DataClass {
           other.componentCount == this.componentCount &&
           other.isNew == this.isNew &&
           other.sourceCount == this.sourceCount &&
-          $driftBlobEquality.equals(other.sheetSvg, this.sheetSvg) &&
+          $driftBlobEquality.equals(other.sheetImage, this.sheetImage) &&
           other.musicId == this.musicId &&
           other.musicTitle == this.musicTitle &&
           other.musicArtist == this.musicArtist &&
@@ -1948,7 +1966,7 @@ class $PracticeReportViewView
         componentCount,
         isNew,
         sourceCount,
-        sheetSvg,
+        sheetImage,
         musicId,
         musicTitle,
         musicArtist,
@@ -1987,8 +2005,8 @@ class $PracticeReportViewView
       sourceCount: $MusicInfosTable.$convertersourceCount.fromSql(
           attachedDatabase.typeMapping.read(
               DriftSqlType.string, data['${effectivePrefix}source_count'])!),
-      sheetSvg: attachedDatabase.typeMapping
-          .read(DriftSqlType.blob, data['${effectivePrefix}sheet_svg'])!,
+      sheetImage: attachedDatabase.typeMapping
+          .read(DriftSqlType.blob, data['${effectivePrefix}sheet_image'])!,
       musicId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}music_id']),
       musicTitle: attachedDatabase.typeMapping
@@ -2043,9 +2061,9 @@ class $PracticeReportViewView
               type: DriftSqlType.string)
           .withConverter<ComponentCount>(
               $MusicInfosTable.$convertersourceCount);
-  late final GeneratedColumn<Uint8List> sheetSvg = GeneratedColumn<Uint8List>(
-      'sheet_svg', aliasedName, false,
-      generatedAs: GeneratedAs(musicInfo.sheetSvg, false),
+  late final GeneratedColumn<Uint8List> sheetImage = GeneratedColumn<Uint8List>(
+      'sheet_image', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfo.sheetImage, false),
       type: DriftSqlType.blob);
   late final GeneratedColumn<String> musicId = GeneratedColumn<String>(
       'music_id', aliasedName, true,

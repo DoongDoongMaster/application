@@ -1,4 +1,5 @@
 import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/screens/prompt_screen.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +11,7 @@ class CursorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: cursorInfo.top,
+      top: cursorInfo.top + PromptScreen.sheetPadding,
       left: cursorInfo.left,
       child: Container(
         decoration: BoxDecoration(

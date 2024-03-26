@@ -28,7 +28,7 @@ abstract class PracticeReportView extends View {
         practice.componentCount,
         practice.isNew,
         musicInfo.sourceCount,
-        musicInfo.sheetSvg,
+        musicInfo.sheetImage,
         musicId,
         musicTitle,
         musicArtist,

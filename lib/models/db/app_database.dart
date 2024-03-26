@@ -90,8 +90,11 @@ class AppDatabase extends _$AppDatabase {
         bpm: Value(music.bpm),
         artist: Value(music.artist),
         type: Value(music.type),
-        sheetSvg: Value(music.sheetSvg!),
+        sheetImage: Value(music.sheetImage!),
         sourceCount: Value(music.sourceCount),
+        cursorList: Value(music.cursorList),
+        measureList: Value(music.measureList),
+        measureCount: Value(music.measureCount),
       ));
 
   /// MUSIC - READ

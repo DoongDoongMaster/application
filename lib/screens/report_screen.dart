@@ -8,7 +8,6 @@ import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/widgets/report/report_header.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 class ReportScreen extends StatelessWidget {
@@ -79,7 +78,7 @@ class ReportScreen extends StatelessWidget {
                           bestScore: 0,
                           sourceBPM: 0,
                           bpm: 0,
-                          sheetSvg: Uint8List(0),
+                          sheetImage: Uint8List(0),
                         ),
                 ),
               ),
@@ -99,16 +98,15 @@ class ReportScreen extends StatelessWidget {
                             boxShadow: [ShadowStyles.shadow200],
                           ),
                           child: snapshot.hasData && snapshot.data!.isNotEmpty
-                              ? Stack(
-                                  children: [
-                                    Center(
-                                      child: SvgPicture.memory(
-                                        snapshot.data![0].sheetSvg,
-                                        width: 1024,
-                                        allowDrawingOutsideViewBox: true,
-                                      ),
+                              ? Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 40),
+                                  child: Center(
+                                    child: Image.memory(
+                                      snapshot.data![0].sheetImage,
+                                      width: 1024,
                                     ),
-                                  ],
+                                  ),
                                 )
                               : Center(
                                   child: SizedBox(

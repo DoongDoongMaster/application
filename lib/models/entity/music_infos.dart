@@ -13,7 +13,7 @@ class MusicInfo {
   final String id, title, artist;
   final int bpm, measureCount;
   final List<Cursors> cursorList;
-  final Uint8List? sheetSvg;
+  final Uint8List? sheetImage;
   final List<Cursors> measureList;
   final MusicType type;
   final ComponentCount sourceCount;
@@ -26,9 +26,19 @@ class MusicInfo {
     this.cursorList = const [],
     this.measureList = const [],
     this.type = MusicType.user,
-    this.sheetSvg,
+    this.sheetImage,
     this.sourceCount = const {},
   }) : measureCount = measureList.length;
+
+  copyWith({String? title, String? artist, int? bpm}) => MusicInfo(
+        title: title ?? this.title,
+        artist: artist ?? this.artist,
+        bpm: bpm ?? this.bpm,
+        sheetImage: sheetImage,
+        cursorList: cursorList,
+        measureList: measureList,
+        sourceCount: sourceCount,
+      );
 }
 
 @UseRowClass(MusicInfo)
@@ -50,7 +60,7 @@ class MusicInfos extends DefaultTable {
   TextColumn get measureList => text()
       .map(const CursorListConvertor())
       .withDefault(Constant(const CursorListConvertor().toSql([])))();
-  BlobColumn get sheetSvg => blob().clientDefault(() => Uint8List(0))();
+  BlobColumn get sheetImage => blob().clientDefault(() => Uint8List(0))();
   IntColumn get type => intEnum<MusicType>().clientDefault(() => 0)();
 
   TextColumn get sourceCount => text()

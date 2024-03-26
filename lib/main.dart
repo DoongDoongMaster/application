@@ -16,11 +16,7 @@ import 'package:flutter/services.dart';
 
 late final AppDatabase database;
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  database = AppDatabase();
-
+insertDummyData() async {
 // TODO: 우선 디버깅 용으로, 재 실행시 테스트 데이터 있는지 확인하고 넣도록 수정 필요함.
   Random random = Random();
   for (var i = 0; i < 4; i++) {
@@ -29,8 +25,8 @@ void main() async {
             title: const Value('Stay with me'),
             bpm: const Value(90),
             artist: const Value('자우림'),
-            sheetSvg: Value(
-                (await rootBundle.load('assets/music/stay-with-me.svg'))
+            sheetImage: Value(
+                (await rootBundle.load('assets/music/stay-with-me.png'))
                     .buffer
                     .asUint8List()),
             cursorList: Value(List<Cursors>.from(
@@ -158,6 +154,13 @@ void main() async {
   //     await (database.select(database.practiceInfos)..limit(1)).getSingle();
   // final temp = await database.getPracticeReport(tempId.id);
   // print(temp);
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  database = AppDatabase();
+  await insertDummyData();
 
   runApp(const MyApp());
 }

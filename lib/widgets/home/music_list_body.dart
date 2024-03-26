@@ -1,6 +1,7 @@
 import 'package:application/main.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
+import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/home/add_new_button.dart';
@@ -9,8 +10,9 @@ import 'package:application/widgets/home/n_column_grid_view.dart';
 import 'package:application/widgets/home/home_header.dart';
 import 'package:application/widgets/no_content_widget.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:go_router/go_router.dart';
 
 class MusicListBody extends StatefulWidget {
   static const colCount = 5;
@@ -192,8 +194,8 @@ class MusicPreview extends StatelessWidget {
           SizedBox(
             height: 100,
             width: size.width,
-            child: SvgPicture.memory(
-              music.sheetSvg,
+            child: Image.memory(
+              music.sheetImage,
               fit: BoxFit.cover,
             ),
           ),
@@ -339,8 +341,26 @@ class _AddNewMusicButton extends StatelessWidget {
     return AddNewButton(
       label: '악보 추가',
       size: MusicPreview.size,
-      onPressed: () => showDialog(
-          context: context, builder: (context) => const NewMusicModal()),
+      onPressed: () {
+        // 파일 선택기 - 파일 경로 및 확장자 뗀 파일명 확보
+        FilePicker.platform
+            .pickFiles(type: FileType.any, withData: false)
+            .then((result) {
+          if (result == null) {
+            return;
+          }
+          // 파일 경로
+          String filePath = result.files.single.path!;
+          RegExp regex = RegExp(r'^(.+?)(\..+)?$');
+          String title =
+              regex.firstMatch(result.files.single.name)?.group(1) ?? "";
+
+          context.pushNamed(RouterPath.newMusic.name, queryParameters: {
+            "fileName": title,
+            "filePath": filePath,
+          });
+        });
+      },
     );
   }
 }

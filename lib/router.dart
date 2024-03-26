@@ -1,6 +1,8 @@
 import 'package:application/screens/home_screen.dart';
+import 'package:application/screens/new_music_screen.dart';
 import 'package:application/screens/prompt_screen.dart';
 import 'package:application/screens/report_screen.dart';
+import 'package:application/screens/test_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +13,7 @@ enum RouterPath {
   project,
   prompt,
   report,
+  newMusic,
 }
 
 CustomTransitionPage buildPageWithDefaultTransition<T>(
@@ -19,8 +22,6 @@ CustomTransitionPage buildPageWithDefaultTransition<T>(
     key: state.uri.queryParameters.containsKey('refresh')
         ? UniqueKey()
         : state.pageKey,
-
-    // key: UniqueKey(),
     child: child,
     transitionsBuilder: (context, animation, secondaryAnimation, child) =>
         FadeTransition(opacity: animation, child: child),
@@ -31,16 +32,6 @@ final GoRouter goRouter = GoRouter(
   initialLocation: '/${RouterPath.home.name}',
   debugLogDiagnostics: true,
   routes: [
-    // GoRoute(
-    //   path: '/${RouterPath.list.name}',
-    //   name: RouterPath.list.name,
-    //   pageBuilder: (context, state) => goHome(context, state),
-    // ),
-    // GoRoute(
-    //     path: '/${RouterPath.favoriteList.name}',
-    //     name: RouterPath.favoriteList.name,
-    //     pageBuilder: (context, state) => buildPageWithDefaultTransition(
-    //         context, state, const HomeScreen(favoriteOnly: true))),
     GoRoute(
       path: '/${RouterPath.home.name}',
       name: RouterPath.home.name,
@@ -54,7 +45,6 @@ final GoRouter goRouter = GoRouter(
         ),
       ),
     ),
-
     GoRoute(
       path: '/${RouterPath.prompt.name}/:musicId/:projectId',
       name: RouterPath.prompt.name,
@@ -66,10 +56,6 @@ final GoRouter goRouter = GoRouter(
         return buildPageWithDefaultTransition(
           context,
           state,
-          // PrevPromptScreen(
-          //   musicId: state.pathParameters["musicId"],
-          //   projectId: state.pathParameters["projectId"],
-          // ),
           PromptScreen(
               musicId: state.pathParameters["musicId"],
               projectId: state.pathParameters["projectId"]),
@@ -88,7 +74,25 @@ final GoRouter goRouter = GoRouter(
           ),
         );
       },
-    )
+    ),
+    GoRoute(
+      path: '/${RouterPath.newMusic.name}',
+      name: RouterPath.newMusic.name,
+      pageBuilder: (context, state) {
+        if (state.uri.queryParameters["fileName"] == null ||
+            state.uri.queryParameters["filePath"] == null) {
+          return goHome(context, state);
+        }
+        return buildPageWithDefaultTransition(
+          context,
+          state,
+          NewMusicScreen(
+            fileName: state.uri.queryParameters["fileName"],
+            filePath: state.uri.queryParameters["filePath"],
+          ),
+        );
+      },
+    ),
   ],
 );
 

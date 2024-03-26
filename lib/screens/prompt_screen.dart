@@ -24,7 +24,6 @@ import 'package:application/widgets/prompt/prompt_footer_widget.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 enum PromptState {
@@ -52,6 +51,7 @@ SnackBar buildSnackbar(BuildContext context) {
 }
 
 class PromptScreen extends StatefulWidget {
+  static const double sheetPadding = 40;
   final String? musicId, projectId;
   const PromptScreen({
     super.key,
@@ -305,7 +305,7 @@ class _PromptScreenState extends State<PromptScreen> {
     });
 
     if (context.mounted) {
-      context.goNamed(RouterPath.home.name);
+      context.pop();
     }
   }
 
@@ -360,7 +360,7 @@ class _PromptScreenState extends State<PromptScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: music.sheetSvg != null
+            child: music.sheetImage != null
                 ? DecoratedBox(
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -373,13 +373,16 @@ class _PromptScreenState extends State<PromptScreen> {
                         children: [
                           Stack(
                             children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: PromptScreen.sheetPadding),
+                                child: Image.memory(
+                                  music.sheetImage!,
+                                  width: 1024,
+                                ),
+                              ),
                               CursorWidget(
                                 cursorInfo: currentCursor,
-                              ),
-                              SvgPicture.memory(
-                                music.sheetSvg!,
-                                width: 1024,
-                                allowDrawingOutsideViewBox: true,
                               ),
                             ],
                           ),
