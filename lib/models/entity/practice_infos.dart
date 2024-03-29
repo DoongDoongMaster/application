@@ -11,9 +11,9 @@ class PracticeInfo {
   final double? speed;
   final int? score;
   final bool isNew;
-  final ComponentCount? componentCount;
-  final AccuracyCount? accuracyCount;
-  final List<MusicEntry> transcription;
+  ComponentCount? componentCount;
+  AccuracyCount? accuracyCount;
+  List<MusicEntry>? transcription;
 
   PracticeInfo({
     this.id = "",
@@ -23,8 +23,8 @@ class PracticeInfo {
     this.bpm,
     this.speed,
     this.isNew = false,
-    this.accuracyCount = const {},
-    this.componentCount = const {},
+    this.accuracyCount,
+    this.componentCount,
     this.transcription = const [],
   });
 }

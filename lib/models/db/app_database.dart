@@ -60,7 +60,7 @@ class AppDatabase extends _$AppDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
-          if (false) {
+          if (true) {
             print("recreating database...");
             final m = Migrator(this);
             for (final table in allTables) {
@@ -92,7 +92,7 @@ class AppDatabase extends _$AppDatabase {
         artist: Value(music.artist),
         type: Value(music.type),
         sheetImage: Value(music.sheetImage!),
-        sourceCount: Value(music.sourceCount),
+        sourceCount: Value(music.sourceCount ?? ComponentCount()),
         cursorList: Value(music.cursorList),
         measureList: Value(music.measureList),
         measureCount: Value(music.measureCount),

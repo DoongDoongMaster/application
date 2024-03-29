@@ -1,14 +1,11 @@
-import 'dart:math';
-
 import 'package:application/main.dart';
-import 'package:application/models/convertors/accuracy_count_convertor.dart';
-import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/screens/home_screen.dart';
+import 'package:application/services/api_service.dart';
 import 'package:application/services/local_storage.dart';
 import 'package:application/services/metronome.dart';
 import 'package:application/services/recorder_service.dart';
@@ -208,8 +205,8 @@ class _PromptScreenState extends State<PromptScreen> {
   /// update cursor & scroll down if needed.
   void updateCursor(Cursors newCursor) {
     // y가 바뀐 경우
-    if (currentCursor.top != newCursor.top) {
-      final scrollYPos = newCursor.top - cursorOffset;
+    if (currentCursor.y != newCursor.y) {
+      final scrollYPos = newCursor.y - cursorOffset;
       // only if there is space
       if (scrollYPos < _controller.position.maxScrollExtent) {
         _controller.animateTo(
@@ -267,43 +264,40 @@ class _PromptScreenState extends State<PromptScreen> {
     _metronome.start();
   }
 
+  void submitRecord(String filePath) async {
+    var result =
+        await ApiService.getADTResult(dataPath: filePath, bpm: currentBPM);
+    if (result == null) {
+      return;
+    }
+
+    result.calculateWithAnswer(music.musicEntries);
+
+    // TODO: 종료 시 API 호출 필요. + push 알림 등 처리 필요
+    (database.update(database.practiceInfos)
+          ..where((tbl) => tbl.id.equals(practice.id)))
+        .write(
+      PracticeInfosCompanion(
+        isNew: const drift.Value(true),
+        score: drift.Value(result.score),
+        accuracyCount: drift.Value(result.accuracyCount),
+        componentCount: drift.Value(result.componentCount),
+        transcription: drift.Value(result.transcription),
+      ),
+    );
+  }
+
   /// stop metronome, finish record, api call, redirection
   void finishPractice() async {
     _metronome.stop();
-    final result = await _recorder.stopRecord();
-    await result.toList();
+    final filePath = await _recorder.stopRecord();
     // 필요한거 정리.
     _recorder.dispose();
-
-    // TODO: 종료 시 API 호출 필요. + push 알림 등 처리 필요
-    Future.delayed(const Duration(seconds: 10), () {
-      final random = Random();
-      (database.update(database.practiceInfos)
-            ..where((tbl) => tbl.id.equals(practice.id)))
-          .write(
-        PracticeInfosCompanion(
-          isNew: const drift.Value(true),
-          score: const drift.Value(91),
-          accuracyCount: drift.Value(
-            {
-              AccuracyType.correct.name:
-                  random.nextInt(music.sourceCount[DrumComponent.total.name]!),
-              AccuracyType.wrongComponent.name: random.nextInt(50),
-              AccuracyType.wrongTiming.name: random.nextInt(60),
-              AccuracyType.wrong.name: random.nextInt(20),
-              AccuracyType.miss.name: random.nextInt(10),
-            },
-          ),
-          componentCount: drift.Value({
-            for (var k in DrumComponent.values)
-              k.name: music.sourceCount[k.name]! == 0
-                  ? 0
-                  : random.nextInt(music.sourceCount[k.name]!)
-          }),
-        ),
-      );
-    });
-
+    if (filePath != null) {
+      submitRecord(filePath);
+    } else {
+      print("file not saved!!!!");
+    }
     if (context.mounted) {
       context.pop();
     }
@@ -373,6 +367,9 @@ class _PromptScreenState extends State<PromptScreen> {
                         children: [
                           Stack(
                             children: [
+                              CursorWidget(
+                                cursorInfo: currentCursor,
+                              ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: PromptScreen.sheetPadding),
@@ -380,9 +377,6 @@ class _PromptScreenState extends State<PromptScreen> {
                                   music.sheetImage!,
                                   width: 1024,
                                 ),
-                              ),
-                              CursorWidget(
-                                cursorInfo: currentCursor,
                               ),
                             ],
                           ),

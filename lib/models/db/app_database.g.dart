@@ -98,13 +98,14 @@ class $MusicInfosTable extends MusicInfos
   static const VerificationMeta _sourceCountMeta =
       const VerificationMeta('sourceCount');
   @override
-  late final GeneratedColumnWithTypeConverter<ComponentCount, String>
-      sourceCount = GeneratedColumn<String>('source_count', aliasedName, false,
-              type: DriftSqlType.string,
-              requiredDuringInsert: false,
-              defaultValue: Constant(const ComponentCountConvertor().toSql({})))
-          .withConverter<ComponentCount>(
-              $MusicInfosTable.$convertersourceCount);
+  late final GeneratedColumnWithTypeConverter<ComponentCount,
+      String> sourceCount = GeneratedColumn<String>(
+          'source_count', aliasedName, false,
+          type: DriftSqlType.string,
+          requiredDuringInsert: false,
+          defaultValue:
+              Constant(const ComponentCountConvertor().toSql(ComponentCount())))
+      .withConverter<ComponentCount>($MusicInfosTable.$convertersourceCount);
   static const VerificationMeta _musicEntriesMeta =
       const VerificationMeta('musicEntries');
   @override
@@ -1709,7 +1710,7 @@ class $ProjectThumbnailViewView
 
 class ProjectSummaryViewData extends DataClass {
   final String id;
-  final sourceCount;
+  final ComponentCount sourceCount;
   final int? bestScore;
   const ProjectSummaryViewData(
       {required this.id, required this.sourceCount, this.bestScore});
@@ -1839,7 +1840,7 @@ class PracticeReportViewData extends DataClass {
   final AccuracyCount? accuracyCount;
   final ComponentCount? componentCount;
   final bool isNew;
-  final sourceCount;
+  final ComponentCount sourceCount;
   final Uint8List sheetImage;
   final String? musicId;
   final String? musicTitle;

@@ -53,7 +53,7 @@ class ReportHeader extends StatelessWidget {
               const Spacer(),
               AccuracyAnalysisChartLegend(
                 accuracyCnt: report.accuracyCount!,
-                totalCount: report.sourceCount![DrumComponent.total.name]!,
+                totalCount: report.sourceCount.total,
                 autoSizeGroup: AutoSizeGroup(),
               ),
               const Spacer(),
@@ -73,8 +73,8 @@ class ReportHeader extends StatelessWidget {
                   .map(
                     (data) => _AnalysisPerComponent(
                       label: data.label,
-                      hitCnt: report.componentCount![data.name]!,
-                      sourceCnt: report.sourceCount![data.name]!,
+                      hitCnt: report.componentCount!.getByType(data),
+                      sourceCnt: report.sourceCount.getByType(data),
                     ),
                   ),
             ],
@@ -279,7 +279,7 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: "${accuracyCnt?[data.name] ?? '-'}",
+                          text: "${accuracyCnt?.getByType(data) ?? '-'}",
                           style: TextStyle(
                               fontWeight: data == AccuracyType.correct
                                   ? FontWeight.bold
@@ -373,7 +373,7 @@ class _AccuracyAnalysisChart extends StatelessWidget {
               sections: [
                 for (var data in AccuracyType.values)
                   PieChartSectionData(
-                    value: accuracyData[data.name]!.toDouble(),
+                    value: accuracyData.getByType(data)!.toDouble(),
                     showTitle: false,
                     color: data.color.withOpacity(0.7),
                     radius: graphThickness - 2 * strokeWidth,

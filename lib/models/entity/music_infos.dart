@@ -19,7 +19,7 @@ class MusicInfo {
   final Uint8List? sheetImage;
   final List<Cursors> measureList;
   final MusicType type;
-  final ComponentCount sourceCount;
+  final ComponentCount? sourceCount;
   final List<MusicEntry> musicEntries;
 
   MusicInfo({
@@ -31,7 +31,7 @@ class MusicInfo {
     this.measureList = const [],
     this.type = MusicType.user,
     this.sheetImage,
-    this.sourceCount = const {},
+    this.sourceCount,
     this.musicEntries = const [],
   }) : measureCount = measureList.length;
 
@@ -39,6 +39,9 @@ class MusicInfo {
       {required String title,
       required Map<String, dynamic> json,
       required String base64String}) {
+    var componentCount = ComponentCount();
+    componentCount.setWithAdtKey(json["sourceCount"]);
+
     return MusicInfo(
       title: title,
       cursorList: List<Cursors>.from(
@@ -47,10 +50,7 @@ class MusicInfo {
           json["measureList"].map((v) => Cursors.fromJson(v))),
       sheetImage: base64Decode(base64String.split(',')[1]),
       type: MusicType.user,
-      sourceCount: {
-        for (var v in DrumComponent.values)
-          v.name: json["sourceCount"][v.adtKey.toString()]!,
-      },
+      sourceCount: componentCount,
       musicEntries: List<MusicEntry>.from(
           json["musicEntries"].map((v) => MusicEntry.fromJson(v))),
     );
@@ -90,9 +90,9 @@ class MusicInfos extends DefaultTable {
   BlobColumn get sheetImage => blob().clientDefault(() => Uint8List(0))();
   IntColumn get type => intEnum<MusicType>().clientDefault(() => 0)();
 
-  TextColumn get sourceCount => text()
-      .map(const ComponentCountConvertor())
-      .withDefault(Constant(const ComponentCountConvertor().toSql({})))();
+  TextColumn get sourceCount =>
+      text().map(const ComponentCountConvertor()).withDefault(
+          Constant(const ComponentCountConvertor().toSql(ComponentCount())))();
   TextColumn get musicEntries => text()
       .map(const MusicEntryListConvertor())
       .withDefault(Constant(const MusicEntryListConvertor().toSql([])))();

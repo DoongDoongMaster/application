@@ -42,7 +42,7 @@ abstract class PracticeAnalysisView extends View {
 class AnalysisSummaryData {
   final ComponentCount sourceCount;
   final int? bestScore;
-  final ComponentCount? bestCount;
+  final AccuracyCount? bestCount;
 
   final List<double?> scoreList;
   final List<AccuracyCount?> accuracyList;

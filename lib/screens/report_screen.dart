@@ -65,15 +65,9 @@ class ReportScreen extends StatelessWidget {
                           musicTitle: "",
                           musicArtist: "",
                           isNew: false,
-                          accuracyCount: {
-                            for (var k in AccuracyType.values) k.name: 0
-                          },
-                          componentCount: {
-                            for (var k in DrumComponent.values) k.name: 0
-                          },
-                          sourceCount: {
-                            for (var k in DrumComponent.values) k.name: 0
-                          },
+                          accuracyCount: AccuracyCount(),
+                          componentCount: ComponentCount(),
+                          sourceCount: ComponentCount(),
                           score: 0,
                           bestScore: 0,
                           sourceBPM: 0,

@@ -20,19 +20,19 @@ class RecorderService {
     // Check and request permission if needed
     // DateTime dt1 = DateTime.now();
     // Start recording to file
-    // await _recorder.start(const RecordConfig(), path: path);
-    stream = await _recorder
-        .startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
+    await _recorder.start(const RecordConfig(), path: path);
+    // stream = await _recorder
+    //     .startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
 
     return 0;
   }
 
-  Future<Stream<Uint8List>> stopRecord() async {
+  Future<String?> stopRecord() async {
     if (await _recorder.isRecording()) {
       // Stop recording...
-      await _recorder.stop();
+      return _recorder.stop();
     }
-    return stream;
+    return null;
   }
 
   cancelRecord() async {

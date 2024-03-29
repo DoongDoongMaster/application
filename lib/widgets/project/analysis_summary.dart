@@ -101,7 +101,7 @@ class _AccuracyChart extends StatelessWidget {
                         AnalysisSummary.previewSize -
                             accuracyList.length +
                             i.toDouble(),
-                        v == null ? 0 : v[line.name]!.toDouble(),
+                        v == null ? 0 : v.getByType(line)!.toDouble(),
                       )
                   ],
                   color: line.color,

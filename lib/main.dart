@@ -37,20 +37,18 @@ insertDummyData() async {
             measureCount: const Value(50),
             // type: Value(MusicType.values[random.nextInt(2)]),
             type: const Value(MusicType.ddm),
-            sourceCount: Value(
-              {
-                DrumComponent.hihat.name: random.nextInt(101),
-                DrumComponent.snareDrum.name: random.nextInt(40),
-                DrumComponent.smallTom.name: random.nextInt(20),
-                DrumComponent.kick.name: random.nextInt(10),
-                DrumComponent.total.name: random.nextInt(300) + 100,
-                // DrumComponent.hihat.name: 104,
-                // DrumComponent.snareDrum.name: 52,
-                // DrumComponent.smallTom.name: 10,
-                // DrumComponent.total.name: 346,
-                // DrumComponent.kick.name: 80,
-              },
-            ),
+            sourceCount: Value(ComponentCount(
+              hihat: random.nextInt(101),
+              snareDrum: random.nextInt(40),
+              smallTom: random.nextInt(20),
+              kick: random.nextInt(10),
+              total: random.nextInt(300) + 100,
+              // DrumComponent.hihat.name: 104,
+              // DrumComponent.snareDrum.name: 52,
+              // DrumComponent.smallTom.name: 10,
+              // DrumComponent.total.name: 346,
+              // DrumComponent.kick.name: 80,
+            )),
           ),
         );
 
@@ -118,36 +116,35 @@ insertDummyData() async {
     //       ),
     //     );
 
-    for (var j = 0; j < i; j++) {
-      final isNull = random.nextBool();
-      await database.into(database.practiceInfos).insert(
-            PracticeInfosCompanion.insert(
-              score: isNull ? const Value(null) : Value(random.nextInt(101)),
-              isNew: isNull ? const Value(false) : Value(random.nextBool()),
-              // bpm: const Value(100),
-              speed: Value([0.5, 0.75, 1.0, 1.25, 1.5][random.nextInt(5)]),
-              projectId: project.id,
-              accuracyCount: isNull
-                  ? const Value.absent()
-                  : Value({
-                      AccuracyType.correct.name: random.nextInt(
-                          music.sourceCount[DrumComponent.total.name]!),
-                      AccuracyType.wrongComponent.name: random.nextInt(50),
-                      AccuracyType.wrongTiming.name: random.nextInt(60),
-                      AccuracyType.wrong.name: random.nextInt(20),
-                      AccuracyType.miss.name: random.nextInt(10),
-                    }),
-              componentCount: isNull
-                  ? const Value.absent()
-                  : Value({
-                      for (var k in DrumComponent.values)
-                        k.name: music.sourceCount[k.name]! == 0
-                            ? 0
-                            : random.nextInt(music.sourceCount[k.name]!)
-                    }),
-            ),
-          );
-    }
+    // for (var j = 0; j < i; j++) {
+    //   final isNull = random.nextBool();
+    //   await database.into(database.practiceInfos).insert(
+    //         PracticeInfosCompanion.insert(
+    //           score: isNull ? const Value(null) : Value(random.nextInt(101)),
+    //           isNew: isNull ? const Value(false) : Value(random.nextBool()),
+    //           // bpm: const Value(100),
+    //           speed: Value([0.5, 0.75, 1.0, 1.25, 1.5][random.nextInt(5)]),
+    //           projectId: project.id,
+    //           accuracyCount: isNull
+    //               ? const Value.absent()
+    //               : Value(AccuracyCount(
+    //                   correct: random.nextInt(music.sourceCount!.total),
+    //                   wrongComponent: random.nextInt(50),
+    //                   wrongTiming: random.nextInt(60),
+    //                   wrong: random.nextInt(20),
+    //                   miss: random.nextInt(10),
+    //                 )),
+    //           componentCount: isNull
+    //               ? const Value.absent()
+    //               : Value(ComponentCount.fromJson({
+    //                   for (var k in DrumComponent.values)
+    //                     k.name: music.sourceCount!.getByType(k) == 0
+    //                         ? 0
+    //                         : random.nextInt(music.sourceCount!.getByType(k))
+    //                 })),
+    //         ),
+    //       );
+    // }
   }
 
   // final tempId =
@@ -161,7 +158,6 @@ void main() async {
 
   database = AppDatabase();
   await insertDummyData();
-
   runApp(const MyApp());
 }
 
