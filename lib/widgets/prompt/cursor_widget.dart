@@ -11,15 +11,15 @@ class CursorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: cursorInfo.top + PromptScreen.sheetPadding,
-      left: cursorInfo.left,
+      left: cursorInfo.x,
+      top: cursorInfo.y + PromptScreen.sheetPadding,
       child: Container(
         decoration: BoxDecoration(
             color: ColorStyles.primaryShadow36,
             borderRadius: BorderRadius.circular(4)),
         child: SizedBox(
-          height: cursorInfo.height,
-          width: cursorInfo.width,
+          height: cursorInfo.h,
+          width: cursorInfo.w,
         ),
       ),
     );

@@ -6,26 +6,26 @@ part 'cursor_convertor.g.dart';
 
 @JsonSerializable()
 class Cursors {
-  final double top;
-  final double left;
-  final double width;
-  final double height;
-  final double timestamp;
+  final double x;
+  final double y;
+  final double w;
+  final double h;
+  final double ts;
 
   Cursors({
-    required this.top,
-    required this.left,
-    required this.width,
-    required this.height,
-    required this.timestamp,
+    required this.x,
+    required this.y,
+    required this.w,
+    required this.h,
+    required this.ts,
   });
 
   Cursors.createEmpty()
-      : top = 0,
-        left = 0,
-        width = 0,
-        height = 0,
-        timestamp = 0;
+      : x = 0,
+        y = 0,
+        w = 0,
+        h = 0,
+        ts = 0;
 
   factory Cursors.fromJson(Map<String, dynamic> json) =>
       _$CursorsFromJson(json);

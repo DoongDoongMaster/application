@@ -1,5 +1,6 @@
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
+import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/entity/default_table.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:drift/drift.dart';
@@ -12,6 +13,7 @@ class PracticeInfo {
   final bool isNew;
   final ComponentCount? componentCount;
   final AccuracyCount? accuracyCount;
+  final List<MusicEntry> transcription;
 
   PracticeInfo({
     this.id = "",
@@ -23,6 +25,7 @@ class PracticeInfo {
     this.isNew = false,
     this.accuracyCount = const {},
     this.componentCount = const {},
+    this.transcription = const [],
   });
 }
 
@@ -46,4 +49,8 @@ class PracticeInfos extends DefaultTable {
 
   TextColumn get accuracyCount =>
       text().map(const AccuracyCountConvertor()).nullable()();
+
+  TextColumn get transcription => text()
+      .map(const MusicEntryListConvertor())
+      .withDefault(Constant(const MusicEntryListConvertor().toSql([])))();
 }

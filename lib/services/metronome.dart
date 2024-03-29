@@ -67,7 +67,7 @@ class Metronome {
       }
 
       nextCursorTimestamp =
-          (music.cursorList[nextCursorIdx].timestamp * 4 * usPerBeat).toInt();
+          (music.cursorList[nextCursorIdx].ts * 4 * usPerBeat).toInt();
     }
 
     // update time

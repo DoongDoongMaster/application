@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/screens/home_screen.dart';
@@ -108,21 +109,10 @@ class _NewMusicScreenState extends State<NewMusicScreen> {
                               callback: (args) {
                                 setState(() {
                                   isLoading = false;
-                                  musicInfo = MusicInfo(
+                                  musicInfo = MusicInfo.fromJson(
                                       title: widget.fileName!,
-                                      cursorList: List<Cursors>.from(args[0]
-                                              ["cursorList"]
-                                          .map((v) => Cursors.fromJson(v))),
-                                      measureList: List<Cursors>.from(args[0]
-                                              ["measureList"]
-                                          .map((v) => Cursors.fromJson(v))),
-                                      sheetImage:
-                                          base64Decode(args[1].split(',')[1]),
-                                      type: MusicType.user,
-                                      sourceCount: {
-                                        for (var v in DrumComponent.values)
-                                          v.name: 10,
-                                      });
+                                      json: args[0],
+                                      base64String: args[1]);
                                 });
                               },
                             );

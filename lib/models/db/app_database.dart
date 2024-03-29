@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
@@ -59,7 +60,7 @@ class AppDatabase extends _$AppDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
-          if (true) {
+          if (false) {
             print("recreating database...");
             final m = Migrator(this);
             for (final table in allTables) {
@@ -95,6 +96,7 @@ class AppDatabase extends _$AppDatabase {
         cursorList: Value(music.cursorList),
         measureList: Value(music.measureList),
         measureCount: Value(music.measureCount),
+        musicEntries: Value(music.musicEntries),
       ));
 
   /// MUSIC - READ

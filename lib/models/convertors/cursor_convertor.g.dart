@@ -7,17 +7,17 @@ part of 'cursor_convertor.dart';
 // **************************************************************************
 
 Cursors _$CursorsFromJson(Map<String, dynamic> json) => Cursors(
-      top: (json['top'] as num).toDouble(),
-      left: (json['left'] as num).toDouble(),
-      width: (json['width'] as num).toDouble(),
-      height: (json['height'] as num).toDouble(),
-      timestamp: (json['timestamp'] as num).toDouble(),
+      x: (json['x'] as num).toDouble(),
+      y: (json['y'] as num).toDouble(),
+      w: (json['w'] as num).toDouble(),
+      h: (json['h'] as num).toDouble(),
+      ts: (json['ts'] as num).toDouble(),
     );
 
 Map<String, dynamic> _$CursorsToJson(Cursors instance) => <String, dynamic>{
-      'top': instance.top,
-      'left': instance.left,
-      'width': instance.width,
-      'height': instance.height,
-      'timestamp': instance.timestamp,
+      'x': instance.x,
+      'y': instance.y,
+      'w': instance.w,
+      'h': instance.h,
+      'ts': instance.ts,
     };

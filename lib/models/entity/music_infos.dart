@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:drift/drift.dart';
 import 'package:application/models/entity/default_table.dart';
 
@@ -17,6 +20,7 @@ class MusicInfo {
   final List<Cursors> measureList;
   final MusicType type;
   final ComponentCount sourceCount;
+  final List<MusicEntry> musicEntries;
 
   MusicInfo({
     this.id = "",
@@ -28,7 +32,29 @@ class MusicInfo {
     this.type = MusicType.user,
     this.sheetImage,
     this.sourceCount = const {},
+    this.musicEntries = const [],
   }) : measureCount = measureList.length;
+
+  factory MusicInfo.fromJson(
+      {required String title,
+      required Map<String, dynamic> json,
+      required String base64String}) {
+    return MusicInfo(
+      title: title,
+      cursorList: List<Cursors>.from(
+          json["cursorList"].map((v) => Cursors.fromJson(v))),
+      measureList: List<Cursors>.from(
+          json["measureList"].map((v) => Cursors.fromJson(v))),
+      sheetImage: base64Decode(base64String.split(',')[1]),
+      type: MusicType.user,
+      sourceCount: {
+        for (var v in DrumComponent.values)
+          v.name: json["sourceCount"][v.adtKey.toString()]!,
+      },
+      musicEntries: List<MusicEntry>.from(
+          json["musicEntries"].map((v) => MusicEntry.fromJson(v))),
+    );
+  }
 
   copyWith({String? title, String? artist, int? bpm}) => MusicInfo(
         title: title ?? this.title,
@@ -38,6 +64,7 @@ class MusicInfo {
         cursorList: cursorList,
         measureList: measureList,
         sourceCount: sourceCount,
+        musicEntries: musicEntries,
       );
 }
 
@@ -66,4 +93,7 @@ class MusicInfos extends DefaultTable {
   TextColumn get sourceCount => text()
       .map(const ComponentCountConvertor())
       .withDefault(Constant(const ComponentCountConvertor().toSql({})))();
+  TextColumn get musicEntries => text()
+      .map(const MusicEntryListConvertor())
+      .withDefault(Constant(const MusicEntryListConvertor().toSql([])))();
 }

@@ -3,15 +3,16 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 
 enum DrumComponent {
-  hihat(label: '하이헷'),
-  snareDrum(label: '스네어'),
-  smallTom(label: '스몰탐'),
-  kick(label: '킥'),
-  total(label: '전체');
+  hihat(label: '하이헷', adtKey: 0),
+  smallTom(label: '스몰탐', adtKey: 1),
+  snareDrum(label: '스네어', adtKey: 2),
+  kick(label: '킥', adtKey: 3),
+  total(label: '전체', adtKey: -1);
 
-  const DrumComponent({required this.label});
+  const DrumComponent({required this.label, required this.adtKey});
 
   final String label;
+  final int adtKey;
 }
 
 typedef ComponentCount = Map<String, int>;
