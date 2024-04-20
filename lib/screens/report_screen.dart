@@ -1,24 +1,90 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:application/main.dart';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
+import 'package:application/widgets/music_sheet_viewer_widget.dart';
 import 'package:application/widgets/report/report_header.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
-class ReportScreen extends StatelessWidget {
+class ReportScreen extends StatefulWidget {
   static const double headerHeight = 312;
   final String? practiceId;
   const ReportScreen({super.key, required this.practiceId});
 
   @override
+  State<ReportScreen> createState() => _ReportScreenState();
+}
+
+class _ReportScreenState extends State<ReportScreen> {
+  PracticeReportViewData _practiceReportViewData = PracticeReportViewData(
+    id: "",
+    musicTitle: "",
+    musicArtist: "",
+    isNew: false,
+    accuracyCount: AccuracyCount(),
+    componentCount: ComponentCount(),
+    sourceCount: ComponentCount(),
+    score: 0,
+    bestScore: 0,
+    sourceBPM: 0,
+    bpm: 0,
+    xmlData: Uint8List(0),
+    result: [],
+    hitCount: 0,
+  );
+  Uint8List? markedImage;
+  @override
+  void initState() {
+    super.initState();
+    getPracticeReport();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  getPracticeReport() async {
+    var practice = await database.getPracticeReport(widget.practiceId!);
+    if (practice == null) {
+      Future.microtask(() => context.pop());
+      return;
+    }
+
+    // 처음 읽는 레포트의 경우 읽기 처리.
+    if (practice.isNew) {
+      database.readPracticeReport(practice.id);
+    }
+
+    setState(() {
+      _practiceReportViewData = practice;
+    });
+
+    // OSMD - 악보에 답 표기
+    OSMDService osmd = OSMDService(
+      callback: (base64Image, json) {
+        setState(() {
+          markedImage = base64Decode(base64Image);
+        });
+      },
+    );
+
+    osmd.run(
+      xmlData: practice.xmlData,
+      transcription: practice.result,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (practiceId == null) {
+    if (widget.practiceId == null) {
       Future.microtask(() => context.pop());
     }
     return Scaffold(
@@ -44,90 +110,46 @@ class ReportScreen extends StatelessWidget {
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endTop,
-      body: FutureBuilder<List<PracticeReportViewData>>(
-        future: database.getPracticeReport(practiceId!),
-        builder: (context, snapshot) {
-          if (snapshot.hasData && snapshot.data!.isEmpty) {
-            Future.microtask(() => context.pop());
-          } else if (snapshot.hasData && snapshot.data![0].isNew) {
-            database.readPracticeReport(practiceId!);
-          }
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                height: headerHeight,
-                color: ColorStyles.background,
-                child: ReportHeader(
-                  snapshot.hasData && snapshot.data!.isNotEmpty
-                      ? snapshot.data![0]
-                      : PracticeReportViewData(
-                          id: "",
-                          musicTitle: "",
-                          musicArtist: "",
-                          isNew: false,
-                          accuracyCount: {
-                            for (var k in AccuracyType.values) k.name: 0
-                          },
-                          componentCount: {
-                            for (var k in DrumComponent.values) k.name: 0
-                          },
-                          sourceCount: {
-                            for (var k in DrumComponent.values) k.name: 0
-                          },
-                          score: 0,
-                          bestScore: 0,
-                          sourceBPM: 0,
-                          bpm: 0,
-                          sheetSvg: Uint8List(0),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Container(
+            height: ReportScreen.headerHeight,
+            color: ColorStyles.background,
+            child: ReportHeader(_practiceReportViewData),
+          ),
+          SizedBox(
+            height:
+                MediaQuery.of(context).size.height - ReportScreen.headerHeight,
+            child: OverflowBox(
+              maxHeight: MediaQuery.of(context).size.height,
+              alignment: Alignment.bottomCenter,
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    const SizedBox(height: ReportScreen.headerHeight),
+                    MusicSheetBox(
+                      child: Container(
+                        constraints: BoxConstraints(
+                          minHeight: MediaQuery.of(context).size.height -
+                              ReportScreen.headerHeight,
                         ),
+                        alignment: markedImage != null
+                            ? Alignment.topCenter
+                            : Alignment.center,
+                        child: markedImage != null
+                            ? MusicSheetWidget(image: markedImage!)
+                            : const CircularProgressIndicator(),
+                      ),
+                    )
+                  ],
                 ),
               ),
-              SizedBox(
-                height: MediaQuery.of(context).size.height - headerHeight,
-                child: OverflowBox(
-                  maxHeight: MediaQuery.of(context).size.height,
-                  alignment: Alignment.bottomCenter,
-                  child: SingleChildScrollView(
-                    physics: const BouncingScrollPhysics(),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: headerHeight),
-                        DecoratedBox(
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            boxShadow: [ShadowStyles.shadow200],
-                          ),
-                          child: snapshot.hasData && snapshot.data!.isNotEmpty
-                              ? Stack(
-                                  children: [
-                                    Center(
-                                      child: SvgPicture.memory(
-                                        snapshot.data![0].sheetSvg,
-                                        width: 1024,
-                                        allowDrawingOutsideViewBox: true,
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : Center(
-                                  child: SizedBox(
-                                    height: MediaQuery.of(context).size.height -
-                                        headerHeight,
-                                    child: const UnconstrainedBox(
-                                      child: CircularProgressIndicator(),
-                                    ),
-                                  ),
-                                ),
-                        )
-                      ],
-                    ),
-                  ),
-                ),
-              )
-            ],
-          );
-        },
+            ),
+          )
+        ],
       ),
     );
   }

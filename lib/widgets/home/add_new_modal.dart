@@ -1,14 +1,11 @@
 import 'package:application/main.dart';
-import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/router.dart';
-import 'package:application/screens/home_screen.dart';
 import 'package:application/widgets/home/music_list_body.dart';
 import 'package:application/widgets/custom_dialog.dart';
 import 'package:application/widgets/home/project_preview.dart';
 import 'package:application/widgets/modal_widget.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -62,6 +59,7 @@ class _NewProjectModalState extends State<NewProjectModal> {
                 title: _previewText,
                 isLiked: false,
                 unreadCount: 0,
+                createdAt: DateTime.now(),
               ),
               onPressed: () {},
             ),
@@ -88,8 +86,11 @@ class _NewProjectModalState extends State<NewProjectModal> {
 }
 
 class NewMusicModal extends StatefulWidget {
+  final MusicInfo initialMusicInfo;
+
   const NewMusicModal({
     super.key,
+    required this.initialMusicInfo,
   });
 
   @override
@@ -97,32 +98,16 @@ class NewMusicModal extends StatefulWidget {
 }
 
 class _NewMusicModalState extends State<NewMusicModal> {
-  late final PlatformFile file;
   final _formKey = GlobalKey<FormState>();
 
   String title = "";
   String artist = "";
   int bpm = 0;
-  bool isLoaded = false;
 
   @override
   void initState() {
     super.initState();
-
-    FilePicker.platform
-        .pickFiles(type: FileType.any, withData: true)
-        .then((value) {
-      setState(() {
-        if (value == null) {
-          context.pop();
-          return;
-        }
-        file = value.files.single;
-        RegExp regex = RegExp(r'^(.+?)(\..+)?$');
-        title = regex.firstMatch(file.name)?.group(1) ?? "";
-        isLoaded = true;
-      });
-    });
+    title = widget.initialMusicInfo.title;
   }
 
   @override
@@ -136,92 +121,77 @@ class _NewMusicModalState extends State<NewMusicModal> {
               onComplete: () {
                 if (_formKey.currentState!.validate()) {
                   database
-                      .addNewMusic(MusicInfo(
-                          title: title,
-                          artist: artist,
-                          bpm: bpm,
-                          sheetSvg: file.bytes!,
-                          type: MusicType.user,
-                          sourceCount: {
-                        for (var v in DrumComponent.values) v.name: 0,
-                      }))
+                      .addNewMusic(widget.initialMusicInfo
+                          .copyWith(title: title, artist: artist, bpm: bpm))
                       .then((value) {
-                    context.pop();
-                    context.pushReplacementNamed(RouterPath.home.name,
-                        queryParameters: {"tab": HomeTab.musicList.name});
+                    context.pop(true);
                   });
                 }
               }),
           const Divider(height: 0),
-          if (!isLoaded)
-            const Padding(
-              padding: EdgeInsets.all(30),
-              child: CircularProgressIndicator(),
-            ),
-          if (isLoaded)
-            Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  IgnorePointer(
-                    ignoring: true,
-                    child: MusicPreview(
-                      music: MusicThumbnailViewData(
-                        id: "",
-                        type: MusicType.user,
-                        title: title,
-                        artist: artist,
-                        sheetSvg: file.bytes!,
-                      ),
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                IgnorePointer(
+                  ignoring: true,
+                  child: MusicPreview(
+                    music: MusicThumbnailViewData(
+                      id: "",
+                      type: MusicType.user,
+                      title: title,
+                      artist: artist,
+                      sheetImage: widget.initialMusicInfo.sheetImage!,
                     ),
                   ),
-                  Form(
-                    autovalidateMode: AutovalidateMode.always,
-                    key: _formKey,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        ModalTextFieldWithLabel(
-                          label: '제목',
-                          onChanged: (v) {
-                            setState(() {
-                              title = v;
-                            });
-                          },
-                          initialValue: title,
-                        ),
-                        const SizedBox(height: 15),
-                        ModalTextFieldWithLabel(
-                          label: '아티스트',
-                          onChanged: (v) {
-                            setState(() {
-                              artist = v;
-                            });
-                          },
-                          hintText: '이름 없는 아티스트',
-                        ),
-                        const SizedBox(height: 15),
-                        ModalTextFieldWithLabel(
-                          label: 'BPM',
-                          validator: (v) {
-                            if (v != null) {
-                              bpm = int.tryParse(v) ?? 0;
-                              if (bpm > 0) {
-                                return null;
-                              }
+                ),
+                Form(
+                  autovalidateMode: AutovalidateMode.always,
+                  key: _formKey,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      ModalTextFieldWithLabel(
+                        label: '제목',
+                        onChanged: (v) {
+                          setState(() {
+                            title = v;
+                          });
+                        },
+                        initialValue: title,
+                      ),
+                      const SizedBox(height: 15),
+                      ModalTextFieldWithLabel(
+                        label: '아티스트',
+                        onChanged: (v) {
+                          setState(() {
+                            artist = v;
+                          });
+                        },
+                        hintText: '이름 없는 아티스트',
+                      ),
+                      const SizedBox(height: 15),
+                      ModalTextFieldWithLabel(
+                        label: 'BPM',
+                        validator: (v) {
+                          if (v != null) {
+                            bpm = int.tryParse(v) ?? 0;
+                            if (bpm > 0) {
+                              return null;
                             }
-                            return '1 ~ 200까지 숫자를 입력해주세요.';
-                          },
-                        ),
-                        const SizedBox(height: 15),
-                      ],
-                    ),
-                  )
-                ],
-              ),
+                          }
+                          return '1 ~ 200까지 숫자를 입력해주세요.';
+                        },
+                      ),
+                      const SizedBox(height: 15),
+                    ],
+                  ),
+                )
+              ],
             ),
+          ),
         ],
       ),
     );

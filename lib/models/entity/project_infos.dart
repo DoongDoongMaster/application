@@ -2,16 +2,18 @@ import 'package:application/models/entity/default_table.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:drift/drift.dart';
 
-class ProjectInfo {
-  final String id, musicId, title;
+class ProjectInfo extends DefaultEntity {
+  final String musicId, title;
   final bool isLiked;
 
   ProjectInfo({
-    required this.id,
+    super.id = "",
+    super.createdAt,
+    super.updatedAt,
     required this.musicId,
     required this.title,
     required this.isLiked,
-  });
+  }) : super();
 }
 
 @UseRowClass(ProjectInfo)

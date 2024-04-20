@@ -1,13 +1,18 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
-import 'package:application/models/convertors/accuracy_count_convertor.dart';
+import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
+import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/sample_music.dart';
+import 'package:application/services/local_storage.dart';
+import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:drift/drift.dart';
@@ -16,11 +21,7 @@ import 'package:flutter/services.dart';
 
 late final AppDatabase database;
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  database = AppDatabase();
-
+insertDummyData() async {
 // TODO: 우선 디버깅 용으로, 재 실행시 테스트 데이터 있는지 확인하고 넣도록 수정 필요함.
   Random random = Random();
   for (var i = 0; i < 4; i++) {
@@ -29,8 +30,8 @@ void main() async {
             title: const Value('Stay with me'),
             bpm: const Value(90),
             artist: const Value('자우림'),
-            sheetSvg: Value(
-                (await rootBundle.load('assets/music/stay-with-me.svg'))
+            sheetImage: Value(
+                (await rootBundle.load('assets/music/stay-with-me.png'))
                     .buffer
                     .asUint8List()),
             cursorList: Value(List<Cursors>.from(
@@ -41,20 +42,18 @@ void main() async {
             measureCount: const Value(50),
             // type: Value(MusicType.values[random.nextInt(2)]),
             type: const Value(MusicType.ddm),
-            sourceCount: Value(
-              {
-                DrumComponent.hihat.name: random.nextInt(101),
-                DrumComponent.snareDrum.name: random.nextInt(40),
-                DrumComponent.smallTom.name: random.nextInt(20),
-                DrumComponent.kick.name: random.nextInt(10),
-                DrumComponent.total.name: random.nextInt(300) + 100,
-                // DrumComponent.hihat.name: 104,
-                // DrumComponent.snareDrum.name: 52,
-                // DrumComponent.smallTom.name: 10,
-                // DrumComponent.total.name: 346,
-                // DrumComponent.kick.name: 80,
-              },
-            ),
+            sourceCount: Value(ComponentCount(
+              hihat: random.nextInt(101),
+              snareDrum: random.nextInt(40),
+              smallTom: random.nextInt(20),
+              kick: random.nextInt(10),
+              total: random.nextInt(300) + 100,
+              // DrumComponent.hihat.name: 104,
+              // DrumComponent.snareDrum.name: 52,
+              // DrumComponent.smallTom.name: 10,
+              // DrumComponent.total.name: 346,
+              // DrumComponent.kick.name: 80,
+            )),
           ),
         );
 
@@ -122,43 +121,200 @@ void main() async {
     //       ),
     //     );
 
-    for (var j = 0; j < i; j++) {
-      final isNull = random.nextBool();
-      await database.into(database.practiceInfos).insert(
-            PracticeInfosCompanion.insert(
-              score: isNull ? const Value(null) : Value(random.nextInt(101)),
-              isNew: isNull ? const Value(false) : Value(random.nextBool()),
-              // bpm: const Value(100),
-              speed: Value([0.5, 0.75, 1.0, 1.25, 1.5][random.nextInt(5)]),
-              projectId: project.id,
-              accuracyCount: isNull
-                  ? const Value.absent()
-                  : Value({
-                      AccuracyType.correct.name: random.nextInt(
-                          music.sourceCount[DrumComponent.total.name]!),
-                      AccuracyType.wrongComponent.name: random.nextInt(50),
-                      AccuracyType.wrongTiming.name: random.nextInt(60),
-                      AccuracyType.wrong.name: random.nextInt(20),
-                      AccuracyType.miss.name: random.nextInt(10),
-                    }),
-              componentCount: isNull
-                  ? const Value.absent()
-                  : Value({
-                      for (var k in DrumComponent.values)
-                        k.name: music.sourceCount[k.name]! == 0
-                            ? 0
-                            : random.nextInt(music.sourceCount[k.name]!)
-                    }),
-            ),
-          );
-    }
+    // for (var j = 0; j < i; j++) {
+    //   final isNull = random.nextBool();
+    //   await database.into(database.practiceInfos).insert(
+    //         PracticeInfosCompanion.insert(
+    //           score: isNull ? const Value(null) : Value(random.nextInt(101)),
+    //           isNew: isNull ? const Value(false) : Value(random.nextBool()),
+    //           // bpm: const Value(100),
+    //           speed: Value([0.5, 0.75, 1.0, 1.25, 1.5][random.nextInt(5)]),
+    //           projectId: project.id,
+    //           accuracyCount: isNull
+    //               ? const Value.absent()
+    //               : Value(AccuracyCount(
+    //                   correct: random.nextInt(music.sourceCount!.total),
+    //                   wrongComponent: random.nextInt(50),
+    //                   wrongTiming: random.nextInt(60),
+    //                   wrong: random.nextInt(20),
+    //                   miss: random.nextInt(10),
+    //                 )),
+    //           componentCount: isNull
+    //               ? const Value.absent()
+    //               : Value(ComponentCount.fromJson({
+    //                   for (var k in DrumComponent.values)
+    //                     k.name: music.sourceCount!.getByType(k) == 0
+    //                         ? 0
+    //                         : random.nextInt(music.sourceCount!.getByType(k))
+    //                 })),
+    //         ),
+    //       );
+    // }
   }
 
   // final tempId =
   //     await (database.select(database.practiceInfos)..limit(1)).getSingle();
   // final temp = await database.getPracticeReport(tempId.id);
   // print(temp);
+}
 
+fixData() async {
+  List<MusicInfo> musics = await database.musicInfos.select().get();
+  var i = 1;
+  for (var m in musics) {
+    OSMDService osmd = OSMDService(callback: (base64Image, json) {
+      var temp = MusicInfo.fromJson(
+        title: m.title,
+        json: json!,
+        base64String: base64Image,
+        xmlData: m.xmlData,
+      );
+
+      // (database.update(database.musicInfos)
+      //       ..where((tbl) => tbl.id.equals(m.id)))
+      //     .write(MusicInfosCompanion(
+      //   cursorList: Value(temp.cursorList),
+      //   hitCount: Value(temp.hitCount),
+      //   sheetImage: Value(temp.sheetImage!),
+      //   measureCount: Value(temp.measureCount),
+      //   measureList: Value(temp.measureList),
+      //   musicEntries: Value(temp.musicEntries),
+      //   sourceCount: Value(temp.sourceCount!),
+      // ));
+    });
+
+    osmd.run(xmlData: m.xmlData!);
+
+    break;
+    await Future.delayed(const Duration(seconds: 10));
+    print("$i / ${musics.length}. ${m.id}: ${m.title}, DONE");
+    i++;
+  }
+}
+
+removeUnusedMusic() async {
+  List<MusicInfo> musics = await database.musicInfos.select().get();
+  for (var m in musics) {
+    var result = await (database.select(database.projectInfos)
+          ..where((tbl) => tbl.musicId.equals(m.id)))
+        .get();
+    if (result.isEmpty) {
+      await database.musicInfos.deleteWhere((tbl) => tbl.id.equals(m.id));
+    }
+  }
+}
+
+changeMusicType() async {
+  // List<MusicInfo> musics = await (database.musicInfos.select()
+  //       ..where((tbl) => tbl.type.equalsValue(MusicType.ddm)))
+  //     .get();
+  // var i = 1;
+  // for (var m in musics) {
+  //   (database.update(database.musicInfos)..where((tbl) => tbl.id.equals(m.id)))
+  //       .write(MusicInfosCompanion(title: Value("루디먼트 ${i++}")));
+  // }
+
+  (database.update(
+    database.musicInfos,
+  )..where((tbl) => tbl.type.equalsValue(MusicType.ddm)))
+      .write(const MusicInfosCompanion(artist: Value('DDM')));
+}
+
+/// 이걸로 다시 계산하기
+reCaculatePractice() async {
+  List<MusicInfo> musics = await database.musicInfos.select().get();
+  for (var m in musics) {
+    List<ProjectInfo> projects = await (database.projectInfos.select()
+          ..where((tbl) => tbl.musicId.equals(m.id)))
+        .get();
+
+    for (var proj in projects) {
+      List<PracticeInfo> practices = await (database.practiceInfos.select()
+            ..where((tbl) => tbl.projectId.equals(proj.id)))
+          .get();
+
+      for (var prac in practices) {
+        if (prac.transcription == null || prac.transcription!.isEmpty) continue;
+        var currentBPM = (prac.speed! * m.bpm).toInt();
+        var updated = ADTResultModel(transcription: prac.transcription!);
+
+        await updated.calculateWithAnswer(m.musicEntries, currentBPM);
+        print("${prac.title} ${updated.result.length}");
+        try {
+          await (database.update(database.practiceInfos)
+                ..where((tbl) => tbl.id.equals(prac.id)))
+              .writeReturning(PracticeInfosCompanion(
+                accuracyCount: Value(updated.accuracyCount),
+                componentCount: Value(updated.componentCount),
+                score: Value(updated.score),
+                result: Value(updated.result),
+                bpm: Value(currentBPM),
+              ))
+              .then((value) => print(value.first.result?.length));
+        } catch (e) {
+          print(e);
+        }
+      }
+    }
+  }
+}
+
+makeBackUpData() async {
+  print("start backup....");
+  var root = await LocalStorage.getLocalPath();
+  var backupPath = "$root/backup";
+
+  List<MusicInfo> musics = await database.musicInfos.select().get();
+  for (var m in musics) {
+    print("music: ${m.id}");
+    List<ProjectInfo> projects = await (database.projectInfos.select()
+          ..where((tbl) => tbl.musicId.equals(m.id)))
+        .get();
+
+    for (var proj in projects) {
+      print("project: ${proj.id}");
+      List<PracticeInfo> practices = await (database.practiceInfos.select()
+            ..where((tbl) => tbl.projectId.equals(proj.id)))
+          .get();
+
+      for (var prac in practices) {
+        print("practice: ${prac.id}");
+        if (prac.score == null ||
+            prac.transcription == null ||
+            prac.transcription!.isEmpty) continue;
+
+        var newDir = "$backupPath/${prac.id}";
+        // await Directory(newDir).create(recursive: true);
+        // 1. wav 파일 가져오기
+        // File("$root/${prac.id}.wav").copySync("$newDir/${prac.id}.wav");
+        // 2.json 파일 만들기
+
+        /// 3, 이미지 파일 생성
+        var osmd = OSMDService(
+          callback: (base64Image, json) {
+            // 이미지 파일 저장
+            File("$newDir/sheet.png")
+                .writeAsBytesSync(base64Decode(base64Image));
+          },
+        );
+
+        osmd.run(xmlData: m.xmlData!, transcription: prac.result);
+        await Future.delayed(const Duration(seconds: 4));
+      }
+    }
+  }
+}
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  database = AppDatabase();
+  // await insertDummyData();
+  // await fixData();
+  // await removeUnusedMusic();
+  // await changeMusicType();
+  // await reCaculatePractice();
+  // await makeBackUpData();
   runApp(const MyApp());
 }
 
@@ -242,7 +398,6 @@ class MyApp extends StatelessWidget {
       ),
       color: ColorStyles.primary,
       routerConfig: goRouter,
-      // home: const Scaffold(body: MusicListScreen()),
     );
   }
 }

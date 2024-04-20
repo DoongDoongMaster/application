@@ -18,6 +18,7 @@ abstract class ProjectSummaryView extends View {
         projectInfo.id,
         musicInfo.sourceCount,
         bestScore,
+        musicInfo.hitCount,
       ]).from(projectInfo).join([
         innerJoin(musicInfo, musicInfo.id.equalsExp(projectInfo.musicId)),
         leftOuterJoin(
@@ -41,8 +42,8 @@ abstract class PracticeAnalysisView extends View {
 
 class AnalysisSummaryData {
   final ComponentCount sourceCount;
-  final int? bestScore;
-  final ComponentCount? bestCount;
+  final int? bestScore, hitCount;
+  final AccuracyCount? bestCount;
 
   final List<double?> scoreList;
   final List<AccuracyCount?> accuracyList;
@@ -53,6 +54,7 @@ class AnalysisSummaryData {
     this.bestCount,
   })  : sourceCount = projectInfo.sourceCount,
         bestScore = projectInfo.bestScore,
+        hitCount = projectInfo.hitCount,
         scoreList = practiceList.map((d) => d.score?.toDouble()).toList(),
         accuracyList = practiceList.map((d) => d.accuracyCount).toList();
 }

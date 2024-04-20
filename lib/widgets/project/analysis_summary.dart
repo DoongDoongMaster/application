@@ -39,6 +39,7 @@ class AnalysisSummary extends StatelessWidget {
               child: Panel(
                 size: const Size(0, 200),
                 child: _AccuracyChart(
+                    hitCount: data.hitCount,
                     accuracyCount: data.bestCount,
                     accuracyList: data.accuracyList.reversed.toList()),
               ),
@@ -52,10 +53,12 @@ class AnalysisSummary extends StatelessWidget {
 
 class _AccuracyChart extends StatelessWidget {
   const _AccuracyChart({
+    this.hitCount,
     required this.accuracyCount,
     required this.accuracyList,
   });
 
+  final int? hitCount;
   final AccuracyCount? accuracyCount;
   final List<AccuracyCount?> accuracyList;
   static final AutoSizeGroup _autoSizeGroup = AutoSizeGroup();
@@ -82,8 +85,8 @@ class _AccuracyChart extends StatelessWidget {
               const Spacer(),
               AccuracyAnalysisChartLegend(
                 accuracyCnt: accuracyCount,
-                totalCount: 250,
                 autoSizeGroup: _autoSizeGroup,
+                hitCount: hitCount,
               ),
               const Spacer(),
             ],
@@ -101,7 +104,7 @@ class _AccuracyChart extends StatelessWidget {
                         AnalysisSummary.previewSize -
                             accuracyList.length +
                             i.toDouble(),
-                        v == null ? 0 : v[line.name]!.toDouble(),
+                        v == null ? 0 : v.getByType(line)!.toDouble(),
                       )
                   ],
                   color: line.color,

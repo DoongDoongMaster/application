@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
+import 'package:application/models/convertors/music_entry_convertor.dart';
+import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
@@ -59,7 +61,9 @@ class AppDatabase extends _$AppDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
-          if (true) {
+          // final m = Migrator(this);
+          // await m.recreateAllViews();
+          if (false) {
             print("recreating database...");
             final m = Migrator(this);
             for (final table in allTables) {
@@ -69,10 +73,16 @@ class AppDatabase extends _$AppDatabase {
             await m.recreateAllViews();
           }
         },
+        onUpgrade: (Migrator m, int from, int to) async {
+          if (from < 2) {
+            await m.addColumn(practiceInfos, practiceInfos.result);
+            await m.recreateAllViews();
+          }
+        },
       );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   Future resetDatabse() {
     return transaction(() async {
@@ -90,8 +100,14 @@ class AppDatabase extends _$AppDatabase {
         bpm: Value(music.bpm),
         artist: Value(music.artist),
         type: Value(music.type),
-        sheetSvg: Value(music.sheetSvg!),
-        sourceCount: Value(music.sourceCount),
+        sheetImage: Value(music.sheetImage!),
+        xmlData: Value(music.xmlData!),
+        sourceCount: Value(music.sourceCount ?? ComponentCount()),
+        cursorList: Value(music.cursorList),
+        measureList: Value(music.measureList),
+        measureCount: Value(music.measureCount),
+        musicEntries: Value(music.musicEntries),
+        hitCount: Value(music.hitCount),
       ));
 
   /// MUSIC - READ
@@ -180,9 +196,9 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  Future<List<PracticeReportViewData>> getPracticeReport(String practiceId) =>
+  Future<PracticeReportViewData?> getPracticeReport(String practiceId) =>
       (select(practiceReportView)..where((tbl) => tbl.id.equals(practiceId)))
-          .get();
+          .getSingleOrNull();
 
 //////////////////////////////////////////////
 }

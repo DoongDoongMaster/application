@@ -16,7 +16,7 @@ enum NoteType {
   bassDrum, //F4
   smallTom, //E5
   middleTom, //D5
-  floorTom, //A5
+  floorTom, //A4
 
   rest
 }

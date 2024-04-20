@@ -51,9 +51,8 @@ class _PrecountWidgetState extends State<PrecountWidget> {
   }
 
   startPrecount() async {
-    await widget.startPractice();
-
     sixteenthCount = 0;
+    await widget.startPractice();
     _ticker.start();
   }
 

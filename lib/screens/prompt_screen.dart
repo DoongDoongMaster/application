@@ -1,30 +1,26 @@
-import 'dart:math';
-
 import 'package:application/main.dart';
-import 'package:application/models/convertors/accuracy_count_convertor.dart';
-import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/screens/home_screen.dart';
+import 'package:application/services/api_service.dart';
 import 'package:application/services/local_storage.dart';
 import 'package:application/services/metronome.dart';
 import 'package:application/services/recorder_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
-import 'package:application/styles/text_styles.dart';
 import 'package:application/time_utils.dart';
 import 'package:application/widgets/prompt/cursor_widget.dart';
 import 'package:application/widgets/prompt/practice_setting_modal.dart';
 import 'package:application/widgets/prompt/precount_widget.dart';
 import 'package:application/widgets/prompt/prompt_app_bar_widget.dart';
 import 'package:application/widgets/prompt/prompt_footer_widget.dart';
+import 'package:application/widgets/show_snackbar.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 
 enum PromptState {
@@ -34,24 +30,8 @@ enum PromptState {
   playing,
 }
 
-/// 삭제 시 안내 스낵바.
-SnackBar buildSnackbar(BuildContext context) {
-  return SnackBar(
-    dismissDirection: DismissDirection.up,
-    behavior: SnackBarBehavior.floating,
-    margin: EdgeInsets.only(
-      bottom: MediaQuery.of(context).size.height - 100,
-      left: 400,
-      right: 400,
-    ),
-    content: const Text('삭제되었습니다.',
-        style: TextStyles.bodyMedium, textAlign: TextAlign.center),
-    backgroundColor: ColorStyles.blackShadow80,
-    duration: const Duration(seconds: 3),
-  );
-}
-
 class PromptScreen extends StatefulWidget {
+  static const double sheetPadding = 40;
   final String? musicId, projectId;
   const PromptScreen({
     super.key,
@@ -80,7 +60,7 @@ class _PromptScreenState extends State<PromptScreen> {
   final RecorderService _recorder = RecorderService();
 
   /// user settings...
-  bool isMuted = false;
+  bool isMuted = true;
   int currentBPM = 90;
   double speed = 0;
 
@@ -208,8 +188,8 @@ class _PromptScreenState extends State<PromptScreen> {
   /// update cursor & scroll down if needed.
   void updateCursor(Cursors newCursor) {
     // y가 바뀐 경우
-    if (currentCursor.top != newCursor.top) {
-      final scrollYPos = newCursor.top - cursorOffset;
+    if (currentCursor.y != newCursor.y) {
+      final scrollYPos = newCursor.y - cursorOffset;
       // only if there is space
       if (scrollYPos < _controller.position.maxScrollExtent) {
         _controller.animateTo(
@@ -233,6 +213,7 @@ class _PromptScreenState extends State<PromptScreen> {
         .insertReturningOrNull(PracticeInfosCompanion.insert(
           projectId: widget.projectId!,
           speed: drift.Value(speed),
+          bpm: drift.Value(currentBPM),
         ));
 
     if (temp != null) {
@@ -263,56 +244,58 @@ class _PromptScreenState extends State<PromptScreen> {
     Future.delayed(Duration(microseconds: _metronome.offset),
         () => state = PromptState.playing);
     // 녹음 시작
-    await _recorder.startRecord('$dirPath/${practice.id}.m4a');
+    await _recorder.startRecord('$dirPath/${practice.id}.wav');
     _metronome.start();
+  }
+
+  void submitRecord(String filePath) async {
+    var result =
+        await ApiService.getADTResult(dataPath: filePath, bpm: currentBPM);
+    if (result == null) {
+      return;
+    }
+    // var result = ADTResultModel(transcription: []);
+
+    await result.calculateWithAnswer(music.musicEntries, music.bpm);
+
+    // TODO: push 알림 등 처리 필요
+    (database.update(database.practiceInfos)
+          ..where((tbl) => tbl.id.equals(practice.id)))
+        .write(
+      PracticeInfosCompanion(
+        isNew: const drift.Value(true),
+        score: drift.Value(result.score),
+        accuracyCount: drift.Value(result.accuracyCount),
+        componentCount: drift.Value(result.componentCount),
+        transcription: drift.Value(result.transcription),
+        result: drift.Value(result.result),
+        updatedAt: drift.Value(DateTime.now()),
+      ),
+    );
   }
 
   /// stop metronome, finish record, api call, redirection
   void finishPractice() async {
     _metronome.stop();
-    final result = await _recorder.stopRecord();
-    await result.toList();
+    final filePath = await _recorder.stopRecord();
     // 필요한거 정리.
     _recorder.dispose();
-
-    // TODO: 종료 시 API 호출 필요. + push 알림 등 처리 필요
-    Future.delayed(const Duration(seconds: 10), () {
-      final random = Random();
-      (database.update(database.practiceInfos)
-            ..where((tbl) => tbl.id.equals(practice.id)))
-          .write(
-        PracticeInfosCompanion(
-          isNew: const drift.Value(true),
-          score: const drift.Value(91),
-          accuracyCount: drift.Value(
-            {
-              AccuracyType.correct.name:
-                  random.nextInt(music.sourceCount[DrumComponent.total.name]!),
-              AccuracyType.wrongComponent.name: random.nextInt(50),
-              AccuracyType.wrongTiming.name: random.nextInt(60),
-              AccuracyType.wrong.name: random.nextInt(20),
-              AccuracyType.miss.name: random.nextInt(10),
-            },
-          ),
-          componentCount: drift.Value({
-            for (var k in DrumComponent.values)
-              k.name: music.sourceCount[k.name]! == 0
-                  ? 0
-                  : random.nextInt(music.sourceCount[k.name]!)
-          }),
-        ),
-      );
-    });
-
+    if (filePath != null) {
+      submitRecord(filePath);
+    } else {
+      if (context.mounted) {
+        showSnackbar(context, '오류가 발생했습니다. - 녹음 저장 실패');
+      }
+    }
     if (context.mounted) {
-      context.goNamed(RouterPath.home.name);
+      context.pop();
     }
   }
 
-  /// clean off practice data in DB, record, state
-  cleanOffPractice() {
+  /// clean up practice data in DB, record, state
+  cleanUpPractice() {
     currentSec = 0;
-    ScaffoldMessenger.of(context).showSnackBar(buildSnackbar(context));
+    showSnackbar(context, '삭제되었습니다.');
 
     return Future.wait(<Future<dynamic>>[
       database.deletePractice(practice.id),
@@ -324,14 +307,14 @@ class _PromptScreenState extends State<PromptScreen> {
   /// restart practice with current user setting (speed)
   void restartPractice() async {
     state = PromptState.initializing;
-    await cleanOffPractice();
+    await cleanUpPractice();
     _showPrecountWidget();
   }
 
   /// start new practice
   void cancelPractice() async {
     state = PromptState.waiting;
-    await cleanOffPractice();
+    await cleanUpPractice();
     _showPracticeSettingModal();
   }
 
@@ -345,7 +328,7 @@ class _PromptScreenState extends State<PromptScreen> {
           title: music.title,
           artist: music.artist,
           exitPractice: () async {
-            await cleanOffPractice();
+            await cleanUpPractice();
             if (context.mounted) {
               if (context.canPop()) {
                 context.pop();
@@ -360,7 +343,7 @@ class _PromptScreenState extends State<PromptScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Expanded(
-            child: music.sheetSvg != null
+            child: music.sheetImage != null
                 ? DecoratedBox(
                     decoration: const BoxDecoration(
                       color: Colors.white,
@@ -376,10 +359,13 @@ class _PromptScreenState extends State<PromptScreen> {
                               CursorWidget(
                                 cursorInfo: currentCursor,
                               ),
-                              SvgPicture.memory(
-                                music.sheetSvg!,
-                                width: 1024,
-                                allowDrawingOutsideViewBox: true,
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: PromptScreen.sheetPadding),
+                                child: Image.memory(
+                                  music.sheetImage!,
+                                  width: 1024,
+                                ),
                               ),
                             ],
                           ),

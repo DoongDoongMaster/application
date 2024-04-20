@@ -10,6 +10,6 @@ abstract class MusicThumbnailView extends View {
         musicInfos.type,
         musicInfos.title,
         musicInfos.artist,
-        musicInfos.sheetSvg,
+        musicInfos.sheetImage,
       ]).from(musicInfos);
 }

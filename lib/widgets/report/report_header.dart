@@ -53,8 +53,8 @@ class ReportHeader extends StatelessWidget {
               const Spacer(),
               AccuracyAnalysisChartLegend(
                 accuracyCnt: report.accuracyCount!,
-                totalCount: report.sourceCount![DrumComponent.total.name]!,
                 autoSizeGroup: AutoSizeGroup(),
+                hitCount: report.hitCount,
               ),
               const Spacer(),
               const SizedBox(width: 15),
@@ -73,8 +73,8 @@ class ReportHeader extends StatelessWidget {
                   .map(
                     (data) => _AnalysisPerComponent(
                       label: data.label,
-                      hitCnt: report.componentCount![data.name]!,
-                      sourceCnt: report.sourceCount![data.name]!,
+                      hitCnt: report.componentCount!.getByType(data),
+                      sourceCnt: report.sourceCount.getByType(data),
                     ),
                   ),
             ],
@@ -219,12 +219,11 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
   const AccuracyAnalysisChartLegend({
     super.key,
     required this.accuracyCnt,
-    required this.totalCount,
     required this.autoSizeGroup,
+    this.hitCount,
   });
-
+  final int? hitCount;
   final AccuracyCount? accuracyCnt;
-  final int totalCount;
   final AutoSizeGroup autoSizeGroup;
 
   @override
@@ -279,7 +278,7 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                     TextSpan(
                       children: [
                         TextSpan(
-                          text: "${accuracyCnt?[data.name] ?? '-'}",
+                          text: "${accuracyCnt?.getByType(data) ?? '-'}",
                           style: TextStyle(
                               fontWeight: data == AccuracyType.correct
                                   ? FontWeight.bold
@@ -287,7 +286,7 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                         ),
                         if (data == AccuracyType.correct)
                           TextSpan(
-                            text: "/$totalCount",
+                            text: "/${hitCount ?? "-"}",
                             style:
                                 const TextStyle(color: ColorStyles.graphMiss),
                           ),
@@ -373,7 +372,7 @@ class _AccuracyAnalysisChart extends StatelessWidget {
               sections: [
                 for (var data in AccuracyType.values)
                   PieChartSectionData(
-                    value: accuracyData[data.name]!.toDouble(),
+                    value: accuracyData.getByType(data)!.toDouble(),
                     showTitle: false,
                     color: data.color.withOpacity(0.7),
                     radius: graphThickness - 2 * strokeWidth,
