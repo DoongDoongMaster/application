@@ -37,7 +37,7 @@ class Metronome {
     required this.music,
     required this.updateCursor,
     required this.onComplete,
-    this.volume = 1,
+    this.volume = 0,
   });
 
   _onTick(Duration elasped) {
@@ -93,7 +93,7 @@ class Metronome {
       await player.setPlayerMode(PlayerMode.lowLatency);
       await player.setReleaseMode(ReleaseMode.stop);
       await player.setSource(_tickSoundSrc);
-      // await player.setVolume(0);
+      await player.setVolume(volume);
       // await player.resume();
 
       // await Future.delayed(const Duration(milliseconds: 100), () {

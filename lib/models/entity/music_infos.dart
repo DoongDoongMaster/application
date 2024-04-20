@@ -14,9 +14,10 @@ enum MusicType {
 
 class MusicInfo {
   final String id, title, artist;
-  final int bpm, measureCount;
+  final int bpm, measureCount, hitCount;
   final List<Cursors> cursorList;
   final Uint8List? sheetImage;
+  final Uint8List? xmlData;
   final List<Cursors> measureList;
   final MusicType type;
   final ComponentCount? sourceCount;
@@ -27,10 +28,12 @@ class MusicInfo {
     this.title = "",
     this.artist = "",
     this.bpm = 90,
+    this.hitCount = 0,
     this.cursorList = const [],
     this.measureList = const [],
     this.type = MusicType.user,
     this.sheetImage,
+    this.xmlData,
     this.sourceCount,
     this.musicEntries = const [],
   }) : measureCount = measureList.length;
@@ -38,21 +41,26 @@ class MusicInfo {
   factory MusicInfo.fromJson(
       {required String title,
       required Map<String, dynamic> json,
-      required String base64String}) {
+      required String base64String,
+      required xmlData}) {
     var componentCount = ComponentCount();
     componentCount.setWithAdtKey(json["sourceCount"]);
+    var cursorList =
+        List<Cursors>.from(json["cursorList"].map((v) => Cursors.fromJson(v)));
+    var musicEntries = List<MusicEntry>.from(
+        json["musicEntries"].map((v) => MusicEntry.fromJson(v)));
 
     return MusicInfo(
       title: title,
-      cursorList: List<Cursors>.from(
-          json["cursorList"].map((v) => Cursors.fromJson(v))),
+      cursorList: cursorList,
+      hitCount: musicEntries.where((e) => e.pitch != -1).length,
       measureList: List<Cursors>.from(
           json["measureList"].map((v) => Cursors.fromJson(v))),
-      sheetImage: base64Decode(base64String.split(',')[1]),
+      sheetImage: base64Decode(base64String),
       type: MusicType.user,
       sourceCount: componentCount,
-      musicEntries: List<MusicEntry>.from(
-          json["musicEntries"].map((v) => MusicEntry.fromJson(v))),
+      xmlData: xmlData,
+      musicEntries: musicEntries,
     );
   }
 
@@ -61,10 +69,12 @@ class MusicInfo {
         artist: artist ?? this.artist,
         bpm: bpm ?? this.bpm,
         sheetImage: sheetImage,
+        xmlData: xmlData,
         cursorList: cursorList,
         measureList: measureList,
         sourceCount: sourceCount,
         musicEntries: musicEntries,
+        hitCount: hitCount,
       );
 }
 
@@ -88,6 +98,8 @@ class MusicInfos extends DefaultTable {
       .map(const CursorListConvertor())
       .withDefault(Constant(const CursorListConvertor().toSql([])))();
   BlobColumn get sheetImage => blob().clientDefault(() => Uint8List(0))();
+
+  BlobColumn get xmlData => blob().clientDefault(() => Uint8List(0))();
   IntColumn get type => intEnum<MusicType>().clientDefault(() => 0)();
 
   TextColumn get sourceCount =>
@@ -96,4 +108,5 @@ class MusicInfos extends DefaultTable {
   TextColumn get musicEntries => text()
       .map(const MusicEntryListConvertor())
       .withDefault(Constant(const MusicEntryListConvertor().toSql([])))();
+  IntColumn get hitCount => integer().withDefault(const Constant(0))();
 }

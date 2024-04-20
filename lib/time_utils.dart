@@ -3,8 +3,8 @@ class TimeUtils {
     return (Duration.secondsPerMinute * Duration.microsecondsPerSecond) ~/ bpm;
   }
 
-  static int getSecPerBeat(int bpm) {
-    return Duration.secondsPerMinute ~/ bpm;
+  static double getSecPerBeat(int bpm) {
+    return Duration.secondsPerMinute / bpm;
   }
 
   static Duration getTotalDuration(int bpm, int measureLength) {

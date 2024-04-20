@@ -140,3 +140,5 @@ app.*.symbols
 
 assets/*
 fonts/*
+
+**/environment.dart

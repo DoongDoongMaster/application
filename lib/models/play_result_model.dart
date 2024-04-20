@@ -5,12 +5,8 @@ class PlayResultModel {
   final List<List<List<bool>>> sheet = [];
 
   static const Map<int, String> codeToDrum = {
-    0: 'CC',
-    1: 'HH',
-    2: 'RC',
-    3: 'ST',
-    4: 'MT',
-    5: 'SD',
+    0: 'HH',
+    1: 'MT',
     6: 'FT',
     7: 'KK'
   };

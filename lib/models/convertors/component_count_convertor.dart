@@ -5,7 +5,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'component_count_convertor.g.dart';
 
-getDrumComponentFromADTKey(int key) =>
+DrumComponent getDrumComponentFromADTKey(int key) =>
     DrumComponent.values.where((e) => e.adtKey == key).first;
 
 enum DrumComponent {
@@ -13,7 +13,7 @@ enum DrumComponent {
   smallTom(label: '스몰탐', adtKey: 1),
   snareDrum(label: '스네어', adtKey: 2),
   kick(label: '킥', adtKey: 3),
-  total(label: '전체', adtKey: -1);
+  total(label: '기타', adtKey: -1);
 
   const DrumComponent({required this.label, required this.adtKey});
 

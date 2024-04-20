@@ -1,17 +1,13 @@
-import 'dart:convert';
 import 'dart:io';
 
-import 'package:application/models/convertors/component_count_convertor.dart';
-import 'package:application/models/convertors/cursor_convertor.dart';
-import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/screens/home_screen.dart';
-import 'package:application/styles/shadow_styles.dart';
+import 'package:application/services/osmd_service.dart';
 import 'package:application/widgets/home/add_new_modal.dart';
+import 'package:application/widgets/music_sheet_viewer_widget.dart';
 import 'package:application/widgets/white_thin_app_bar.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:go_router/go_router.dart';
 
 class NewMusicScreen extends StatefulWidget {
@@ -25,30 +21,31 @@ class NewMusicScreen extends StatefulWidget {
 }
 
 class _NewMusicScreenState extends State<NewMusicScreen> {
-  InAppLocalhostServer localhostServer =
-      InAppLocalhostServer(documentRoot: 'assets/web');
-
-  late File file;
-  late MusicInfo musicInfo;
-  bool isLoading = true;
+  MusicInfo? musicInfo;
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    startLocalhost();
-  }
 
-  startLocalhost() async {
-    file = File(widget.filePath!);
-    await localhostServer.start();
-    setState(() {});
+    File(widget.filePath!).readAsBytes().then((bytes) {
+      OSMDService osmd = OSMDService(
+        callback: (base64Image, json) {
+          setState(() {
+            musicInfo = MusicInfo.fromJson(
+              title: widget.fileName!,
+              json: json!,
+              base64String: base64Image,
+              xmlData: bytes,
+            );
+          });
+        },
+      );
+      osmd.run(xmlData: bytes);
+    });
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
-    localhostServer.close();
     super.dispose();
   }
 
@@ -60,71 +57,34 @@ class _NewMusicScreenState extends State<NewMusicScreen> {
         leftText: "취소",
         rightText: "다음",
         onPressedLeftLabel: () => context.pop(),
-        onPressedRightLabel: () => showDialog(
-            context: context,
-            builder: (context) =>
-                NewMusicModal(initialMusicInfo: musicInfo)).then((value) {
-          context.pop();
-          context.pushReplacementNamed(RouterPath.home.name,
-              queryParameters: {"tab": HomeTab.musicList.name});
-        }),
+        onPressedRightLabel: musicInfo == null
+            ? null
+            : () => showDialog(
+                  context: context,
+                  builder: (context) =>
+                      NewMusicModal(initialMusicInfo: musicInfo!),
+                ).then((value) {
+                  if (value == true) {
+                    context.pushReplacementNamed(RouterPath.home.name,
+                        queryParameters: {"tab": HomeTab.musicList.name});
+                  }
+                }),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Divider(height: 1),
           const SizedBox(height: 40),
-          if (localhostServer.isRunning())
-            Expanded(
-              child: Stack(
-                children: [
-                  DecoratedBox(
-                    decoration: const BoxDecoration(
-                      boxShadow: [ShadowStyles.shadow200],
-                      color: Colors.white,
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: SizedBox.expand(
-                        child: InAppWebView(
-                          initialUrlRequest: URLRequest(
-                            url: WebUri('http://localhost:8080'),
-                          ),
-                          // onConsoleMessage: (controller, consoleMessage) =>
-                          //     print(consoleMessage),
-                          // onReceivedError: (controller, request, error) =>
-                          //     print(error.description),
-                          onWebViewCreated: (controller) async {
-                            controller.addJavaScriptHandler(
-                                handlerName: 'sendFileToOSMD',
-                                callback: (args) async {
-                                  return {
-                                    'bytes':
-                                        utf8.decode(await file.readAsBytes()),
-                                    'name': file.path
-                                  };
-                                });
-                            controller.addJavaScriptHandler(
-                              handlerName: 'getDataFromOSMD',
-                              callback: (args) {
-                                setState(() {
-                                  isLoading = false;
-                                  musicInfo = MusicInfo.fromJson(
-                                      title: widget.fileName!,
-                                      json: args[0],
-                                      base64String: args[1]);
-                                });
-                              },
-                            );
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                  if (isLoading) const LinearProgressIndicator(),
-                ],
-              ),
-            )
+          Expanded(
+            child: SingleChildScrollView(
+              child: musicInfo == null
+                  ? const Center(
+                      child: CircularProgressIndicator(),
+                    )
+                  : MusicSheetBox(
+                      child: MusicSheetWidget(image: musicInfo!.sheetImage!)),
+            ),
+          )
         ],
       ),
     );

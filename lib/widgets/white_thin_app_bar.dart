@@ -9,7 +9,7 @@ class WhiteThinAppBar extends AppBar {
     required String leftText,
     required String rightText,
     required void Function() onPressedLeftLabel,
-    required void Function() onPressedRightLabel,
+    required void Function()? onPressedRightLabel,
   }) : super(
           toolbarHeight: 50,
           automaticallyImplyLeading: false,

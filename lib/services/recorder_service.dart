@@ -20,7 +20,10 @@ class RecorderService {
     // Check and request permission if needed
     // DateTime dt1 = DateTime.now();
     // Start recording to file
-    await _recorder.start(const RecordConfig(), path: path);
+    await _recorder.start(
+      const RecordConfig(encoder: AudioEncoder.wav),
+      path: path,
+    );
     // stream = await _recorder
     //     .startStream(const RecordConfig(encoder: AudioEncoder.pcm16bits));
 

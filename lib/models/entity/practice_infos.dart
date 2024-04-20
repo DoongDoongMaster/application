@@ -1,6 +1,7 @@
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/music_entry_convertor.dart';
+import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:application/models/entity/default_table.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:drift/drift.dart';
@@ -14,6 +15,7 @@ class PracticeInfo {
   ComponentCount? componentCount;
   AccuracyCount? accuracyCount;
   List<MusicEntry>? transcription;
+  List<ScoredEntry>? result;
 
   PracticeInfo({
     this.id = "",
@@ -26,6 +28,7 @@ class PracticeInfo {
     this.accuracyCount,
     this.componentCount,
     this.transcription = const [],
+    this.result = const [],
   });
 }
 
@@ -42,7 +45,7 @@ class PracticeInfos extends DefaultTable {
   BoolColumn get isNew => boolean().withDefault(const Constant(false))();
 
   TextColumn get projectId =>
-      text().references(ProjectInfos, #id, onDelete: KeyAction.cascade)();
+      text().references(ProjectInfos, #id, onDelete: KeyAction.restrict)();
 
   TextColumn get componentCount =>
       text().map(const ComponentCountConvertor()).nullable()();
@@ -53,4 +56,8 @@ class PracticeInfos extends DefaultTable {
   TextColumn get transcription => text()
       .map(const MusicEntryListConvertor())
       .withDefault(Constant(const MusicEntryListConvertor().toSql([])))();
+  TextColumn get result => text()
+      .map(const ScoredEntryListConvertor())
+      .withDefault(Constant(const ScoredEntryListConvertor().toSql([])))
+      .nullable()();
 }

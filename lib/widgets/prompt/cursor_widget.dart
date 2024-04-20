@@ -17,10 +17,8 @@ class CursorWidget extends StatelessWidget {
         decoration: BoxDecoration(
             color: ColorStyles.primaryShadow36,
             borderRadius: BorderRadius.circular(4)),
-        child: SizedBox(
-          height: cursorInfo.h,
-          width: cursorInfo.w,
-        ),
+        height: cursorInfo.h,
+        width: cursorInfo.w,
       ),
     );
   }

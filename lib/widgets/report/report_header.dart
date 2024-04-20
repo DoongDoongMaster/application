@@ -53,8 +53,8 @@ class ReportHeader extends StatelessWidget {
               const Spacer(),
               AccuracyAnalysisChartLegend(
                 accuracyCnt: report.accuracyCount!,
-                totalCount: report.sourceCount.total,
                 autoSizeGroup: AutoSizeGroup(),
+                hitCount: report.hitCount,
               ),
               const Spacer(),
               const SizedBox(width: 15),
@@ -219,12 +219,11 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
   const AccuracyAnalysisChartLegend({
     super.key,
     required this.accuracyCnt,
-    required this.totalCount,
     required this.autoSizeGroup,
+    this.hitCount,
   });
-
+  final int? hitCount;
   final AccuracyCount? accuracyCnt;
-  final int totalCount;
   final AutoSizeGroup autoSizeGroup;
 
   @override
@@ -287,7 +286,7 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                         ),
                         if (data == AccuracyType.correct)
                           TextSpan(
-                            text: "/$totalCount",
+                            text: "/${hitCount ?? "-"}",
                             style:
                                 const TextStyle(color: ColorStyles.graphMiss),
                           ),

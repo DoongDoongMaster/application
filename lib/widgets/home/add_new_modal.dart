@@ -124,7 +124,7 @@ class _NewMusicModalState extends State<NewMusicModal> {
                       .addNewMusic(widget.initialMusicInfo
                           .copyWith(title: title, artist: artist, bpm: bpm))
                       .then((value) {
-                    context.pop();
+                    context.pop(true);
                   });
                 }
               }),

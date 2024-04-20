@@ -11,13 +11,13 @@ import 'package:application/services/metronome.dart';
 import 'package:application/services/recorder_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
-import 'package:application/styles/text_styles.dart';
 import 'package:application/time_utils.dart';
 import 'package:application/widgets/prompt/cursor_widget.dart';
 import 'package:application/widgets/prompt/practice_setting_modal.dart';
 import 'package:application/widgets/prompt/precount_widget.dart';
 import 'package:application/widgets/prompt/prompt_app_bar_widget.dart';
 import 'package:application/widgets/prompt/prompt_footer_widget.dart';
+import 'package:application/widgets/show_snackbar.dart';
 import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -28,23 +28,6 @@ enum PromptState {
   initializing,
   starting,
   playing,
-}
-
-/// 삭제 시 안내 스낵바.
-SnackBar buildSnackbar(BuildContext context) {
-  return SnackBar(
-    dismissDirection: DismissDirection.up,
-    behavior: SnackBarBehavior.floating,
-    margin: EdgeInsets.only(
-      bottom: MediaQuery.of(context).size.height - 100,
-      left: 400,
-      right: 400,
-    ),
-    content: const Text('삭제되었습니다.',
-        style: TextStyles.bodyMedium, textAlign: TextAlign.center),
-    backgroundColor: ColorStyles.blackShadow80,
-    duration: const Duration(seconds: 3),
-  );
 }
 
 class PromptScreen extends StatefulWidget {
@@ -77,7 +60,7 @@ class _PromptScreenState extends State<PromptScreen> {
   final RecorderService _recorder = RecorderService();
 
   /// user settings...
-  bool isMuted = false;
+  bool isMuted = true;
   int currentBPM = 90;
   double speed = 0;
 
@@ -230,6 +213,7 @@ class _PromptScreenState extends State<PromptScreen> {
         .insertReturningOrNull(PracticeInfosCompanion.insert(
           projectId: widget.projectId!,
           speed: drift.Value(speed),
+          bpm: drift.Value(currentBPM),
         ));
 
     if (temp != null) {
@@ -260,7 +244,7 @@ class _PromptScreenState extends State<PromptScreen> {
     Future.delayed(Duration(microseconds: _metronome.offset),
         () => state = PromptState.playing);
     // 녹음 시작
-    await _recorder.startRecord('$dirPath/${practice.id}.m4a');
+    await _recorder.startRecord('$dirPath/${practice.id}.wav');
     _metronome.start();
   }
 
@@ -270,10 +254,11 @@ class _PromptScreenState extends State<PromptScreen> {
     if (result == null) {
       return;
     }
+    // var result = ADTResultModel(transcription: []);
 
-    result.calculateWithAnswer(music.musicEntries);
+    await result.calculateWithAnswer(music.musicEntries, music.bpm);
 
-    // TODO: 종료 시 API 호출 필요. + push 알림 등 처리 필요
+    // TODO: push 알림 등 처리 필요
     (database.update(database.practiceInfos)
           ..where((tbl) => tbl.id.equals(practice.id)))
         .write(
@@ -283,6 +268,7 @@ class _PromptScreenState extends State<PromptScreen> {
         accuracyCount: drift.Value(result.accuracyCount),
         componentCount: drift.Value(result.componentCount),
         transcription: drift.Value(result.transcription),
+        // result: drift.Value(result.result),
       ),
     );
   }
@@ -296,7 +282,9 @@ class _PromptScreenState extends State<PromptScreen> {
     if (filePath != null) {
       submitRecord(filePath);
     } else {
-      print("file not saved!!!!");
+      if (context.mounted) {
+        showSnackbar(context, '오류가 발생했습니다. - 녹음 저장 실패');
+      }
     }
     if (context.mounted) {
       context.pop();
@@ -306,7 +294,7 @@ class _PromptScreenState extends State<PromptScreen> {
   /// clean off practice data in DB, record, state
   cleanOffPractice() {
     currentSec = 0;
-    ScaffoldMessenger.of(context).showSnackBar(buildSnackbar(context));
+    showSnackbar(context, '삭제되었습니다.');
 
     return Future.wait(<Future<dynamic>>[
       database.deletePractice(practice.id),

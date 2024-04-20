@@ -1,13 +1,15 @@
 import 'dart:math';
 
-import 'package:application/models/convertors/accuracy_count_convertor.dart';
+import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
+import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/sample_music.dart';
+import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:drift/drift.dart';
@@ -153,11 +155,121 @@ insertDummyData() async {
   // print(temp);
 }
 
+fixData() async {
+  List<MusicInfo> musics = await database.musicInfos.select().get();
+  var i = 1;
+  for (var m in musics) {
+    OSMDService osmd = OSMDService(callback: (base64Image, json) {
+      var temp = MusicInfo.fromJson(
+        title: m.title,
+        json: json!,
+        base64String: base64Image,
+        xmlData: m.xmlData,
+      );
+
+      // (database.update(database.musicInfos)
+      //       ..where((tbl) => tbl.id.equals(m.id)))
+      //     .write(MusicInfosCompanion(
+      //   cursorList: Value(temp.cursorList),
+      //   hitCount: Value(temp.hitCount),
+      //   sheetImage: Value(temp.sheetImage!),
+      //   measureCount: Value(temp.measureCount),
+      //   measureList: Value(temp.measureList),
+      //   musicEntries: Value(temp.musicEntries),
+      //   sourceCount: Value(temp.sourceCount!),
+      // ));
+    });
+
+    osmd.run(xmlData: m.xmlData!);
+
+    break;
+    await Future.delayed(const Duration(seconds: 10));
+    print("$i / ${musics.length}. ${m.id}: ${m.title}, DONE");
+    i++;
+  }
+}
+
+removeUnusedMusic() async {
+  List<MusicInfo> musics = await database.musicInfos.select().get();
+  for (var m in musics) {
+    var result = await (database.select(database.projectInfos)
+          ..where((tbl) => tbl.musicId.equals(m.id)))
+        .get();
+    if (result.isEmpty) {
+      await database.musicInfos.deleteWhere((tbl) => tbl.id.equals(m.id));
+    }
+  }
+}
+
+changeMusicType() async {
+  // List<MusicInfo> musics = await (database.musicInfos.select()
+  //       ..where((tbl) => tbl.type.equalsValue(MusicType.ddm)))
+  //     .get();
+  // var i = 1;
+  // for (var m in musics) {
+  //   (database.update(database.musicInfos)..where((tbl) => tbl.id.equals(m.id)))
+  //       .write(MusicInfosCompanion(title: Value("루디먼트 ${i++}")));
+  // }
+
+  (database.update(
+    database.musicInfos,
+  )..where((tbl) => tbl.type.equalsValue(MusicType.ddm)))
+      .write(const MusicInfosCompanion(artist: Value('DDM')));
+}
+
+/// 이걸로 다시 계산하기
+reCaculatePractice() async {
+  List<MusicInfo> musics = await database.musicInfos.select().get();
+  for (var m in musics) {
+    ////
+    ///
+
+    List<ProjectInfo> projects = await (database.projectInfos.select()
+          ..where((tbl) => tbl.musicId.equals(m.id)))
+        .get();
+
+    for (var proj in projects) {
+      List<PracticeInfo> practices = await (database.practiceInfos.select()
+            ..where((tbl) => tbl.projectId.equals(proj.id)))
+          .get();
+
+      for (var prac in practices) {
+        if (prac.transcription == null || prac.transcription!.isEmpty) continue;
+        var currentBPM = (prac.speed! * m.bpm).toInt();
+        var updated = ADTResultModel(transcription: prac.transcription!);
+
+        await updated.calculateWithAnswer(m.musicEntries, currentBPM);
+        print("${prac.title} ${updated.result.length}");
+        try {
+          await (database.update(database.practiceInfos)
+                ..where((tbl) => tbl.id.equals(prac.id)))
+              .writeReturning(PracticeInfosCompanion(
+                accuracyCount: Value(updated.accuracyCount),
+                componentCount: Value(updated.componentCount),
+                score: Value(updated.score),
+                result: Value(updated.result),
+                bpm: Value(currentBPM),
+              ))
+              .then((value) => print(value.first.result?.length));
+        } catch (e) {
+          print(e);
+        }
+      }
+    }
+  }
+}
+
+makeBackUpData() async {}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   database = AppDatabase();
-  await insertDummyData();
+  // await insertDummyData();
+  // await fixData();
+  // await removeUnusedMusic();
+  // await changeMusicType();
+  // await reCaculatePractice();
   runApp(const MyApp());
 }
 
@@ -241,7 +353,6 @@ class MyApp extends StatelessWidget {
       ),
       color: ColorStyles.primary,
       routerConfig: goRouter,
-      // home: const Scaffold(body: MusicListScreen()),
     );
   }
 }
