@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:application/models/adt_result_model.dart';
@@ -9,6 +11,7 @@ import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/sample_music.dart';
+import 'package:application/services/local_storage.dart';
 import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
@@ -221,9 +224,6 @@ changeMusicType() async {
 reCaculatePractice() async {
   List<MusicInfo> musics = await database.musicInfos.select().get();
   for (var m in musics) {
-    ////
-    ///
-
     List<ProjectInfo> projects = await (database.projectInfos.select()
           ..where((tbl) => tbl.musicId.equals(m.id)))
         .get();
@@ -259,7 +259,51 @@ reCaculatePractice() async {
   }
 }
 
-makeBackUpData() async {}
+makeBackUpData() async {
+  print("start backup....");
+  var root = await LocalStorage.getLocalPath();
+  var backupPath = "$root/backup";
+
+  List<MusicInfo> musics = await database.musicInfos.select().get();
+  for (var m in musics) {
+    print("music: ${m.id}");
+    List<ProjectInfo> projects = await (database.projectInfos.select()
+          ..where((tbl) => tbl.musicId.equals(m.id)))
+        .get();
+
+    for (var proj in projects) {
+      print("project: ${proj.id}");
+      List<PracticeInfo> practices = await (database.practiceInfos.select()
+            ..where((tbl) => tbl.projectId.equals(proj.id)))
+          .get();
+
+      for (var prac in practices) {
+        print("practice: ${prac.id}");
+        if (prac.score == null ||
+            prac.transcription == null ||
+            prac.transcription!.isEmpty) continue;
+
+        var newDir = "$backupPath/${prac.id}";
+        // await Directory(newDir).create(recursive: true);
+        // 1. wav 파일 가져오기
+        // File("$root/${prac.id}.wav").copySync("$newDir/${prac.id}.wav");
+        // 2.json 파일 만들기
+
+        /// 3, 이미지 파일 생성
+        var osmd = OSMDService(
+          callback: (base64Image, json) {
+            // 이미지 파일 저장
+            File("$newDir/sheet.png")
+                .writeAsBytesSync(base64Decode(base64Image));
+          },
+        );
+
+        osmd.run(xmlData: m.xmlData!, transcription: prac.result);
+        await Future.delayed(const Duration(seconds: 4));
+      }
+    }
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -270,6 +314,7 @@ void main() async {
   // await removeUnusedMusic();
   // await changeMusicType();
   // await reCaculatePractice();
+  // await makeBackUpData();
   runApp(const MyApp());
 }
 

@@ -12,8 +12,8 @@ enum MusicType {
   // shared, // 공유된 악보 (현재 미사용)
 }
 
-class MusicInfo {
-  final String id, title, artist;
+class MusicInfo extends DefaultEntity {
+  final String title, artist;
   final int bpm, measureCount, hitCount;
   final List<Cursors> cursorList;
   final Uint8List? sheetImage;
@@ -24,7 +24,9 @@ class MusicInfo {
   final List<MusicEntry> musicEntries;
 
   MusicInfo({
-    this.id = "",
+    super.id = "",
+    super.createdAt,
+    super.updatedAt,
     this.title = "",
     this.artist = "",
     this.bpm = 90,
@@ -36,7 +38,8 @@ class MusicInfo {
     this.xmlData,
     this.sourceCount,
     this.musicEntries = const [],
-  }) : measureCount = measureList.length;
+  })  : measureCount = measureList.length,
+        super();
 
   factory MusicInfo.fromJson(
       {required String title,

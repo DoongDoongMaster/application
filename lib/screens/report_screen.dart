@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:application/main.dart';
-import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';

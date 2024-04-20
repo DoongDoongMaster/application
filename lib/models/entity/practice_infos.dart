@@ -6,8 +6,8 @@ import 'package:application/models/entity/default_table.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:drift/drift.dart';
 
-class PracticeInfo {
-  final String id, projectId, title;
+class PracticeInfo extends DefaultEntity {
+  final String projectId, title;
   final int? bpm;
   final double? speed;
   final int? score;
@@ -18,7 +18,9 @@ class PracticeInfo {
   List<ScoredEntry>? result;
 
   PracticeInfo({
-    this.id = "",
+    super.id = "",
+    super.createdAt,
+    super.updatedAt,
     this.projectId = "",
     this.title = "",
     this.score,
@@ -29,7 +31,7 @@ class PracticeInfo {
     this.componentCount,
     this.transcription = const [],
     this.result = const [],
-  });
+  }) : super();
 }
 
 @UseRowClass(PracticeInfo)

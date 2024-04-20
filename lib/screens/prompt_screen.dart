@@ -268,7 +268,8 @@ class _PromptScreenState extends State<PromptScreen> {
         accuracyCount: drift.Value(result.accuracyCount),
         componentCount: drift.Value(result.componentCount),
         transcription: drift.Value(result.transcription),
-        // result: drift.Value(result.result),
+        result: drift.Value(result.result),
+        updatedAt: drift.Value(DateTime.now()),
       ),
     );
   }
@@ -291,8 +292,8 @@ class _PromptScreenState extends State<PromptScreen> {
     }
   }
 
-  /// clean off practice data in DB, record, state
-  cleanOffPractice() {
+  /// clean up practice data in DB, record, state
+  cleanUpPractice() {
     currentSec = 0;
     showSnackbar(context, '삭제되었습니다.');
 
@@ -306,14 +307,14 @@ class _PromptScreenState extends State<PromptScreen> {
   /// restart practice with current user setting (speed)
   void restartPractice() async {
     state = PromptState.initializing;
-    await cleanOffPractice();
+    await cleanUpPractice();
     _showPrecountWidget();
   }
 
   /// start new practice
   void cancelPractice() async {
     state = PromptState.waiting;
-    await cleanOffPractice();
+    await cleanUpPractice();
     _showPracticeSettingModal();
   }
 
@@ -327,7 +328,7 @@ class _PromptScreenState extends State<PromptScreen> {
           title: music.title,
           artist: music.artist,
           exitPractice: () async {
-            await cleanOffPractice();
+            await cleanUpPractice();
             if (context.mounted) {
               if (context.canPop()) {
                 context.pop();
