@@ -9,8 +9,8 @@ DrumComponent getDrumComponentFromADTKey(int key) =>
     DrumComponent.values.where((e) => e.adtKey == key).first;
 
 enum DrumComponent {
-  hihat(label: '하이헷', adtKey: 0),
-  smallTom(label: '스몰탐', adtKey: 1),
+  hihat(label: '하이햇', adtKey: 0),
+  smallTom(label: '탐', adtKey: 1),
   snareDrum(label: '스네어', adtKey: 2),
   kick(label: '킥', adtKey: 3),
   total(label: '기타', adtKey: -1);

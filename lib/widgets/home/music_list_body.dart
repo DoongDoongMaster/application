@@ -10,6 +10,7 @@ import 'package:application/widgets/home/n_column_grid_view.dart';
 import 'package:application/widgets/home/home_header.dart';
 import 'package:application/widgets/no_content_widget.dart';
 import 'package:auto_size_text/auto_size_text.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -120,7 +121,12 @@ class MusicListDetail extends StatelessWidget {
         ),
         Expanded(
           child: FutureBuilder<List<MusicThumbnailViewData>>(
-            future: database.select(database.musicThumbnailView).get(),
+            future: (database.select(database.musicThumbnailView)
+                  ..orderBy([
+                    (u) => drift.OrderingTerm.desc(
+                        database.musicThumbnailView.createdAt)
+                  ]))
+                .get(),
             builder: (context, snapshot) {
               List<Widget> gridList = [
                 if (filter == MusicType.user)

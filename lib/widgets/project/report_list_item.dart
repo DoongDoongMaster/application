@@ -1,9 +1,11 @@
 import 'package:application/main.dart';
+import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:application/widgets/ddm_popup_menu_item.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -95,24 +97,24 @@ class ReportListItem extends StatelessWidget {
               onSelected: (value) {
                 switch (value) {
                   case 0:
-                    // TODO: 연습 삭제 함수 만들기.
                     database.deletePractice(data.id).then((value) =>
                         context.pushReplacementNamed(RouterPath.home.name));
+                    break;
+                  case 1:
+                    ADT.runWithId(data.id, context);
                 }
               },
               itemBuilder: (context) => [
-                const PopupMenuItem(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  height: 28,
+                DDMPopupMenuItem(
+                  text: "삭제하기",
                   value: 0,
-                  child: ListTile(
-                    trailing: Icon(
-                      Icons.delete_outline_rounded,
-                      size: 18,
-                    ),
-                    leading: Text("삭제하기"),
-                  ),
-                )
+                  icon: Icons.delete_outline_rounded,
+                ),
+                DDMPopupMenuItem(
+                  text: "다시 채점하기",
+                  value: 1,
+                  icon: Icons.refresh_rounded,
+                ),
               ],
               icon: const Icon(
                 Icons.more_horiz_rounded,

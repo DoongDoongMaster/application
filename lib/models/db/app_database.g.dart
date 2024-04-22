@@ -15,6 +15,7 @@ class $MusicInfosTable extends MusicInfos
       'id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
       clientDefault: () => const Uuid().v4());
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
@@ -493,6 +494,7 @@ class $ProjectInfosTable extends ProjectInfos
       'id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
       clientDefault: () => const Uuid().v4());
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
@@ -724,6 +726,7 @@ class $PracticeInfosTable extends PracticeInfos
       'id', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: false,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
       clientDefault: () => const Uuid().v4());
   static const VerificationMeta _createdAtMeta =
       const VerificationMeta('createdAt');
@@ -1148,12 +1151,14 @@ class MusicThumbnailViewData extends DataClass {
   final String title;
   final String artist;
   final Uint8List sheetImage;
+  final DateTime createdAt;
   const MusicThumbnailViewData(
       {required this.id,
       required this.type,
       required this.title,
       required this.artist,
-      required this.sheetImage});
+      required this.sheetImage,
+      required this.createdAt});
   factory MusicThumbnailViewData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
@@ -1164,6 +1169,7 @@ class MusicThumbnailViewData extends DataClass {
       title: serializer.fromJson<String>(json['title']),
       artist: serializer.fromJson<String>(json['artist']),
       sheetImage: serializer.fromJson<Uint8List>(json['sheetImage']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
   @override
@@ -1176,6 +1182,7 @@ class MusicThumbnailViewData extends DataClass {
       'title': serializer.toJson<String>(title),
       'artist': serializer.toJson<String>(artist),
       'sheetImage': serializer.toJson<Uint8List>(sheetImage),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
@@ -1184,13 +1191,15 @@ class MusicThumbnailViewData extends DataClass {
           MusicType? type,
           String? title,
           String? artist,
-          Uint8List? sheetImage}) =>
+          Uint8List? sheetImage,
+          DateTime? createdAt}) =>
       MusicThumbnailViewData(
         id: id ?? this.id,
         type: type ?? this.type,
         title: title ?? this.title,
         artist: artist ?? this.artist,
         sheetImage: sheetImage ?? this.sheetImage,
+        createdAt: createdAt ?? this.createdAt,
       );
   @override
   String toString() {
@@ -1199,14 +1208,15 @@ class MusicThumbnailViewData extends DataClass {
           ..write('type: $type, ')
           ..write('title: $title, ')
           ..write('artist: $artist, ')
-          ..write('sheetImage: $sheetImage')
+          ..write('sheetImage: $sheetImage, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, type, title, artist, $driftBlobEquality.hash(sheetImage));
+  int get hashCode => Object.hash(
+      id, type, title, artist, $driftBlobEquality.hash(sheetImage), createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1215,7 +1225,8 @@ class MusicThumbnailViewData extends DataClass {
           other.type == this.type &&
           other.title == this.title &&
           other.artist == this.artist &&
-          $driftBlobEquality.equals(other.sheetImage, this.sheetImage));
+          $driftBlobEquality.equals(other.sheetImage, this.sheetImage) &&
+          other.createdAt == this.createdAt);
 }
 
 class $MusicThumbnailViewView
@@ -1228,7 +1239,8 @@ class $MusicThumbnailViewView
   $MusicInfosTable get musicInfos =>
       attachedDatabase.musicInfos.createAlias('t0');
   @override
-  List<GeneratedColumn> get $columns => [id, type, title, artist, sheetImage];
+  List<GeneratedColumn> get $columns =>
+      [id, type, title, artist, sheetImage, createdAt];
   @override
   String get aliasedName => _alias ?? entityName;
   @override
@@ -1251,6 +1263,8 @@ class $MusicThumbnailViewView
           .read(DriftSqlType.string, data['${effectivePrefix}artist'])!,
       sheetImage: attachedDatabase.typeMapping
           .read(DriftSqlType.blob, data['${effectivePrefix}sheet_image'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
   }
 
@@ -1275,6 +1289,10 @@ class $MusicThumbnailViewView
       'sheet_image', aliasedName, false,
       generatedAs: GeneratedAs(musicInfos.sheetImage, false),
       type: DriftSqlType.blob);
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      generatedAs: GeneratedAs(musicInfos.createdAt, false),
+      type: DriftSqlType.dateTime);
   @override
   $MusicThumbnailViewView createAlias(String alias) {
     return $MusicThumbnailViewView(attachedDatabase, alias);
@@ -1953,6 +1971,7 @@ class PracticeReportViewData extends DataClass {
   final ComponentCount sourceCount;
   final Uint8List xmlData;
   final int hitCount;
+  final List<Cursors> measureList;
   final String? musicId;
   final String? musicTitle;
   final String? musicArtist;
@@ -1971,6 +1990,7 @@ class PracticeReportViewData extends DataClass {
       required this.sourceCount,
       required this.xmlData,
       required this.hitCount,
+      required this.measureList,
       this.musicId,
       this.musicTitle,
       this.musicArtist,
@@ -1993,6 +2013,7 @@ class PracticeReportViewData extends DataClass {
       sourceCount: serializer.fromJson<ComponentCount>(json['sourceCount']),
       xmlData: serializer.fromJson<Uint8List>(json['xmlData']),
       hitCount: serializer.fromJson<int>(json['hitCount']),
+      measureList: serializer.fromJson<List<Cursors>>(json['measureList']),
       musicId: serializer.fromJson<String?>(json['musicId']),
       musicTitle: serializer.fromJson<String?>(json['musicTitle']),
       musicArtist: serializer.fromJson<String?>(json['musicArtist']),
@@ -2016,6 +2037,7 @@ class PracticeReportViewData extends DataClass {
       'sourceCount': serializer.toJson<ComponentCount>(sourceCount),
       'xmlData': serializer.toJson<Uint8List>(xmlData),
       'hitCount': serializer.toJson<int>(hitCount),
+      'measureList': serializer.toJson<List<Cursors>>(measureList),
       'musicId': serializer.toJson<String?>(musicId),
       'musicTitle': serializer.toJson<String?>(musicTitle),
       'musicArtist': serializer.toJson<String?>(musicArtist),
@@ -2037,6 +2059,7 @@ class PracticeReportViewData extends DataClass {
           ComponentCount? sourceCount,
           Uint8List? xmlData,
           int? hitCount,
+          List<Cursors>? measureList,
           Value<String?> musicId = const Value.absent(),
           Value<String?> musicTitle = const Value.absent(),
           Value<String?> musicArtist = const Value.absent(),
@@ -2057,6 +2080,7 @@ class PracticeReportViewData extends DataClass {
         sourceCount: sourceCount ?? this.sourceCount,
         xmlData: xmlData ?? this.xmlData,
         hitCount: hitCount ?? this.hitCount,
+        measureList: measureList ?? this.measureList,
         musicId: musicId.present ? musicId.value : this.musicId,
         musicTitle: musicTitle.present ? musicTitle.value : this.musicTitle,
         musicArtist: musicArtist.present ? musicArtist.value : this.musicArtist,
@@ -2078,6 +2102,7 @@ class PracticeReportViewData extends DataClass {
           ..write('sourceCount: $sourceCount, ')
           ..write('xmlData: $xmlData, ')
           ..write('hitCount: $hitCount, ')
+          ..write('measureList: $measureList, ')
           ..write('musicId: $musicId, ')
           ..write('musicTitle: $musicTitle, ')
           ..write('musicArtist: $musicArtist, ')
@@ -2101,6 +2126,7 @@ class PracticeReportViewData extends DataClass {
       sourceCount,
       $driftBlobEquality.hash(xmlData),
       hitCount,
+      measureList,
       musicId,
       musicTitle,
       musicArtist,
@@ -2122,6 +2148,7 @@ class PracticeReportViewData extends DataClass {
           other.sourceCount == this.sourceCount &&
           $driftBlobEquality.equals(other.xmlData, this.xmlData) &&
           other.hitCount == this.hitCount &&
+          other.measureList == this.measureList &&
           other.musicId == this.musicId &&
           other.musicTitle == this.musicTitle &&
           other.musicArtist == this.musicArtist &&
@@ -2158,6 +2185,7 @@ class $PracticeReportViewView
         sourceCount,
         xmlData,
         hitCount,
+        measureList,
         musicId,
         musicTitle,
         musicArtist,
@@ -2203,6 +2231,9 @@ class $PracticeReportViewView
           .read(DriftSqlType.blob, data['${effectivePrefix}xml_data'])!,
       hitCount: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}hit_count'])!,
+      measureList: $MusicInfosTable.$convertermeasureList.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}measure_list'])!),
       musicId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}music_id']),
       musicTitle: attachedDatabase.typeMapping
@@ -2271,6 +2302,11 @@ class $PracticeReportViewView
       'hit_count', aliasedName, false,
       generatedAs: GeneratedAs(musicInfo.hitCount, false),
       type: DriftSqlType.int);
+  late final GeneratedColumnWithTypeConverter<List<Cursors>, String>
+      measureList = GeneratedColumn<String>('measure_list', aliasedName, false,
+              generatedAs: GeneratedAs(musicInfo.measureList, false),
+              type: DriftSqlType.string)
+          .withConverter<List<Cursors>>($MusicInfosTable.$convertermeasureList);
   late final GeneratedColumn<String> musicId = GeneratedColumn<String>(
       'music_id', aliasedName, true,
       generatedAs: GeneratedAs(musicInfo.id, false), type: DriftSqlType.string);
@@ -2645,6 +2681,138 @@ class $PracticeAnalysisViewView
   Set<String> get readTables => const {'practice_infos'};
 }
 
+class ADTRequestViewData extends DataClass {
+  final String id;
+  final int? bpm;
+  final List<MusicEntry> musicEntries;
+  final String? musicId;
+  const ADTRequestViewData(
+      {required this.id, this.bpm, required this.musicEntries, this.musicId});
+  factory ADTRequestViewData.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ADTRequestViewData(
+      id: serializer.fromJson<String>(json['id']),
+      bpm: serializer.fromJson<int?>(json['bpm']),
+      musicEntries: serializer.fromJson<List<MusicEntry>>(json['musicEntries']),
+      musicId: serializer.fromJson<String?>(json['musicId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'bpm': serializer.toJson<int?>(bpm),
+      'musicEntries': serializer.toJson<List<MusicEntry>>(musicEntries),
+      'musicId': serializer.toJson<String?>(musicId),
+    };
+  }
+
+  ADTRequestViewData copyWith(
+          {String? id,
+          Value<int?> bpm = const Value.absent(),
+          List<MusicEntry>? musicEntries,
+          Value<String?> musicId = const Value.absent()}) =>
+      ADTRequestViewData(
+        id: id ?? this.id,
+        bpm: bpm.present ? bpm.value : this.bpm,
+        musicEntries: musicEntries ?? this.musicEntries,
+        musicId: musicId.present ? musicId.value : this.musicId,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('ADTRequestViewData(')
+          ..write('id: $id, ')
+          ..write('bpm: $bpm, ')
+          ..write('musicEntries: $musicEntries, ')
+          ..write('musicId: $musicId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, bpm, musicEntries, musicId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ADTRequestViewData &&
+          other.id == this.id &&
+          other.bpm == this.bpm &&
+          other.musicEntries == this.musicEntries &&
+          other.musicId == this.musicId);
+}
+
+class $ADTRequestViewView
+    extends ViewInfo<$ADTRequestViewView, ADTRequestViewData>
+    implements HasResultSet {
+  final String? _alias;
+  @override
+  final _$AppDatabase attachedDatabase;
+  $ADTRequestViewView(this.attachedDatabase, [this._alias]);
+  $PracticeInfosTable get practice =>
+      attachedDatabase.practiceInfos.createAlias('t0');
+  $ProjectInfosTable get project =>
+      attachedDatabase.projectInfos.createAlias('t1');
+  $MusicInfosTable get music => attachedDatabase.musicInfos.createAlias('t2');
+  @override
+  List<GeneratedColumn> get $columns => [id, bpm, musicEntries, musicId];
+  @override
+  String get aliasedName => _alias ?? entityName;
+  @override
+  String get entityName => 'a_d_t_request_view';
+  @override
+  Map<SqlDialect, String>? get createViewStatements => null;
+  @override
+  $ADTRequestViewView get asDslTable => this;
+  @override
+  ADTRequestViewData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ADTRequestViewData(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
+      bpm: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}bpm']),
+      musicEntries: $MusicInfosTable.$convertermusicEntries.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}music_entries'])!),
+      musicId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}music_id']),
+    );
+  }
+
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
+      generatedAs: GeneratedAs(practice.id, false), type: DriftSqlType.string);
+  late final GeneratedColumn<int> bpm = GeneratedColumn<int>(
+      'bpm', aliasedName, true,
+      generatedAs: GeneratedAs(practice.bpm, false), type: DriftSqlType.int);
+  late final GeneratedColumnWithTypeConverter<List<MusicEntry>, String>
+      musicEntries = GeneratedColumn<String>(
+              'music_entries', aliasedName, false,
+              generatedAs: GeneratedAs(music.musicEntries, false),
+              type: DriftSqlType.string)
+          .withConverter<List<MusicEntry>>(
+              $MusicInfosTable.$convertermusicEntries);
+  late final GeneratedColumn<String> musicId = GeneratedColumn<String>(
+      'music_id', aliasedName, true,
+      generatedAs: GeneratedAs(music.id, false), type: DriftSqlType.string);
+  @override
+  $ADTRequestViewView createAlias(String alias) {
+    return $ADTRequestViewView(attachedDatabase, alias);
+  }
+
+  @override
+  Query? get query =>
+      (attachedDatabase.selectOnly(practice)..addColumns($columns)).join([
+        innerJoin(project, project.id.equalsExp(practice.projectId)),
+        innerJoin(music, music.id.equalsExp(project.musicId))
+      ]);
+  @override
+  Set<String> get readTables =>
+      const {'practice_infos', 'project_infos', 'music_infos'};
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   late final $MusicInfosTable musicInfos = $MusicInfosTable(this);
@@ -2666,6 +2834,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $PracticeListViewView(this);
   late final $PracticeAnalysisViewView practiceAnalysisView =
       $PracticeAnalysisViewView(this);
+  late final $ADTRequestViewView aDTRequestView = $ADTRequestViewView(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -2681,6 +2850,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         projectSummaryView,
         practiceReportView,
         practiceListView,
-        practiceAnalysisView
+        practiceAnalysisView,
+        aDTRequestView
       ];
 }

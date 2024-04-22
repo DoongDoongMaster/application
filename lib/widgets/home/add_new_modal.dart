@@ -143,6 +143,7 @@ class _NewMusicModalState extends State<NewMusicModal> {
                       title: title,
                       artist: artist,
                       sheetImage: widget.initialMusicInfo.sheetImage!,
+                      createdAt: DateTime.now(),
                     ),
                   ),
                 ),

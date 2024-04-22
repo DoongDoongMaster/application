@@ -1,14 +1,18 @@
 import 'dart:convert';
 
 import 'package:application/main.dart';
+import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/models/entity/music_infos.dart';
+import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/widgets/music_sheet_viewer_widget.dart';
 import 'package:application/widgets/report/report_header.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -38,6 +42,7 @@ class _ReportScreenState extends State<ReportScreen> {
     xmlData: Uint8List(0),
     result: [],
     hitCount: 0,
+    measureList: [],
   );
   Uint8List? markedImage;
   @override
@@ -62,6 +67,28 @@ class _ReportScreenState extends State<ReportScreen> {
     if (practice.isNew) {
       database.readPracticeReport(practice.id);
     }
+
+    // // HACK: 여기서부터 다시 계산!!!!!
+    // await Future.wait([
+    //   (database.practiceInfos.select()
+    //         ..where((tbl) => tbl.id.equals(widget.practiceId!)))
+    //       .getSingle(),
+    //   (database.musicInfos.select()
+    //         ..where((tbl) => tbl.id.equals(practice!.musicId!)))
+    //       .getSingle()
+    // ]).then((value) {
+    //   var newResult = ADTResultModel(
+    //       transcription: (value[0] as PracticeInfo).transcription!);
+    //   newResult.calculateWithAnswer((value[1] as MusicInfo).musicEntries,
+    //       (value[0] as PracticeInfo).bpm!);
+    //   practice = practice!.copyWith(
+    //     score: drift.Value(newResult.score),
+    //     accuracyCount: drift.Value(newResult.accuracyCount),
+    //     componentCount: drift.Value(newResult.componentCount),
+    //     result: drift.Value(newResult.result),
+    //   );
+    // });
+    // // HACK: 여기서부터 다시 계산!!!!!
 
     setState(() {
       _practiceReportViewData = practice;

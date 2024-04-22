@@ -1,11 +1,11 @@
 import 'package:application/main.dart';
+import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/screens/home_screen.dart';
-import 'package:application/services/api_service.dart';
 import 'package:application/services/local_storage.dart';
 import 'package:application/services/metronome.dart';
 import 'package:application/services/recorder_service.dart';
@@ -248,32 +248,6 @@ class _PromptScreenState extends State<PromptScreen> {
     _metronome.start();
   }
 
-  void submitRecord(String filePath) async {
-    var result =
-        await ApiService.getADTResult(dataPath: filePath, bpm: currentBPM);
-    if (result == null) {
-      return;
-    }
-    // var result = ADTResultModel(transcription: []);
-
-    await result.calculateWithAnswer(music.musicEntries, music.bpm);
-
-    // TODO: push 알림 등 처리 필요
-    (database.update(database.practiceInfos)
-          ..where((tbl) => tbl.id.equals(practice.id)))
-        .write(
-      PracticeInfosCompanion(
-        isNew: const drift.Value(true),
-        score: drift.Value(result.score),
-        accuracyCount: drift.Value(result.accuracyCount),
-        componentCount: drift.Value(result.componentCount),
-        transcription: drift.Value(result.transcription),
-        result: drift.Value(result.result),
-        updatedAt: drift.Value(DateTime.now()),
-      ),
-    );
-  }
-
   /// stop metronome, finish record, api call, redirection
   void finishPractice() async {
     _metronome.stop();
@@ -281,7 +255,14 @@ class _PromptScreenState extends State<PromptScreen> {
     // 필요한거 정리.
     _recorder.dispose();
     if (filePath != null) {
-      submitRecord(filePath);
+      ADT.run(
+        practiceId: practice.id,
+        musicId: music.id,
+        filePath: filePath,
+        bpm: currentBPM,
+        answer: music.musicEntries,
+        context: context.mounted ? context : null,
+      );
     } else {
       if (context.mounted) {
         showSnackbar(context, '오류가 발생했습니다. - 녹음 저장 실패');

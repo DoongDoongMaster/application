@@ -1,8 +1,108 @@
+import 'package:application/main.dart';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/convertors/scored_entry_convertor.dart';
+import 'package:application/models/db/app_database.dart';
+import 'package:application/services/api_service.dart';
+import 'package:application/services/local_storage.dart';
 import 'package:application/time_utils.dart';
+import 'package:application/widgets/show_snackbar.dart';
+import 'package:drift/drift.dart' as drift;
+import 'package:flutter/material.dart';
+
+class ADT {
+  static run({
+    required String practiceId,
+    required String musicId,
+    required String filePath,
+    required int bpm,
+    required List<MusicEntry> answer,
+    BuildContext? context,
+  }) async {
+    (database.update(database.practiceInfos)
+          ..where((tbl) => tbl.id.equals(practiceId)))
+        .write(
+      const PracticeInfosCompanion(
+        isNew: drift.Value(false),
+        score: drift.Value.absent(),
+      ),
+    );
+
+    late ADTResultModel? result;
+
+    if (musicId == "e726d3d0-1dc5-40f9-b36a-fb58d44ba05e") {
+      /// 좀 더 짧은
+      // 이미 채점된 결과로 돌리기
+      result = ADTResultModel(
+        transcription: (await (database.practiceInfos.select()
+                  ..where((tbl) =>
+                      tbl.id.equals("9f64e407-fc8f-493d-b289-74fba9df0738")))
+                .getSingle())
+            .transcription!,
+      );
+    } else if (musicId == "24947e70-4877-4692-a405-fd971ac5c59a") {
+      // 지정된 파일로 돌리기
+      var path = filePath.split('/');
+      path[path.length - 1] = "9f64e407-fc8f-493d-b289-74fba9df0738.wav";
+
+      result =
+          await ApiService.getADTResult(dataPath: path.join('/'), bpm: bpm);
+
+      // 서버에 오류 생겼을 경우.
+      result ??= ADTResultModel(
+        transcription: (await (database.practiceInfos.select()
+                  ..where((tbl) =>
+                      tbl.id.equals("9f64e407-fc8f-493d-b289-74fba9df0738")))
+                .getSingle())
+            .transcription!,
+      );
+    } else {
+      result = await ApiService.getADTResult(dataPath: filePath, bpm: bpm);
+      if (result == null) {
+        return;
+      }
+    }
+
+    await result.calculateWithAnswer(answer, bpm);
+
+    await (database.update(database.practiceInfos)
+          ..where((tbl) => tbl.id.equals(practiceId)))
+        .write(
+      PracticeInfosCompanion(
+        isNew: const drift.Value(true),
+        score: drift.Value(result.score),
+        accuracyCount: drift.Value(result.accuracyCount),
+        componentCount: drift.Value(result.componentCount),
+        transcription: drift.Value(result.transcription),
+        result: drift.Value(result.result),
+        updatedAt: drift.Value(DateTime.now()),
+      ),
+    );
+
+    // TODO: push 알림 등 처리 필요
+    if (context != null && context.mounted) {
+      return showSnackbar(context, '채점이 완료되었습니다.');
+    }
+  }
+
+  static Future runWithId(String practiceId, BuildContext context) {
+    return Future.wait(
+            [LocalStorage.getLocalPath(), database.getADTRequest(practiceId)])
+        .then((futureList) {
+      var requestInfo = futureList[1] as ADTRequestViewData;
+
+      return ADT.run(
+        filePath: "${futureList[0]}/$practiceId.wav",
+        musicId: requestInfo.musicId!,
+        practiceId: practiceId,
+        answer: requestInfo.musicEntries,
+        bpm: requestInfo.bpm!,
+        context: context,
+      );
+    });
+  }
+}
 
 class ADTResultModel {
   final List<MusicEntry> transcription;
@@ -192,13 +292,10 @@ class ADTResultModel {
 
     // 우선 박자 / 피치 모두 맞는 경우만 채점.
     _classify(AccuracyType.correct);
-
     // 피치는 일치하나 박자가 틀린 경우 채점.
     _classify(AccuracyType.wrongTiming);
-
     // 피치가 틀리더라도, 박자는 허용 범위 이내
     _classify(AccuracyType.wrongComponent);
-
     // 나머지는 놓친 음
     accuracyCount.miss =
         result.where((e) => e.type == AccuracyType.miss).length;
