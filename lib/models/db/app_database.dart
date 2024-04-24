@@ -8,6 +8,7 @@ import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
+import 'package:application/models/views/adt_request_view.dart';
 import 'package:application/models/views/music_thumbnail_view.dart';
 import 'package:application/models/views/practice_list_view.dart';
 import 'package:application/models/views/practice_report_view.dart';
@@ -54,6 +55,7 @@ LazyDatabase _openConnection() {
   PracticeReportView,
   PracticeListView,
   PracticeAnalysisView,
+  ADTRequestView,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -61,8 +63,8 @@ class AppDatabase extends _$AppDatabase {
   @override
   MigrationStrategy get migration => MigrationStrategy(
         beforeOpen: (details) async {
-          // final m = Migrator(this);
-          // await m.recreateAllViews();
+          final m = Migrator(this);
+          await m.recreateAllViews();
           if (false) {
             print("recreating database...");
             final m = Migrator(this);
@@ -115,6 +117,7 @@ class AppDatabase extends _$AppDatabase {
       MusicType type, int count) {
     return (select(musicThumbnailView)
           ..where((tbl) => tbl.type.equalsValue(type))
+          ..orderBy([(u) => OrderingTerm.desc(musicInfos.createdAt)])
           ..limit(count))
         .get();
   }
@@ -158,6 +161,10 @@ class AppDatabase extends _$AppDatabase {
   /// PRACTICE - DELETE
   Future<void> deletePractice(String id) =>
       (delete(practiceInfos)..where((tbl) => tbl.id.equals(id))).go();
+
+  /// PRACTICE - read data for ADT
+  Future<ADTRequestViewData> getADTRequest(String id) =>
+      (select(aDTRequestView)..where((tbl) => tbl.id.equals(id))).getSingle();
 
 //////////////////////////////////////////////
   /// PROJECT&PRACTICE - READ

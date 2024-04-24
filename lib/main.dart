@@ -205,19 +205,23 @@ removeUnusedMusic() async {
 }
 
 changeMusicType() async {
-  // List<MusicInfo> musics = await (database.musicInfos.select()
-  //       ..where((tbl) => tbl.type.equalsValue(MusicType.ddm)))
-  //     .get();
-  // var i = 1;
-  // for (var m in musics) {
-  //   (database.update(database.musicInfos)..where((tbl) => tbl.id.equals(m.id)))
-  //       .write(MusicInfosCompanion(title: Value("루디먼트 ${i++}")));
-  // }
+  List<MusicInfo> musics = await (database.musicInfos.select()
+        ..where((tbl) => tbl.artist.equals("DDM")))
+      .get();
+  var i = 1;
+  for (var m in musics) {
+    (database.update(database.musicInfos)..where((tbl) => tbl.id.equals(m.id)))
+        .write(MusicInfosCompanion(
+      title: Value("루디먼트 ${i++}"),
+      artist: const Value("DDM"),
+      type: const Value(MusicType.ddm),
+    ));
+  }
 
-  (database.update(
-    database.musicInfos,
-  )..where((tbl) => tbl.type.equalsValue(MusicType.ddm)))
-      .write(const MusicInfosCompanion(artist: Value('DDM')));
+  // (database.update(
+  //   database.musicInfos,
+  // )..where((tbl) => tbl.type.equalsValue(MusicType.ddm)))
+  //     .write(const MusicInfosCompanion(artist: Value('DDM')));
 }
 
 /// 이걸로 다시 계산하기
@@ -234,7 +238,17 @@ reCaculatePractice() async {
           .get();
 
       for (var prac in practices) {
-        if (prac.transcription == null || prac.transcription!.isEmpty) continue;
+        if (prac.transcription == null || prac.transcription!.isEmpty) {
+          var currentBPM = (prac.speed! * m.bpm).toInt();
+          await (database.update(database.practiceInfos)
+                ..where((tbl) => tbl.id.equals(prac.id)))
+              .writeReturning(PracticeInfosCompanion(
+                bpm: Value(currentBPM),
+              ))
+              .then((value) => print(value.first.result?.length));
+        } else {
+          continue;
+        }
         var currentBPM = (prac.speed! * m.bpm).toInt();
         var updated = ADTResultModel(transcription: prac.transcription!);
 
@@ -305,6 +319,39 @@ makeBackUpData() async {
   }
 }
 
+listAll() async {
+  print("===========MUSIC");
+  List<MusicInfo> musics = await (database.musicInfos.select()).get();
+  for (var m in musics) {
+    print("${m.id} ${m.title}  ${m.title.length} ${m.title.contains("_")}");
+  }
+  print("===========PROJECT");
+  List<ProjectInfo> projects = await (database.projectInfos.select()).get();
+  for (var p in projects) {
+    print("${p.id} ${p.title}  ${p.title.length} ${p.title.contains("_")}");
+  }
+  print("==========PRACTICE");
+  List<PracticeInfo> practices = await (database.practiceInfos.select()
+        ..where((tbl) => tbl.score.isNotNull()))
+      .get();
+  practices.sort((a, b) => a.score!.compareTo(b.score!));
+  for (var p in practices) {
+    print("${p.id} ${p.score}");
+  }
+}
+
+listAllProject() async {}
+
+changeProjectName(String id, String after) async {
+  var result = await (database.projectInfos.update()
+        ..where((tbl) => tbl.id.equals(id)))
+      .writeReturning(ProjectInfosCompanion(title: Value(after)));
+
+  // print(result[0]);
+}
+
+listAllMusic() async {}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -315,6 +362,9 @@ void main() async {
   // await changeMusicType();
   // await reCaculatePractice();
   // await makeBackUpData();
+  // await reCaculatePractice();
+  // await changeMusicType();
+  await listAll();
   runApp(const MyApp());
 }
 

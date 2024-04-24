@@ -13,7 +13,7 @@ class ApiService {
     print("uploading file... ${File(dataPath).path}");
 
     // 서버 엔드포인트 URL 수정
-    var uri = Uri.parse('${ApiService.baseUrl}/adt')
+    var uri = Uri.parse('${ApiService.baseUrl}/models/adt/predict')
         .replace(queryParameters: {'bpm': bpm.toString()});
 
     try {

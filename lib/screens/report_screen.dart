@@ -38,6 +38,7 @@ class _ReportScreenState extends State<ReportScreen> {
     xmlData: Uint8List(0),
     result: [],
     hitCount: 0,
+    measureList: [],
   );
   Uint8List? markedImage;
   @override
@@ -62,6 +63,28 @@ class _ReportScreenState extends State<ReportScreen> {
     if (practice.isNew) {
       database.readPracticeReport(practice.id);
     }
+
+    // // HACK: 여기서부터 다시 계산!!!!!
+    // await Future.wait([
+    //   (database.practiceInfos.select()
+    //         ..where((tbl) => tbl.id.equals(widget.practiceId!)))
+    //       .getSingle(),
+    //   (database.musicInfos.select()
+    //         ..where((tbl) => tbl.id.equals(practice!.musicId!)))
+    //       .getSingle()
+    // ]).then((value) {
+    //   var newResult = ADTResultModel(
+    //       transcription: (value[0] as PracticeInfo).transcription!);
+    //   newResult.calculateWithAnswer((value[1] as MusicInfo).musicEntries,
+    //       (value[0] as PracticeInfo).bpm!);
+    //   practice = practice!.copyWith(
+    //     score: drift.Value(newResult.score),
+    //     accuracyCount: drift.Value(newResult.accuracyCount),
+    //     componentCount: drift.Value(newResult.componentCount),
+    //     result: drift.Value(newResult.result),
+    //   );
+    // });
+    // // HACK: 여기서부터 다시 계산!!!!!
 
     setState(() {
       _practiceReportViewData = practice;
