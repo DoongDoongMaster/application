@@ -20,6 +20,7 @@ class ADT {
     required List<MusicEntry> answer,
     BuildContext? context,
   }) async {
+    // 다시 채점할 때 다시 비워놓기
     (database.update(database.practiceInfos)
           ..where((tbl) => tbl.id.equals(practiceId)))
         .write(
@@ -31,37 +32,10 @@ class ADT {
 
     late ADTResultModel? result;
 
-    if (musicId == "e726d3d0-1dc5-40f9-b36a-fb58d44ba05e") {
-      /// 좀 더 짧은
-      // 이미 채점된 결과로 돌리기
-      result = ADTResultModel(
-        transcription: (await (database.practiceInfos.select()
-                  ..where((tbl) =>
-                      tbl.id.equals("9f64e407-fc8f-493d-b289-74fba9df0738")))
-                .getSingle())
-            .transcription!,
-      );
-    } else if (musicId == "24947e70-4877-4692-a405-fd971ac5c59a") {
-      // 지정된 파일로 돌리기
-      var path = filePath.split('/');
-      path[path.length - 1] = "9f64e407-fc8f-493d-b289-74fba9df0738.wav";
+    result = await ApiService.getADTResult(dataPath: filePath, bpm: bpm);
 
-      result =
-          await ApiService.getADTResult(dataPath: path.join('/'), bpm: bpm);
-
-      // 서버에 오류 생겼을 경우.
-      result ??= ADTResultModel(
-        transcription: (await (database.practiceInfos.select()
-                  ..where((tbl) =>
-                      tbl.id.equals("9f64e407-fc8f-493d-b289-74fba9df0738")))
-                .getSingle())
-            .transcription!,
-      );
-    } else {
-      result = await ApiService.getADTResult(dataPath: filePath, bpm: bpm);
-      if (result == null) {
-        return;
-      }
+    if (result == null) {
+      return;
     }
 
     await result.calculateWithAnswer(answer, bpm);

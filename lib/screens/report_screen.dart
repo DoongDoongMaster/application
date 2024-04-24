@@ -1,18 +1,14 @@
 import 'dart:convert';
 
 import 'package:application/main.dart';
-import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
-import 'package:application/models/entity/music_infos.dart';
-import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/widgets/music_sheet_viewer_widget.dart';
 import 'package:application/widgets/report/report_header.dart';
-import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
