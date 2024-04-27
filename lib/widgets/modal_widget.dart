@@ -73,9 +73,15 @@ class ModalTextField extends TextFormField {
 }
 
 class ModalHeader extends StatelessWidget {
-  final String title;
-  final void Function() onComplete;
-  const ModalHeader({super.key, required this.title, required this.onComplete});
+  final String title, left, right;
+  final void Function()? onComplete;
+  const ModalHeader({
+    super.key,
+    this.left = "나가기",
+    this.right = "완료",
+    required this.title,
+    this.onComplete,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +91,8 @@ class ModalHeader extends StatelessWidget {
       children: [
         TextButton(
           onPressed: () => context.pop(),
-          child: const Text(
-            "나가기",
+          child: Text(
+            left,
             style: TextStyles.bodyMedium,
           ),
         ),
@@ -96,11 +102,11 @@ class ModalHeader extends StatelessWidget {
         ),
         TextButton(
           onPressed: onComplete,
-          child: const Text(
-            "완료",
+          child: Text(
+            right,
             style: TextStyles.bodyMedium,
           ),
-        ),
+        )
       ],
     );
   }
