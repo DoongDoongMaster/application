@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
 
 class CustomDialog extends Dialog {
-  final double? height;
-  CustomDialog({Key? key, Widget? child, this.height})
+  CustomDialog({Key? key, Widget? child, double? height, double width = 540})
       : super(
           key: key,
           insetPadding: EdgeInsets.zero,
+          clipBehavior: Clip.hardEdge,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           child: Container(
-            width: 540,
+            width: width,
             height: height,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
+            decoration: const BoxDecoration(
               color: Colors.white,
-              boxShadow: const [
+              boxShadow: [
                 BoxShadow(
                   color: Color(0x4C000000),
                   blurRadius: 3,

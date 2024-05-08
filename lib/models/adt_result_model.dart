@@ -163,7 +163,7 @@ class ADTResultModel {
       // 선택된 경우 삭제
       if (matchedIdx != -1) {
         answer.type = accType;
-        answer.ts = _buffer[matchedIdx].ts;
+        answer.ts = _buffer[matchedIdx].ts - delay;
         _buffer.removeAt(matchedIdx);
         // 정답 개수 증가
         count++;
@@ -279,7 +279,7 @@ class ADTResultModel {
     result.addAll(_buffer.map((e) => ScoredEntry(
           key: e.key,
           pitch: e.pitch,
-          ts: e.ts,
+          ts: e.ts - delay,
           absTS: -1,
           type: AccuracyType.wrong,
         )));

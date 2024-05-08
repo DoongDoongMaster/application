@@ -3,13 +3,16 @@ import 'package:application/styles/shadow_styles.dart';
 import 'package:flutter/material.dart';
 
 class MusicSheetBox extends DecoratedBox {
-  const MusicSheetBox({super.key, required Widget child})
+  MusicSheetBox({super.key, required Widget child})
       : super(
           decoration: const BoxDecoration(
             boxShadow: [ShadowStyles.shadow200],
             color: Colors.white,
           ),
-          child: child,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 40),
+            child: child,
+          ),
         );
 }
 
@@ -24,12 +27,9 @@ class MusicSheetWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 40),
-        child: Image.memory(
-          image,
-          width: 1024,
-        ),
+      child: Image.memory(
+        image,
+        width: 1024,
       ),
     );
   }
