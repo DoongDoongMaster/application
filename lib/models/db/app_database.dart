@@ -5,10 +5,12 @@ import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/convertors/scored_entry_convertor.dart';
+import 'package:application/models/entity/drill_info.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
 import 'package:application/models/views/adt_request_view.dart';
+import 'package:application/models/views/drill_list_view.dart';
 import 'package:application/models/views/music_thumbnail_view.dart';
 import 'package:application/models/views/practice_list_view.dart';
 import 'package:application/models/views/practice_report_view.dart';
@@ -46,6 +48,7 @@ LazyDatabase _openConnection() {
   MusicInfos,
   ProjectInfos,
   PracticeInfos,
+  DrillInfos,
 ], views: [
   MusicThumbnailView,
   ProjectDetailView,
@@ -56,6 +59,7 @@ LazyDatabase _openConnection() {
   PracticeListView,
   PracticeAnalysisView,
   ADTRequestView,
+  DrillMusicView,
 ])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
@@ -76,15 +80,23 @@ class AppDatabase extends _$AppDatabase {
           }
         },
         onUpgrade: (Migrator m, int from, int to) async {
+          print("currentVer: $from");
+
           if (from < 2) {
+            print("upgrading... into ver 2");
             await m.addColumn(practiceInfos, practiceInfos.result);
             await m.recreateAllViews();
+          }
+          if (from < 3) {
+            print("upgrading... into ver 3");
+            await m.createAll();
+            await m.alterTable(TableMigration(practiceInfos));
           }
         },
       );
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   Future resetDatabse() {
     return transaction(() async {
@@ -208,4 +220,19 @@ class AppDatabase extends _$AppDatabase {
           .getSingleOrNull();
 
 //////////////////////////////////////////////
+  Future<DrillListData> getDrillList(String projectId) => Future.wait([
+        (select(drillMusicView)
+              ..where((tbl) => tbl.projectId.equals(projectId)))
+            .getSingleOrNull(),
+        (select(drillInfos)..where((tbl) => tbl.projectId.equals(projectId)))
+            .get(),
+      ]).then((value) {
+        if (value[0] == null) {
+          throw Exception("project not exist");
+        }
+
+        return DrillListData(
+            musicdata: value[0] as DrillMusicViewData,
+            drillList: value[1] as List<DrillInfo>);
+      });
 }

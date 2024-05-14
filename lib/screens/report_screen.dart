@@ -43,6 +43,7 @@ class _ReportScreenState extends State<ReportScreen> {
     bestScore: 0,
     sourceBPM: 0,
     bpm: 0,
+    speed: 1,
     xmlData: Uint8List(0),
     result: [],
     hitCount: 0,
@@ -97,7 +98,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
     setState(() {
       _data = practice;
-      _secPerMeasure = 4 * TimeUtils.getSecPerBeat(practice.bpm!);
+      _secPerMeasure = 4 * TimeUtils.getSecPerBeat(practice.bpm);
     });
 
     // OSMD - 악보에 답 표기
@@ -230,8 +231,8 @@ class _MeasureViewButton extends StatelessWidget {
 
   final Uint8List? markedImage;
   final double ts1, ts2;
-  final Cursors curr;
-  final Cursors? prev, next;
+  final Cursor curr;
+  final Cursor? prev, next;
   final List<ScoredEntry> notes;
 
   @override
@@ -279,8 +280,8 @@ class _MeasureViewModal extends StatelessWidget {
   });
 
   final Uint8List markedImage;
-  final Cursors curr;
-  final Cursors? prev, next;
+  final Cursor curr;
+  final Cursor? prev, next;
   final List<ScoredEntry> notes;
   final double ts1, ts2;
 

@@ -6,7 +6,7 @@ part of 'cursor_convertor.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Cursors _$CursorsFromJson(Map<String, dynamic> json) => Cursors(
+Cursor _$CursorFromJson(Map<String, dynamic> json) => Cursor(
       x: (json['x'] as num).toDouble(),
       y: (json['y'] as num).toDouble(),
       w: (json['w'] as num).toDouble(),
@@ -14,7 +14,7 @@ Cursors _$CursorsFromJson(Map<String, dynamic> json) => Cursors(
       ts: (json['ts'] as num).toDouble(),
     );
 
-Map<String, dynamic> _$CursorsToJson(Cursors instance) => <String, dynamic>{
+Map<String, dynamic> _$CursorToJson(Cursor instance) => <String, dynamic>{
       'x': instance.x,
       'y': instance.y,
       'w': instance.w,

@@ -15,10 +15,10 @@ enum MusicType {
 class MusicInfo extends DefaultEntity {
   final String title, artist;
   final int bpm, measureCount, hitCount;
-  final List<Cursors> cursorList;
+  final List<Cursor> cursorList;
   final Uint8List? sheetImage;
   final Uint8List? xmlData;
-  final List<Cursors> measureList;
+  final List<Cursor> measureList;
   final MusicType type;
   final ComponentCount? sourceCount;
   final List<MusicEntry> musicEntries;
@@ -49,7 +49,7 @@ class MusicInfo extends DefaultEntity {
     var componentCount = ComponentCount();
     componentCount.setWithAdtKey(json["sourceCount"]);
     var cursorList =
-        List<Cursors>.from(json["cursorList"].map((v) => Cursors.fromJson(v)));
+        List<Cursor>.from(json["cursorList"].map((v) => Cursor.fromJson(v)));
     var musicEntries = List<MusicEntry>.from(
         json["musicEntries"].map((v) => MusicEntry.fromJson(v)));
 
@@ -57,8 +57,8 @@ class MusicInfo extends DefaultEntity {
       title: title,
       cursorList: cursorList,
       hitCount: musicEntries.where((e) => e.pitch != -1).length,
-      measureList: List<Cursors>.from(
-          json["measureList"].map((v) => Cursors.fromJson(v))),
+      measureList:
+          List<Cursor>.from(json["measureList"].map((v) => Cursor.fromJson(v))),
       sheetImage: base64Decode(base64String),
       type: MusicType.user,
       sourceCount: componentCount,

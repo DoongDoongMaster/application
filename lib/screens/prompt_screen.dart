@@ -50,7 +50,7 @@ class _PromptScreenState extends State<PromptScreen> {
   late Metronome _metronome;
 
   final ScrollController _controller = ScrollController();
-  Cursors currentCursor = Cursors.createEmpty();
+  Cursor currentCursor = Cursor.createEmpty();
   static const int cursorOffset = 20;
   PromptState state = PromptState.waiting;
 
@@ -186,7 +186,7 @@ class _PromptScreenState extends State<PromptScreen> {
   }
 
   /// update cursor & scroll down if needed.
-  void updateCursor(Cursors newCursor) {
+  void updateCursor(Cursor newCursor) {
     // y가 바뀐 경우
     if (currentCursor.y != newCursor.y) {
       final scrollYPos = newCursor.y - cursorOffset;
@@ -213,7 +213,7 @@ class _PromptScreenState extends State<PromptScreen> {
         .insertReturningOrNull(PracticeInfosCompanion.insert(
           projectId: widget.projectId!,
           speed: drift.Value(speed),
-          bpm: drift.Value(currentBPM),
+          bpm: currentBPM,
         ));
 
     if (temp != null) {

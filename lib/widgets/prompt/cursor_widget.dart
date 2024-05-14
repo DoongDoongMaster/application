@@ -4,7 +4,7 @@ import 'package:application/styles/color_styles.dart';
 import 'package:flutter/material.dart';
 
 class CursorWidget extends StatelessWidget {
-  final Cursors cursorInfo;
+  final Cursor cursorInfo;
 
   const CursorWidget({super.key, required this.cursorInfo});
 

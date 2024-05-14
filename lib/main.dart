@@ -34,10 +34,10 @@ insertDummyData() async {
                 (await rootBundle.load('assets/music/stay-with-me.png'))
                     .buffer
                     .asUint8List()),
-            cursorList: Value(List<Cursors>.from(
-                sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))),
-            measureList: Value(List<Cursors>.from(
-                    sheetInfo["cursorList"].map((v) => Cursors.fromJson(v)))
+            cursorList: Value(List<Cursor>.from(
+                sheetInfo["cursorList"].map((v) => Cursor.fromJson(v)))),
+            measureList: Value(List<Cursor>.from(
+                    sheetInfo["cursorList"].map((v) => Cursor.fromJson(v)))
                 .sublist(0, 20)),
             measureCount: const Value(50),
             // type: Value(MusicType.values[random.nextInt(2)]),
@@ -228,28 +228,30 @@ changeMusicType() async {
 reCaculatePractice() async {
   List<MusicInfo> musics = await database.musicInfos.select().get();
   for (var m in musics) {
+    print("${m.id} ${m.title}");
     List<ProjectInfo> projects = await (database.projectInfos.select()
           ..where((tbl) => tbl.musicId.equals(m.id)))
         .get();
 
     for (var proj in projects) {
+      print(">>${proj.id} ${proj.title}");
       List<PracticeInfo> practices = await (database.practiceInfos.select()
             ..where((tbl) => tbl.projectId.equals(proj.id)))
           .get();
 
       for (var prac in practices) {
+        print(">>>>${prac.id} ${prac.title}");
+
         if (prac.transcription == null || prac.transcription!.isEmpty) {
-          var currentBPM = (prac.speed! * m.bpm).toInt();
+          var currentBPM = (prac.speed * m.bpm).toInt();
           await (database.update(database.practiceInfos)
                 ..where((tbl) => tbl.id.equals(prac.id)))
               .writeReturning(PracticeInfosCompanion(
                 bpm: Value(currentBPM),
               ))
               .then((value) => print(value.first.result?.length));
-        } else {
-          continue;
         }
-        var currentBPM = (prac.speed! * m.bpm).toInt();
+        var currentBPM = (prac.speed * m.bpm).toInt();
         var updated = ADTResultModel(transcription: prac.transcription!);
 
         await updated.calculateWithAnswer(m.musicEntries, currentBPM);
@@ -320,27 +322,44 @@ makeBackUpData() async {
 }
 
 listAll() async {
-  print("===========MUSIC");
-  List<MusicInfo> musics = await (database.musicInfos.select()).get();
+  // print("===========MUSIC");
+  // List<MusicInfo> musics = await (database.musicInfos.select()).get();
+  // for (var m in musics) {
+  //   print("${m.id} ${m.title}  ${m.title.length} ${m.title.contains("_")}");
+  // }
+  // print("===========PROJECT");
+  // List<ProjectInfo> projects = await (database.projectInfos.select()).get();
+  // for (var p in projects) {
+  //   print("${p.id} ${p.title}  ${p.title.length} ${p.title.contains("_")}");
+  // }
+  // print("==========PRACTICE");
+  // List<PracticeInfo> practices = await (database.practiceInfos.select()
+  //       ..where((tbl) => tbl.score.isNotNull()))
+  //     .get();
+  // practices.sort((a, b) => a.score!.compareTo(b.score!));
+  // for (var p in practices) {
+  //   print("${p.id} ${p.score}");
+  // }
+
+  List<MusicInfo> musics = await database.musicInfos.select().get();
   for (var m in musics) {
-    print("${m.id} ${m.title}  ${m.title.length} ${m.title.contains("_")}");
-  }
-  print("===========PROJECT");
-  List<ProjectInfo> projects = await (database.projectInfos.select()).get();
-  for (var p in projects) {
-    print("${p.id} ${p.title}  ${p.title.length} ${p.title.contains("_")}");
-  }
-  print("==========PRACTICE");
-  List<PracticeInfo> practices = await (database.practiceInfos.select()
-        ..where((tbl) => tbl.score.isNotNull()))
-      .get();
-  practices.sort((a, b) => a.score!.compareTo(b.score!));
-  for (var p in practices) {
-    print("${p.id} ${p.score}");
+    print("music: ${m.id} ${m.title}");
+    List<ProjectInfo> projects = await (database.projectInfos.select()
+          ..where((tbl) => tbl.musicId.equals(m.id)))
+        .get();
+
+    for (var proj in projects) {
+      print(">>project: ${proj.id} ${proj.title}");
+      List<PracticeInfo> practices = await (database.practiceInfos.select()
+            ..where((tbl) => tbl.projectId.equals(proj.id)))
+          .get();
+
+      for (var prac in practices) {
+        print(">>>>practice: ${prac.id}, ${prac.score} ${prac.bpm}");
+      }
+    }
   }
 }
-
-listAllProject() async {}
 
 changeProjectName(String id, String after) async {
   var result = await (database.projectInfos.update()
@@ -350,7 +369,7 @@ changeProjectName(String id, String after) async {
   // print(result[0]);
 }
 
-listAllMusic() async {}
+//
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -364,6 +383,9 @@ void main() async {
   // await makeBackUpData();
   // await reCaculatePractice();
   // await changeMusicType();
+
+  // await reCaculatePractice();
+  // await copyPracticeAll();
   await listAll();
   runApp(const MyApp());
 }
