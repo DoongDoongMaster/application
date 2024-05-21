@@ -10,8 +10,8 @@ showSnackbar(BuildContext context, String text) {
       behavior: SnackBarBehavior.floating,
       margin: EdgeInsets.only(
         bottom: MediaQuery.of(context).size.height - 100,
-        left: 400,
-        right: 400,
+        left: 350,
+        right: 350,
       ),
       content:
           Text(text, style: TextStyles.bodyMedium, textAlign: TextAlign.center),

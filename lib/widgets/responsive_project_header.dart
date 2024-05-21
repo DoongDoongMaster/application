@@ -203,7 +203,10 @@ class _StartButtonSet extends StatelessWidget {
             icon: Icons.repeat_rounded,
             bgColor: const Color(0xFFFF6F1D),
             color: Colors.white,
-            onPressed: () {}, // TODO: 구간연습 연결하기!!!
+            onPressed: () => context.goNamed(
+              RouterPath.drillSetting.name,
+              pathParameters: {"projectId": projectId},
+            ),
           ),
         )
       ],

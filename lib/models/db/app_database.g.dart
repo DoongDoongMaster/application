@@ -1191,18 +1191,14 @@ class $DrillInfosTable extends DrillInfos
           'REFERENCES project_infos (id) ON DELETE RESTRICT'));
   static const VerificationMeta _startMeta = const VerificationMeta('start');
   @override
-  late final GeneratedColumn<double> start = GeneratedColumn<double>(
+  late final GeneratedColumn<int> start = GeneratedColumn<int>(
       'start', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(-1));
+      type: DriftSqlType.int, requiredDuringInsert: true);
   static const VerificationMeta _endMeta = const VerificationMeta('end');
   @override
-  late final GeneratedColumn<double> end = GeneratedColumn<double>(
+  late final GeneratedColumn<int> end = GeneratedColumn<int>(
       'end', aliasedName, false,
-      type: DriftSqlType.double,
-      requiredDuringInsert: false,
-      defaultValue: const Constant(-1));
+      type: DriftSqlType.int, requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns =>
       [id, createdAt, updatedAt, projectId, start, end];
@@ -1236,10 +1232,14 @@ class $DrillInfosTable extends DrillInfos
     if (data.containsKey('start')) {
       context.handle(
           _startMeta, start.isAcceptableOrUnknown(data['start']!, _startMeta));
+    } else if (isInserting) {
+      context.missing(_startMeta);
     }
     if (data.containsKey('end')) {
       context.handle(
           _endMeta, end.isAcceptableOrUnknown(data['end']!, _endMeta));
+    } else if (isInserting) {
+      context.missing(_endMeta);
     }
     return context;
   }
@@ -1259,9 +1259,9 @@ class $DrillInfosTable extends DrillInfos
       projectId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}project_id'])!,
       start: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}start'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}start'])!,
       end: attachedDatabase.typeMapping
-          .read(DriftSqlType.double, data['${effectivePrefix}end'])!,
+          .read(DriftSqlType.int, data['${effectivePrefix}end'])!,
     );
   }
 
@@ -1276,8 +1276,8 @@ class DrillInfosCompanion extends UpdateCompanion<DrillInfo> {
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
   final Value<String> projectId;
-  final Value<double> start;
-  final Value<double> end;
+  final Value<int> start;
+  final Value<int> end;
   final Value<int> rowid;
   const DrillInfosCompanion({
     this.id = const Value.absent(),
@@ -1293,17 +1293,19 @@ class DrillInfosCompanion extends UpdateCompanion<DrillInfo> {
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
     required String projectId,
-    this.start = const Value.absent(),
-    this.end = const Value.absent(),
+    required int start,
+    required int end,
     this.rowid = const Value.absent(),
-  }) : projectId = Value(projectId);
+  })  : projectId = Value(projectId),
+        start = Value(start),
+        end = Value(end);
   static Insertable<DrillInfo> custom({
     Expression<String>? id,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
     Expression<String>? projectId,
-    Expression<double>? start,
-    Expression<double>? end,
+    Expression<int>? start,
+    Expression<int>? end,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -1322,8 +1324,8 @@ class DrillInfosCompanion extends UpdateCompanion<DrillInfo> {
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<String>? projectId,
-      Value<double>? start,
-      Value<double>? end,
+      Value<int>? start,
+      Value<int>? end,
       Value<int>? rowid}) {
     return DrillInfosCompanion(
       id: id ?? this.id,
@@ -1352,10 +1354,10 @@ class DrillInfosCompanion extends UpdateCompanion<DrillInfo> {
       map['project_id'] = Variable<String>(projectId.value);
     }
     if (start.present) {
-      map['start'] = Variable<double>(start.value);
+      map['start'] = Variable<int>(start.value);
     }
     if (end.present) {
-      map['end'] = Variable<double>(end.value);
+      map['end'] = Variable<int>(end.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -3050,21 +3052,24 @@ class $ADTRequestViewView
 }
 
 class DrillMusicViewData extends DataClass {
-  final String? projectId;
+  final String id;
   final String musicId;
+  final String title;
   final Uint8List sheetImage;
   final List<Cursor> measureList;
   const DrillMusicViewData(
-      {this.projectId,
+      {required this.id,
       required this.musicId,
+      required this.title,
       required this.sheetImage,
       required this.measureList});
   factory DrillMusicViewData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return DrillMusicViewData(
-      projectId: serializer.fromJson<String?>(json['projectId']),
+      id: serializer.fromJson<String>(json['id']),
       musicId: serializer.fromJson<String>(json['musicId']),
+      title: serializer.fromJson<String>(json['title']),
       sheetImage: serializer.fromJson<Uint8List>(json['sheetImage']),
       measureList: serializer.fromJson<List<Cursor>>(json['measureList']),
     );
@@ -3073,29 +3078,33 @@ class DrillMusicViewData extends DataClass {
   Map<String, dynamic> toJson({ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
-      'projectId': serializer.toJson<String?>(projectId),
+      'id': serializer.toJson<String>(id),
       'musicId': serializer.toJson<String>(musicId),
+      'title': serializer.toJson<String>(title),
       'sheetImage': serializer.toJson<Uint8List>(sheetImage),
       'measureList': serializer.toJson<List<Cursor>>(measureList),
     };
   }
 
   DrillMusicViewData copyWith(
-          {Value<String?> projectId = const Value.absent(),
+          {String? id,
           String? musicId,
+          String? title,
           Uint8List? sheetImage,
           List<Cursor>? measureList}) =>
       DrillMusicViewData(
-        projectId: projectId.present ? projectId.value : this.projectId,
+        id: id ?? this.id,
         musicId: musicId ?? this.musicId,
+        title: title ?? this.title,
         sheetImage: sheetImage ?? this.sheetImage,
         measureList: measureList ?? this.measureList,
       );
   @override
   String toString() {
     return (StringBuffer('DrillMusicViewData(')
-          ..write('projectId: $projectId, ')
+          ..write('id: $id, ')
           ..write('musicId: $musicId, ')
+          ..write('title: $title, ')
           ..write('sheetImage: $sheetImage, ')
           ..write('measureList: $measureList')
           ..write(')'))
@@ -3104,13 +3113,14 @@ class DrillMusicViewData extends DataClass {
 
   @override
   int get hashCode => Object.hash(
-      projectId, musicId, $driftBlobEquality.hash(sheetImage), measureList);
+      id, musicId, title, $driftBlobEquality.hash(sheetImage), measureList);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is DrillMusicViewData &&
-          other.projectId == this.projectId &&
+          other.id == this.id &&
           other.musicId == this.musicId &&
+          other.title == this.title &&
           $driftBlobEquality.equals(other.sheetImage, this.sheetImage) &&
           other.measureList == this.measureList);
 }
@@ -3127,7 +3137,7 @@ class $DrillMusicViewView
   $MusicInfosTable get music => attachedDatabase.musicInfos.createAlias('t1');
   @override
   List<GeneratedColumn> get $columns =>
-      [projectId, musicId, sheetImage, measureList];
+      [id, musicId, title, sheetImage, measureList];
   @override
   String get aliasedName => _alias ?? entityName;
   @override
@@ -3140,10 +3150,12 @@ class $DrillMusicViewView
   DrillMusicViewData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return DrillMusicViewData(
-      projectId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}project_id']),
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       musicId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}music_id'])!,
+      title: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       sheetImage: attachedDatabase.typeMapping
           .read(DriftSqlType.blob, data['${effectivePrefix}sheet_image'])!,
       measureList: $MusicInfosTable.$convertermeasureList.fromSql(
@@ -3152,12 +3164,16 @@ class $DrillMusicViewView
     );
   }
 
-  late final GeneratedColumn<String> projectId = GeneratedColumn<String>(
-      'project_id', aliasedName, true,
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+      'id', aliasedName, false,
       generatedAs: GeneratedAs(project.id, false), type: DriftSqlType.string);
   late final GeneratedColumn<String> musicId = GeneratedColumn<String>(
       'music_id', aliasedName, false,
       generatedAs: GeneratedAs(project.musicId, false),
+      type: DriftSqlType.string);
+  late final GeneratedColumn<String> title = GeneratedColumn<String>(
+      'title', aliasedName, false,
+      generatedAs: GeneratedAs(project.title, false),
       type: DriftSqlType.string);
   late final GeneratedColumn<Uint8List> sheetImage = GeneratedColumn<Uint8List>(
       'sheet_image', aliasedName, false,

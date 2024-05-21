@@ -10,6 +10,8 @@ class WhiteThinAppBar extends AppBar {
     required String rightText,
     required void Function() onPressedLeftLabel,
     required void Function()? onPressedRightLabel,
+    IconButton? iconButton1,
+    IconButton? iconButton2,
   }) : super(
           toolbarHeight: 50,
           automaticallyImplyLeading: false,
@@ -18,18 +20,29 @@ class WhiteThinAppBar extends AppBar {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
-                  onPressed: onPressedLeftLabel,
+                Expanded(
+                  flex: 1,
                   child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      const Icon(
-                        Icons.arrow_back_ios,
-                        size: 20,
-                      ),
-                      Text(
-                        leftText,
-                        style: TextStyles.bodyLarge,
+                      TextButton(
+                        onPressed: onPressedLeftLabel,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            const Icon(
+                              Icons.arrow_back_ios,
+                              size: 20,
+                            ),
+                            SizedBox(
+                              width: 180,
+                              child: Text(
+                                leftText,
+                                style: TextStyles.bodyLarge,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -43,11 +56,22 @@ class WhiteThinAppBar extends AppBar {
                     alignment: Alignment.center,
                   ),
                 ),
-                TextButton(
-                  onPressed: onPressedRightLabel,
-                  child: Text(
-                    rightText,
-                    style: TextStyles.bodyLarge,
+                Expanded(
+                  flex: 1,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (iconButton1 != null) iconButton1,
+                      if (iconButton2 != null) iconButton2,
+                      if (iconButton1 == null && iconButton2 == null)
+                        TextButton(
+                          onPressed: onPressedRightLabel,
+                          child: Text(
+                            rightText,
+                            style: TextStyles.bodyLarge,
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               ],

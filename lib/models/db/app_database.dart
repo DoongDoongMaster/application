@@ -221,8 +221,7 @@ class AppDatabase extends _$AppDatabase {
 
 //////////////////////////////////////////////
   Future<DrillListData> getDrillList(String projectId) => Future.wait([
-        (select(drillMusicView)
-              ..where((tbl) => tbl.projectId.equals(projectId)))
+        (select(drillMusicView)..where((tbl) => tbl.id.equals(projectId)))
             .getSingleOrNull(),
         (select(drillInfos)..where((tbl) => tbl.projectId.equals(projectId)))
             .get(),

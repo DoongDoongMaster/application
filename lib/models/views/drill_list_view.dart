@@ -9,11 +9,11 @@ abstract class DrillMusicView extends View {
   ProjectInfos get project;
   MusicInfos get music;
 
-  Expression<String> get projectId => project.id;
   @override
   Query as() => select([
-        projectId,
+        project.id,
         project.musicId,
+        project.title,
         music.sheetImage,
         music.measureList,
       ]).from(project).join([
@@ -22,7 +22,7 @@ abstract class DrillMusicView extends View {
 }
 
 class DrillListData {
-  final String musicId;
+  final String musicId, projectTitle, projectId;
   final Uint8List? sheetImage;
   final List<Cursor> measureList;
   final List<DrillInfo> drillList;
@@ -30,7 +30,9 @@ class DrillListData {
   DrillListData({
     required DrillMusicViewData musicdata,
     required this.drillList,
-  })  : musicId = musicdata.musicId,
+  })  : projectId = musicdata.id,
+        musicId = musicdata.musicId,
+        projectTitle = musicdata.title,
         sheetImage = musicdata.sheetImage,
         measureList = musicdata.measureList;
 }

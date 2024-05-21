@@ -15,6 +15,7 @@ import 'package:application/time_utils.dart';
 import 'package:application/widgets/custom_dialog.dart';
 import 'package:application/widgets/modal_widget.dart';
 import 'package:application/widgets/music_sheet_viewer_widget.dart';
+import 'package:application/widgets/positioned_container.dart';
 import 'package:application/widgets/report/report_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -178,7 +179,9 @@ class _ReportScreenState extends State<ReportScreen> {
                                 width: 1024,
                                 child: Stack(
                                   children: [
-                                    MusicSheetWidget(image: markedImage!),
+                                    Center(
+                                        child: MusicSheetWidget(
+                                            image: markedImage!)),
                                     for (var i = 0;
                                         i < _data.measureList.length;
                                         i++)
@@ -237,32 +240,25 @@ class _MeasureViewButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      left: curr.x + 1,
-      top: curr.y,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return _MeasureViewModal(
-                markedImage: markedImage!,
-                curr: curr,
-                prev: prev,
-                next: next,
-                notes: notes,
-                ts1: ts1,
-                ts2: ts2,
-              );
-            },
-          );
-        },
-        child: SizedBox(
-          width: curr.w - 2,
-          height: curr.h,
-        ),
-      ),
+    return PositionedInkWell(
+      cursor: curr,
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            // TODO: 너무 느림!!!!! (비동기로 바꿀 수 있을지 찾아보기)
+            return _MeasureViewModal(
+              markedImage: markedImage!,
+              curr: curr,
+              prev: prev,
+              next: next,
+              notes: notes,
+              ts1: ts1,
+              ts2: ts2,
+            );
+          },
+        );
+      },
     );
   }
 }

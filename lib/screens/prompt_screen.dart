@@ -31,7 +31,6 @@ enum PromptState {
 }
 
 class PromptScreen extends StatefulWidget {
-  static const double sheetPadding = 40;
   final String? musicId, projectId;
   const PromptScreen({
     super.key,
@@ -338,15 +337,11 @@ class _PromptScreenState extends State<PromptScreen> {
                           Stack(
                             children: [
                               CursorWidget(
-                                cursorInfo: currentCursor,
+                                cursor: currentCursor,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: PromptScreen.sheetPadding),
-                                child: Image.memory(
-                                  music.sheetImage!,
-                                  width: 1024,
-                                ),
+                              Image.memory(
+                                music.sheetImage!,
+                                width: 1024,
                               ),
                             ],
                           ),

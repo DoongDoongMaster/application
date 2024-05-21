@@ -6,6 +6,7 @@ import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/models/entity/drill_info.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
@@ -158,7 +159,7 @@ insertDummyData() async {
   // print(temp);
 }
 
-fixData() async {
+updateMusicData() async {
   List<MusicInfo> musics = await database.musicInfos.select().get();
   var i = 1;
   for (var m in musics) {
@@ -170,23 +171,22 @@ fixData() async {
         xmlData: m.xmlData,
       );
 
-      // (database.update(database.musicInfos)
-      //       ..where((tbl) => tbl.id.equals(m.id)))
-      //     .write(MusicInfosCompanion(
-      //   cursorList: Value(temp.cursorList),
-      //   hitCount: Value(temp.hitCount),
-      //   sheetImage: Value(temp.sheetImage!),
-      //   measureCount: Value(temp.measureCount),
-      //   measureList: Value(temp.measureList),
-      //   musicEntries: Value(temp.musicEntries),
-      //   sourceCount: Value(temp.sourceCount!),
-      // ));
+      (database.update(database.musicInfos)
+            ..where((tbl) => tbl.id.equals(m.id)))
+          .write(MusicInfosCompanion(
+        cursorList: Value(temp.cursorList),
+        hitCount: Value(temp.hitCount),
+        sheetImage: Value(temp.sheetImage!),
+        measureCount: Value(temp.measureCount),
+        measureList: Value(temp.measureList),
+        musicEntries: Value(temp.musicEntries),
+        sourceCount: Value(temp.sourceCount!),
+      ));
     });
 
     osmd.run(xmlData: m.xmlData!);
 
-    break;
-    await Future.delayed(const Duration(seconds: 10));
+    await Future.delayed(const Duration(seconds: 7));
     print("$i / ${musics.length}. ${m.id}: ${m.title}, DONE");
     i++;
   }
@@ -356,6 +356,12 @@ listAll() async {
 
       for (var prac in practices) {
         print(">>>>practice: ${prac.id}, ${prac.score} ${prac.bpm}");
+      }
+      List<DrillInfo> drills = await (database.drillInfos.select()
+            ..where((tbl) => tbl.projectId.equals(proj.id)))
+          .get();
+      for (var drill in drills) {
+        print(">>>>drill: ${drill.id}, ${drill.start} ${drill.end}");
       }
     }
   }

@@ -27,6 +27,14 @@ class Cursor {
         h = 0,
         ts = 0;
 
+  copyWith({double? x, double? y, double? w, double? h, double? ts}) => Cursor(
+        x: x ?? this.x,
+        y: y ?? this.y,
+        w: w ?? this.w,
+        h: h ?? this.h,
+        ts: ts ?? this.ts,
+      );
+
   factory Cursor.fromJson(Map<String, dynamic> json) => _$CursorFromJson(json);
 
   Map<String, dynamic> toJson() => _$CursorToJson(this);

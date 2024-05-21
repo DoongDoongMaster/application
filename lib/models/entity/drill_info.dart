@@ -4,7 +4,7 @@ import 'package:drift/drift.dart';
 
 class DrillInfo extends DefaultEntity {
   final String projectId;
-  final double start, end;
+  final int start, end;
 
   DrillInfo({
     super.id = "",
@@ -20,6 +20,6 @@ class DrillInfo extends DefaultEntity {
 class DrillInfos extends DefaultTable {
   TextColumn get projectId =>
       text().references(ProjectInfos, #id, onDelete: KeyAction.restrict)();
-  RealColumn get start => real().withDefault(const Constant(-1))();
-  RealColumn get end => real().withDefault(const Constant(-1))();
+  IntColumn get start => integer()();
+  IntColumn get end => integer()();
 }
