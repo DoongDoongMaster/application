@@ -77,6 +77,7 @@ class MusicInfo extends DefaultEntity {
   }
 
   copyWith({
+    String id = "",
     String? title,
     String? artist,
     int? bpm,
@@ -86,6 +87,7 @@ class MusicInfo extends DefaultEntity {
     List<MusicEntry>? musicEntries,
   }) =>
       MusicInfo(
+        id: id,
         title: title ?? this.title,
         artist: artist ?? this.artist,
         bpm: bpm ?? this.bpm,
@@ -139,6 +141,7 @@ class MusicInfo extends DefaultEntity {
 
     // 새로운 객체 반납
     return copyWith(
+      id: id,
       sheetImage: croppedImage,
       measureList: newMeasureList,
       cursorList: newCursorList,

@@ -179,6 +179,8 @@ class _PromptScreenState extends State<PromptScreen> {
     PromptOption? result;
     // 1. 음악 정보 가져오기
     await _getMusicInfo();
+    var sourceCnt = music.sourceCnt;
+    var hitCnt = music.hitCount;
 
     await Future.wait([
       // 2. 구간 연습인 경우 정보 가져오고, 업데이트
@@ -188,7 +190,10 @@ class _PromptScreenState extends State<PromptScreen> {
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) => PromptSettingModal(
+            drillId: widget.drillId,
             promptOption: _option,
+            sourceCnt: sourceCnt,
+            hitCnt: hitCnt,
           ),
         ).then((value) => result = value)
     ]);
@@ -333,7 +338,10 @@ class _PromptScreenState extends State<PromptScreen> {
       temp = await database
           .into(database.drillReportInfos)
           .insertReturningOrNull(DrillReportInfosCompanion.insert(
-              bpm: _option.currentBPM, drillId: widget.drillId!));
+            bpm: _option.currentBPM,
+            drillId: widget.drillId!,
+            count: drift.Value(_option.count),
+          ));
     }
 
     if (temp != null) {
@@ -388,7 +396,21 @@ class _PromptScreenState extends State<PromptScreen> {
         showSnackbar(context, '오류가 발생했습니다. - 녹음 저장 실패');
       }
     }
-    _goBack();
+
+    switch (_option.type) {
+      case ReportType.full:
+        _goBack();
+        break;
+      case ReportType.drill:
+        if (mounted) {
+          context.pushReplacementNamed(RouterPath.prompt.name, pathParameters: {
+            "musicId": music.id,
+            "projectId": drillInfo!.projectId,
+          }, queryParameters: {
+            "drillId": drillInfo!.id,
+          });
+        }
+    }
   }
 
   /// clean up practice data in DB, record, state

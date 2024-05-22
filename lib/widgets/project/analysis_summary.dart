@@ -9,11 +9,12 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
 class AnalysisSummary extends StatelessWidget {
-  static const int previewSize = 8;
+  final int previewSize;
   final AnalysisSummaryData data;
   const AnalysisSummary({
     super.key,
     required this.data,
+    this.previewSize = 8,
   });
 
   @override
@@ -28,6 +29,7 @@ class AnalysisSummary extends StatelessWidget {
               child: Panel(
                 size: const Size(0, 200),
                 child: _ScoreChart(
+                  previewSize: previewSize,
                   bestScore: data.bestScore?.toString() ?? '-',
                   scoreList: data.scoreList.reversed.toList(),
                 ),
@@ -39,6 +41,7 @@ class AnalysisSummary extends StatelessWidget {
               child: Panel(
                 size: const Size(0, 200),
                 child: _AccuracyChart(
+                    previewSize: previewSize,
                     hitCount: data.hitCount,
                     accuracyCount: data.bestCount,
                     accuracyList: data.accuracyList.reversed.toList()),
@@ -56,9 +59,11 @@ class _AccuracyChart extends StatelessWidget {
     this.hitCount,
     required this.accuracyCount,
     required this.accuracyList,
+    required this.previewSize,
   });
 
   final int? hitCount;
+  final int previewSize;
   final AccuracyCount? accuracyCount;
   final List<AccuracyCount?> accuracyList;
   static final AutoSizeGroup _autoSizeGroup = AutoSizeGroup();
@@ -94,6 +99,7 @@ class _AccuracyChart extends StatelessWidget {
         ),
         Expanded(
           child: _ChartContainer(
+            previewSize: previewSize,
             drawVerticalLine: true,
             lineBarData: [
               for (var line in AccuracyType.values)
@@ -101,9 +107,7 @@ class _AccuracyChart extends StatelessWidget {
                   spots: [
                     for (var (i, v) in accuracyList.indexed)
                       FlSpot(
-                        AnalysisSummary.previewSize -
-                            accuracyList.length +
-                            i.toDouble(),
+                        previewSize - accuracyList.length + i.toDouble(),
                         v == null ? 0 : v.getByType(line)!.toDouble(),
                       )
                   ],
@@ -126,8 +130,9 @@ class _ScoreChart extends StatelessWidget {
   const _ScoreChart({
     required this.bestScore,
     required this.scoreList,
+    required this.previewSize,
   });
-
+  final int previewSize;
   final String bestScore;
   final List<double?> scoreList;
 
@@ -197,16 +202,14 @@ class _ScoreChart extends StatelessWidget {
         ),
         Expanded(
           child: _ChartContainer(
+            previewSize: previewSize,
             drawVerticalLine: false,
             lineBarData: [
               LineChartBarData(
                 spots: [
                   for (var (i, v) in scoreList.indexed)
                     FlSpot(
-                        AnalysisSummary.previewSize -
-                            scoreList.length +
-                            i.toDouble(),
-                        v ?? 0)
+                        previewSize - scoreList.length + i.toDouble(), v ?? 0)
                 ],
                 color: ColorStyles.primary,
                 belowBarData: BarAreaData(
@@ -265,6 +268,7 @@ class _ChartContainer extends Container {
   );
 
   _ChartContainer({
+    required int previewSize,
     required List<LineChartBarData> lineBarData,
     required bool drawVerticalLine,
   }) : super(
@@ -282,7 +286,7 @@ class _ChartContainer extends Container {
               lineBarsData: lineBarData,
               backgroundColor: ColorStyles.background,
               minX: 0,
-              maxX: AnalysisSummary.previewSize.toDouble() - 1,
+              maxX: previewSize.toDouble() - 1,
               minY: 0,
               maxY: drawVerticalLine ? null : 100,
               gridData: FlGridData(

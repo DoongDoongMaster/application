@@ -144,7 +144,7 @@ class NavigationPanel extends StatelessWidget {
             const Spacer(),
           MenuChip(
             label: "새로운 연습",
-            isSelected: currentTab == HomeTab.musicList,
+            isSelected: false,
             onSelected: (_) => onTab(HomeTab.musicList),
             iconBgColor: currentTab == HomeTab.musicList
                 ? Colors.transparent

@@ -1,6 +1,7 @@
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/models/entity/drill_report_info.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
@@ -62,4 +63,15 @@ class AnalysisSummaryData {
         accuracyList = practiceList
             .map((d) => AccuracyCount.fromScoredEntries(d.result ?? []))
             .toList();
+
+  AnalysisSummaryData.fromDrillReport({
+    required int bestIdx,
+    required this.sourceCnt,
+    required this.hitCount,
+    required List<int> scores,
+    required this.accuracyList,
+  })  : sourceCount = ComponentCount(),
+        bestScore = scores[bestIdx].toInt(),
+        bestCount = accuracyList[bestIdx],
+        scoreList = scores.map((e) => e.toDouble()).toList();
 }

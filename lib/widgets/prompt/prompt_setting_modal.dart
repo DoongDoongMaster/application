@@ -1,8 +1,16 @@
+import 'dart:math';
+
+import 'package:application/main.dart';
+import 'package:application/models/convertors/accuracy_count_convertor.dart';
+import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/entity/default_report_info.dart';
+import 'package:application/models/entity/drill_report_info.dart';
+import 'package:application/models/views/project_summary_view.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/custom_dialog.dart';
+import 'package:application/widgets/project/analysis_summary.dart';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
@@ -19,10 +27,16 @@ class PromptOption {
 }
 
 class PromptSettingModal extends StatefulWidget {
+  final String? drillId;
   final PromptOption promptOption;
+  final ComponentCount? sourceCnt;
+  final int? hitCnt;
   const PromptSettingModal({
     super.key,
     required this.promptOption,
+    this.sourceCnt,
+    this.hitCnt,
+    this.drillId,
   });
 
   @override
@@ -69,6 +83,7 @@ class PromptSettingModalState extends State<PromptSettingModal> {
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
+      width: (widget.promptOption.type == ReportType.drill) ? 700 : 540,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -118,6 +133,46 @@ class PromptSettingModalState extends State<PromptSettingModal> {
               ],
             ),
           ),
+          if (widget.promptOption.type == ReportType.drill)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+              child: FutureBuilder<List<DrillReportInfo>>(
+                future: database.getPreviosDrillRecord(widget.drillId!),
+                builder: (context, snapshot) {
+                  if (!snapshot.hasData) {
+                    return const LinearProgressIndicator();
+                  }
+                  if (snapshot.data!.isEmpty ||
+                      snapshot.data![0].scores == null) {
+                    return const Text("레포트가 비어 있음");
+                  } else {
+                    var report = snapshot.data![0];
+                    var idx = 0;
+                    var bestScore = 0;
+                    // report.scores
+                    for (var i = 0; i < report.count; i++) {
+                      if (report.scores![i] > bestScore) {
+                        bestScore = report.scores![i];
+                        idx = i;
+                      }
+                    }
+
+                    var data = AnalysisSummaryData.fromDrillReport(
+                      bestIdx: idx,
+                      sourceCnt: widget.sourceCnt!,
+                      hitCount: widget.hitCnt,
+                      scores: report.scores!,
+                      accuracyList: report.accuracyCounts,
+                    );
+                    return AnalysisSummary(
+                      data: data,
+                      previewSize: min(10, report.count),
+                    );
+                  }
+                },
+                // builder: (context) => const SizedBox(),
+              ),
+            ),
           const Divider(height: 0),
           Container(
             decoration: const BoxDecoration(color: ColorStyles.background),

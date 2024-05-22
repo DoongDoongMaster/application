@@ -77,8 +77,7 @@ class ProjectBody extends StatelessWidget {
                     }),
               ),
               FutureBuilder<AnalysisSummaryData?>(
-                  future: database.getAnalysisSummaryData(
-                      projectId, AnalysisSummary.previewSize),
+                  future: database.getAnalysisSummaryData(projectId, 8),
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
                       return const SliverToBoxAdapter(

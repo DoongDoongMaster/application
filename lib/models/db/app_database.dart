@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:application/main.dart';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
@@ -176,6 +177,14 @@ class AppDatabase extends _$AppDatabase {
   //         .write(const DrillReportInfosCompanion());
   //   }
   // }
+
+  /// REPORT - SELECT
+  Future<List<DrillReportInfo>> getPreviosDrillRecord(String drillId) =>
+      (select(drillReportInfos)
+            ..where((tbl) => tbl.drillId.equals(drillId))
+            ..orderBy([(u) => OrderingTerm.desc(drillReportInfos.createdAt)])
+            ..limit(1))
+          .get();
 
   /// Report - DELETE
   Future<void> deleteReport(String id, ReportType type) {
