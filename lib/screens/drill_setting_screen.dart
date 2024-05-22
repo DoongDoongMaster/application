@@ -471,7 +471,9 @@ class DrillSelectPopup extends StatelessWidget {
                             var response = await showDialog<DeleteConfirm>(
                               context: context,
                               builder: (ctx) => DeleteConfirmDialog(
-                                  drillId: selectedList[i]!),
+                                guideText:
+                                    "구간을 삭제하면 레포트 기록도 함께 삭제되며 복구할 수 없습니다.",
+                              ),
                             );
 
                             if (response == DeleteConfirm.ok) {

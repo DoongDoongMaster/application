@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/screens/home_screen.dart';
+import 'package:application/services/api_service.dart';
 import 'package:application/services/osmd_service.dart';
 import 'package:application/widgets/home/add_new_modal.dart';
 import 'package:application/widgets/music_sheet_viewer_widget.dart';
@@ -27,7 +30,8 @@ class _NewMusicScreenState extends State<NewMusicScreen> {
   void initState() {
     super.initState();
 
-    File(widget.filePath!).readAsBytes().then((bytes) {
+    ApiService.getOMRResult(widget.filePath!).then((data) {
+      Uint8List bytes = utf8.encode(data);
       OSMDService osmd = OSMDService(
         callback: (base64Image, json) {
           setState(() {
@@ -41,6 +45,10 @@ class _NewMusicScreenState extends State<NewMusicScreen> {
         },
       );
       osmd.run(xmlData: bytes);
+    }).onError((error, stackTrace) {
+      if (mounted) {
+        context.pop();
+      }
     });
   }
 
@@ -66,7 +74,10 @@ class _NewMusicScreenState extends State<NewMusicScreen> {
                 ).then((value) {
                   if (value == true) {
                     context.pushReplacementNamed(RouterPath.home.name,
-                        queryParameters: {"tab": HomeTab.musicList.name});
+                        queryParameters: {
+                          "tab": HomeTab.musicList.name,
+                          "refresh": ''
+                        });
                   }
                 }),
       ),

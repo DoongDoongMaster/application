@@ -46,7 +46,7 @@ class ProjectPreview extends StatelessWidget {
         child: Badge(
           label: Icon(
             Icons.favorite_rounded,
-            color: data.isLiked ? const Color(0xFFFF0000) : Colors.transparent,
+            color: data.isLiked ? ColorStyles.red : Colors.transparent,
             shadows: [
               if (!data.isLiked) ...[
                 const BoxShadow(

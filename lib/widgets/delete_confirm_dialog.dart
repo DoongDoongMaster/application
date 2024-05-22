@@ -10,52 +10,61 @@ enum DeleteConfirm {
 }
 
 class DeleteConfirmDialog extends CustomDialog {
-  final String drillId;
+  final String guideText;
   DeleteConfirmDialog({
     super.key,
-    required this.drillId,
+    required this.guideText,
   });
 
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      height: 180,
+      // height: 180,
       width: 540,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            "정말 삭제하시겠습니까?",
-            style: TextStyles.titleMedium.copyWith(
-              color: ColorStyles.onSurfaceBlack,
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Text(
+              "정말 삭제하시겠습니까?",
+              style: TextStyles.titleMedium.copyWith(
+                color: ColorStyles.onSurfaceBlack,
+              ),
             ),
           ),
-          const Divider(height: 0),
-          Text(
-            "구간을 삭제하면 레포트 기록도 함께 삭제되며 복구할 수 없습니다.",
-            maxLines: 2,
-            style: TextStyles.bodyMedium.copyWith(
-              color: ColorStyles.onSurfaceBlackVariant,
+          const Divider(height: 3),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 30),
+            child: Text(
+              guideText,
+              style: TextStyles.bodyMedium.copyWith(
+                color: ColorStyles.onSurfaceBlackVariant,
+              ),
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              _ConfrimButton(
-                text: "취소",
-                onPressed: () =>
-                    context.pop<DeleteConfirm>(DeleteConfirm.cancel),
-                foregroundColor: ColorStyles.onSurfaceBlackVariant,
-                backgroundColor: const Color(0xFFEAEAEA),
-              ),
-              const SizedBox(width: 25),
-              _ConfrimButton(
-                text: "삭제",
-                onPressed: () => context.pop<DeleteConfirm>(DeleteConfirm.ok),
-                foregroundColor: Colors.white,
-                backgroundColor: ColorStyles.red,
-              ),
-            ],
+          Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _ConfrimButton(
+                  text: "취소",
+                  onPressed: () =>
+                      context.pop<DeleteConfirm>(DeleteConfirm.cancel),
+                  foregroundColor: ColorStyles.onSurfaceBlackVariant,
+                  backgroundColor: const Color(0xFFEAEAEA),
+                ),
+                const SizedBox(width: 25),
+                _ConfrimButton(
+                  text: "삭제",
+                  onPressed: () => context.pop<DeleteConfirm>(DeleteConfirm.ok),
+                  foregroundColor: Colors.white,
+                  backgroundColor: ColorStyles.red,
+                ),
+              ],
+            ),
           ),
         ],
       ),

@@ -20,7 +20,6 @@ class ApiService {
       {required String dataPath, required int bpm}) async {
     print("uploading file... ${File(dataPath).path}");
 
-    // 서버 엔드포인트 URL 수정
     var uri = Uri.parse('${ApiService.baseUrl}/models/adt/predict')
         .replace(queryParameters: {'bpm': bpm.toString()});
 
@@ -28,7 +27,6 @@ class ApiService {
       var request = http.MultipartRequest('POST', uri)
         ..headers.addAll({
           'Content-Type': 'multipart/form-data',
-          'ngrok-skip-browser-warning': '1',
         })
         ..files.add(
             await http.MultipartFile.fromPath('file', File(dataPath).path));
@@ -74,6 +72,38 @@ class ApiService {
         var jsonResponse = json.decode(responseBody);
         print(jsonResponse);
         return jsonResponse;
+      } else {
+        print('${response.statusCode}: ${response.reasonPhrase}');
+        // throw Error();
+        return null;
+      }
+    } catch (error) {
+      print('오류 발생: $error');
+      return null;
+    }
+  }
+
+  static Future<dynamic> getOMRResult(String dataPath) async {
+    var uri = Uri.parse('${ApiService.baseUrl}/models/omr/predict');
+
+    try {
+      var request = http.MultipartRequest('POST', uri)
+        ..headers.addAll({
+          'Content-Type': 'multipart/form-data',
+        })
+        ..files.add(
+            await http.MultipartFile.fromPath('file', File(dataPath).path));
+      print("request url: ${request.url.toString()}, $dataPath");
+
+      var response = await request.send();
+      print("request, ${request.files}");
+      var responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        // 서버 응답 데이터를 JSON으로 파싱
+        var jsonResponse = json.decode(responseBody);
+        return jsonResponse["result"];
+        // return ADTResultModel.fromJson({'instrument': [], 'rhythm': []});)
       } else {
         print('${response.statusCode}: ${response.reasonPhrase}');
         // throw Error();

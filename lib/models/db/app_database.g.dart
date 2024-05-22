@@ -2156,8 +2156,12 @@ class ProjectSidebarViewData extends DataClass {
   final String id;
   final String title;
   final MusicType type;
+  final DateTime createdAt;
   const ProjectSidebarViewData(
-      {required this.id, required this.title, required this.type});
+      {required this.id,
+      required this.title,
+      required this.type,
+      required this.createdAt});
   factory ProjectSidebarViewData.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
@@ -2166,6 +2170,7 @@ class ProjectSidebarViewData extends DataClass {
       title: serializer.fromJson<String>(json['title']),
       type: $MusicInfosTable.$convertertype
           .fromJson(serializer.fromJson<int>(json['type'])),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
     );
   }
   @override
@@ -2176,35 +2181,39 @@ class ProjectSidebarViewData extends DataClass {
       'title': serializer.toJson<String>(title),
       'type':
           serializer.toJson<int>($MusicInfosTable.$convertertype.toJson(type)),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
     };
   }
 
   ProjectSidebarViewData copyWith(
-          {String? id, String? title, MusicType? type}) =>
+          {String? id, String? title, MusicType? type, DateTime? createdAt}) =>
       ProjectSidebarViewData(
         id: id ?? this.id,
         title: title ?? this.title,
         type: type ?? this.type,
+        createdAt: createdAt ?? this.createdAt,
       );
   @override
   String toString() {
     return (StringBuffer('ProjectSidebarViewData(')
           ..write('id: $id, ')
           ..write('title: $title, ')
-          ..write('type: $type')
+          ..write('type: $type, ')
+          ..write('createdAt: $createdAt')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, title, type);
+  int get hashCode => Object.hash(id, title, type, createdAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ProjectSidebarViewData &&
           other.id == this.id &&
           other.title == this.title &&
-          other.type == this.type);
+          other.type == this.type &&
+          other.createdAt == this.createdAt);
 }
 
 class $ProjectSidebarViewView
@@ -2219,7 +2228,7 @@ class $ProjectSidebarViewView
   $MusicInfosTable get musicInfos =>
       attachedDatabase.musicInfos.createAlias('t1');
   @override
-  List<GeneratedColumn> get $columns => [id, title, type];
+  List<GeneratedColumn> get $columns => [id, title, type, createdAt];
   @override
   String get aliasedName => _alias ?? entityName;
   @override
@@ -2238,6 +2247,8 @@ class $ProjectSidebarViewView
           .read(DriftSqlType.string, data['${effectivePrefix}title'])!,
       type: $MusicInfosTable.$convertertype.fromSql(attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}type'])!),
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
     );
   }
 
@@ -2253,6 +2264,10 @@ class $ProjectSidebarViewView
               generatedAs: GeneratedAs(musicInfos.type, false),
               type: DriftSqlType.int)
           .withConverter<MusicType>($MusicInfosTable.$convertertype);
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      generatedAs: GeneratedAs(projects.createdAt, false),
+      type: DriftSqlType.dateTime);
   @override
   $ProjectSidebarViewView createAlias(String alias) {
     return $ProjectSidebarViewView(attachedDatabase, alias);
