@@ -7,6 +7,7 @@ import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/widgets/ddm_popup_menu_item.dart';
+import 'package:application/widgets/delete_confirm_dialog.dart';
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -93,12 +94,19 @@ class ReportListItem extends StatelessWidget {
             width: 30,
             child: PopupMenuButton(
               padding: EdgeInsets.zero,
-              onSelected: (value) {
+              onSelected: (value) async {
                 switch (value) {
                   case 0:
-                    database.deleteReport(data.id, ReportType.full).then(
-                        (value) =>
-                            context.pushReplacementNamed(RouterPath.home.name));
+                    var response = await showDialog<DeleteConfirm>(
+                        context: context,
+                        builder: (context) => DeleteConfirmDialog(
+                            guideText: '연습 기록(${data.title})을 삭제하시겠습니까?'));
+
+                    if (response == DeleteConfirm.ok) {
+                      database.deleteReport(data.id, ReportType.full).then(
+                          (value) => context
+                              .pushReplacementNamed(RouterPath.home.name));
+                    }
                     break;
                   case 1:
                     ADT.runWithId(data.id, context);

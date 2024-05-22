@@ -5,6 +5,7 @@ import 'package:application/models/views/project_summary_view.dart';
 import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:application/widgets/delete_confirm_dialog.dart';
 import 'package:application/widgets/no_content_widget.dart';
 import 'package:application/widgets/project/analysis_summary.dart';
 import 'package:application/widgets/project/panel.dart';
@@ -318,13 +319,20 @@ class _TopHeaderTempState extends State<_TopHeaderTemp> {
             icon: const Icon(Icons.more_horiz_rounded),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
-            onSelected: (value) {
+            onSelected: (value) async {
               switch (value) {
                 case 0:
-                  database.deleteProject(widget.projectId).then((value) {
-                    context.pushReplacementNamed(RouterPath.home.name,
-                        queryParameters: {'refresh': ''});
-                  });
+                  var response = await showDialog<DeleteConfirm>(
+                      context: context,
+                      builder: (context) => DeleteConfirmDialog(
+                          guideText: '연습장을 삭제하면 연습장의 모든 기록도 삭제됩니다!'));
+
+                  if (response == DeleteConfirm.ok) {
+                    database.deleteProject(widget.projectId).then((value) {
+                      context.pushReplacementNamed(RouterPath.home.name,
+                          queryParameters: {'refresh': ''});
+                    });
+                  }
               }
             },
             itemBuilder: (context) => [
