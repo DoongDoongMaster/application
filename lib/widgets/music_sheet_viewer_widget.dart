@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:application/models/entity/music_infos.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:flutter/material.dart';
 
@@ -17,5 +18,5 @@ class MusicSheetWidget extends Image {
   MusicSheetWidget({
     super.key,
     required Uint8List image,
-  }) : super.memory(image, width: 1024);
+  }) : super.memory(image, width: MusicInfo.imageWidth);
 }

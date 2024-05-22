@@ -145,7 +145,7 @@ class _VerticalContent extends StatelessWidget {
                       artist: data.artist,
                       bpm: data.bpm,
                       length: TimeUtils.getTotalDurationInSec(
-                          data.bpm, data.measureCount),
+                          data.bpm, data.measureList.length),
                       createdAt: data.createdAt,
                     ),
                   ),

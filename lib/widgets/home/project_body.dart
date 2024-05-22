@@ -48,7 +48,7 @@ class ProjectBody extends StatelessWidget {
                         artist: '-',
                         bpm: 90,
                         type: MusicType.ddm,
-                        measureCount: 0,
+                        measureList: [],
                       )
                     ],
                     builder: (context, snapshot) {
@@ -195,7 +195,8 @@ class ProjectBody extends StatelessWidget {
                               );
                             }
                             return ReportListItem(
-                                data: snapshot.data![index - 1]);
+                              data: snapshot.data![index - 1],
+                            );
                           },
                           childCount: snapshot.data!.length + 1,
                         ),

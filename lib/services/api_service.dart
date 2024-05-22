@@ -1,14 +1,22 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:application/models/adt_result_model.dart';
+import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/environment.dart';
 import 'package:http/http.dart' as http;
+
+class ADTApiResponse {
+  final List<MusicEntry> transcription;
+
+  ADTApiResponse.fromJson(Map<String, dynamic> json)
+      : transcription = List<MusicEntry>.from(
+            json["result"].map((v) => MusicEntry.fromJson(v)));
+}
 
 class ApiService {
   static const baseUrl = Environment.serverHost;
 
-  static Future<ADTResultModel?> getADTResult(
+  static Future<ADTApiResponse?> getADTResult(
       {required String dataPath, required int bpm}) async {
     print("uploading file... ${File(dataPath).path}");
 
@@ -35,7 +43,7 @@ class ApiService {
         // 서버 응답 데이터를 JSON으로 파싱
         var jsonResponse = json.decode(responseBody);
         print(jsonResponse);
-        return ADTResultModel.fromJson(jsonResponse);
+        return ADTApiResponse.fromJson(jsonResponse);
         // return ADTResultModel.fromJson({'instrument': [], 'rhythm': []});)
       } else {
         print('${response.statusCode}: ${response.reasonPhrase}');

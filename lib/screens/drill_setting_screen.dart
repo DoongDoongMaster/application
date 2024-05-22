@@ -229,16 +229,6 @@ class _DrillSettingScreenState extends State<DrillSettingScreen> {
     }
   }
 
-  /// drill 삭제 함수
-  void _deleteDrill(String drillId) async {
-    await (database.delete(database.drillInfos)
-          ..where((tbl) => tbl.id.equals(drillId)))
-        .go();
-
-    _initialize();
-    _removeDrillSelectPopup();
-  }
-
   /// 마디 선택시 팝업
   void _showDrillSelectPopup() {
     setState(() {
@@ -294,7 +284,7 @@ class _DrillSettingScreenState extends State<DrillSettingScreen> {
     _changeMode(DrillSettingMode.select);
   }
 
-  /// 마디 선택시 추가/삭제/연습진행
+  /// 마디 선택시 범위선택 or 팝업
   void _onClickMeasure(Measure measure) {
     _removeDrillSelectPopup();
     switch (mode) {
@@ -312,6 +302,29 @@ class _DrillSettingScreenState extends State<DrillSettingScreen> {
         popupAnchor = measure;
         _showDrillSelectPopup();
     }
+  }
+
+  /// drill 삭제 함수
+  void _deleteDrill(String drillId) async {
+    await (database.delete(database.drillInfos)
+          ..where((tbl) => tbl.id.equals(drillId)))
+        .go();
+
+    _initialize();
+    _removeDrillSelectPopup();
+  }
+
+  /// 연습 시작
+  void _startDrill(String drillId) {
+    if (data == null) {
+      return;
+    }
+    context.pushNamed(RouterPath.prompt.name, pathParameters: {
+      "musicId": data!.musicId,
+      "projectId": data!.projectId,
+    }, queryParameters: {
+      "drillId": drillId
+    });
   }
 
   @override
@@ -359,7 +372,11 @@ class _DrillSettingScreenState extends State<DrillSettingScreen> {
                                     isSelected: selectedList.contains(e.id),
                                   ),
                                 ),
-                                MusicSheetWidget(image: data!.sheetImage!),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 80),
+                                  child: MusicSheetWidget(
+                                      image: data!.sheetImage!),
+                                ),
                                 ...sectionList
                                     .where((element) => element.hasLeftBorder)
                                     .map((e) => SectionMarker(
@@ -367,25 +384,31 @@ class _DrillSettingScreenState extends State<DrillSettingScreen> {
                                           isActive:
                                               mode != DrillSettingMode.add,
                                         )),
-                                ...measureList
-                                    .map((measure) => PositionedInkWell(
-                                          cursor: measure,
-                                          height: 100,
-                                          onTap: () => _onClickMeasure(measure),
-                                          decoration: BoxDecoration(
-                                            color: (start <= measure.idx &&
-                                                    measure.idx <= end)
-                                                ? ColorStyles.primary
-                                                    .withOpacity(0.54)
-                                                : Colors.transparent,
-                                          ),
-                                        )),
+                                ...measureList.map(
+                                  (measure) => PositionedInkWell(
+                                    cursor: measure,
+                                    height: 100,
+                                    onTap: (mode == DrillSettingMode.add ||
+                                            measure
+                                                .drillList.nonNulls.isNotEmpty)
+                                        ? () => _onClickMeasure(measure)
+                                        : null,
+                                    decoration: BoxDecoration(
+                                      color: (start <= measure.idx &&
+                                              measure.idx <= end)
+                                          ? ColorStyles.primary
+                                              .withOpacity(0.54)
+                                          : Colors.transparent,
+                                    ),
+                                  ),
+                                ),
                                 if (isDrillSelectPopupVisible)
                                   DrillSelectPopup(
                                     cursor: popupAnchor!,
                                     selectedList: selectedList,
                                     mode: mode,
                                     deleteDrill: _deleteDrill,
+                                    startDrill: _startDrill,
                                   ),
                               ],
                             ),
@@ -408,12 +431,13 @@ class DrillSelectPopup extends StatelessWidget {
     required this.selectedList,
     required this.mode,
     required this.deleteDrill,
+    required this.startDrill,
   });
 
   final Cursor cursor;
   final List<String?> selectedList;
   final DrillSettingMode mode;
-  final void Function(String) deleteDrill;
+  final void Function(String) deleteDrill, startDrill;
 
   @override
   Widget build(BuildContext context) {
@@ -429,35 +453,34 @@ class DrillSelectPopup extends StatelessWidget {
                 borderRadius: BorderRadius.circular(6),
                 boxShadow: const [ShadowStyles.shadow300]),
             padding: const EdgeInsets.all(16.0),
-            child: SizedBox(
-              child: Row(
-                children: [
-                  for (var i = 0; i < SectionType.count; i++)
-                    if (selectedList[i] != null)
-                      DrillSelectButton(
-                        mode: mode,
-                        color: SectionType.values[i].color,
-                        onPressed: () async {
-                          switch (mode) {
-                            case DrillSettingMode.add:
-                              return;
-                            case DrillSettingMode.select:
-                              break;
-                            case DrillSettingMode.delete:
-                              var response = await showDialog<DeleteConfirm>(
-                                context: context,
-                                builder: (ctx) => DeleteConfirmDialog(
-                                    drillId: selectedList[i]!),
-                              );
+            child: Row(
+              children: [
+                for (var i = 0; i < SectionType.count; i++)
+                  if (selectedList[i] != null)
+                    DrillSelectButton(
+                      mode: mode,
+                      color: SectionType.values[i].color,
+                      onPressed: () async {
+                        switch (mode) {
+                          case DrillSettingMode.add:
+                            return;
+                          case DrillSettingMode.select:
+                            startDrill(selectedList[i]!);
+                            break;
+                          case DrillSettingMode.delete:
+                            var response = await showDialog<DeleteConfirm>(
+                              context: context,
+                              builder: (ctx) => DeleteConfirmDialog(
+                                  drillId: selectedList[i]!),
+                            );
 
-                              if (response == DeleteConfirm.ok) {
-                                deleteDrill(selectedList[i]!);
-                              }
-                          }
-                        },
-                      )
-                ],
-              ),
+                            if (response == DeleteConfirm.ok) {
+                              deleteDrill(selectedList[i]!);
+                            }
+                        }
+                      },
+                    )
+              ],
             ),
           ),
         ],

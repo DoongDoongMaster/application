@@ -252,9 +252,10 @@ reCaculatePractice() async {
               .then((value) => print(value.first.result?.length));
         }
         var currentBPM = (prac.speed * m.bpm).toInt();
-        var updated = ADTResultModel(transcription: prac.transcription!);
+        var updated =
+            ADTResultModel(bpm: currentBPM, transcription: prac.transcription!);
 
-        await updated.calculateWithAnswer(m.musicEntries, currentBPM);
+        await updated.calculateWithAnswer(m.musicEntries);
         print("${prac.title} ${updated.result.length}");
         try {
           await (database.update(database.practiceInfos)

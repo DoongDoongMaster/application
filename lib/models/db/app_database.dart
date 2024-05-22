@@ -5,7 +5,10 @@ import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/convertors/scored_entry_convertor.dart';
+import 'package:application/models/entity/default_report_info.dart';
 import 'package:application/models/entity/drill_info.dart';
+import 'package:application/models/entity/drill_report_info.dart';
+import 'package:application/models/entity/list_convertor.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
@@ -49,6 +52,7 @@ LazyDatabase _openConnection() {
   ProjectInfos,
   PracticeInfos,
   DrillInfos,
+  DrillReportInfos,
 ], views: [
   MusicThumbnailView,
   ProjectDetailView,
@@ -69,6 +73,8 @@ class AppDatabase extends _$AppDatabase {
         beforeOpen: (details) async {
           final m = Migrator(this);
           await m.recreateAllViews();
+          await m.deleteTable(drillReportInfos.actualTableName);
+          await m.createTable(drillReportInfos);
           if (false) {
             print("recreating database...");
             final m = Migrator(this);
@@ -85,18 +91,16 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) {
             print("upgrading... into ver 2");
             await m.addColumn(practiceInfos, practiceInfos.result);
-            await m.recreateAllViews();
           }
-          if (from < 3) {
-            print("upgrading... into ver 3");
+          if (from <= 4) {
+            print("upgrading... into ver 4");
             await m.createAll();
-            await m.alterTable(TableMigration(practiceInfos));
           }
         },
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   Future resetDatabse() {
     return transaction(() async {
@@ -159,6 +163,29 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteProject(String id) =>
       (delete(projectInfos)..where((tbl) => tbl.id.equals(id))).go();
 
+  /// REPORT - UPATE
+  // Future<void> UpdateSelectionIntent(String id, ReportType type) {
+  //   if (type == ReportType.full) {
+  //     return (update(practiceInfos)..where((tbl) => tbl.id.equals(id)))
+  //         .write(const PracticeInfosCompanion(
+  //       isNew: Value(false),
+  //       score: Value.absent(),
+  //     ));
+  //   } else {
+  //     return (update(drillReportInfos)..where((tbl) => tbl.id.equals(id)))
+  //         .write(const DrillReportInfosCompanion());
+  //   }
+  // }
+
+  /// Report - DELETE
+  Future<void> deleteReport(String id, ReportType type) {
+    if (type == ReportType.full) {
+      return (delete(practiceInfos)..where((tbl) => tbl.id.equals(id))).go();
+    } else {
+      return (delete(drillReportInfos)..where((tbl) => tbl.id.equals(id))).go();
+    }
+  }
+
 //////////////////////////////////////////////
   /// PRACTICE - READ
   Future<void> readPracticeReport(String practiceId) =>
@@ -169,10 +196,6 @@ class AppDatabase extends _$AppDatabase {
             ..where((tbl) => tbl.projectId.equals(projectId))
             ..orderBy([(u) => OrderingTerm.desc(practiceInfos.createdAt)]))
           .get();
-
-  /// PRACTICE - DELETE
-  Future<void> deletePractice(String id) =>
-      (delete(practiceInfos)..where((tbl) => tbl.id.equals(id))).go();
 
   /// PRACTICE - read data for ADT
   Future<ADTRequestViewData> getADTRequest(String id) =>
@@ -211,7 +234,7 @@ class AppDatabase extends _$AppDatabase {
     return AnalysisSummaryData(
       projectInfo: projectInfo,
       practiceList: practiceList,
-      bestCount: bestCount?.accuracyCount,
+      bestCount: AccuracyCount.fromScoredEntries(bestCount?.result ?? []),
     );
   }
 

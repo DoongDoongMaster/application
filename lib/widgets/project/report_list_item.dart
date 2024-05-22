@@ -1,6 +1,7 @@
 import 'package:application/main.dart';
 import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/models/entity/default_report_info.dart';
 import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
@@ -61,9 +62,7 @@ class ReportListItem extends StatelessWidget {
               "new    ",
               style: TextStyles.bodysmall.copyWith(color: ColorStyles.primary),
             ),
-          if (data.speed != null)
-            _BlackGrayText(
-                blackStr: data.speed!.toStringAsFixed(2), grayStr: 'x'),
+          _BlackGrayText(blackStr: data.speed.toStringAsFixed(2), grayStr: 'x'),
           if (data.score == null)
             const SizedBox(
               width: 180,
@@ -82,7 +81,7 @@ class ReportListItem extends StatelessWidget {
                 offset: Offset(-4.0 * i, 0),
                 child: Icon(
                   Icons.star_rounded,
-                  color: i < data.score! / 20
+                  color: i < data.score! ~/ 20
                       ? ColorStyles.primary
                       : ColorStyles.stroke,
                   size: 18,
@@ -97,8 +96,9 @@ class ReportListItem extends StatelessWidget {
               onSelected: (value) {
                 switch (value) {
                   case 0:
-                    database.deletePractice(data.id).then((value) =>
-                        context.pushReplacementNamed(RouterPath.home.name));
+                    database.deleteReport(data.id, ReportType.full).then(
+                        (value) =>
+                            context.pushReplacementNamed(RouterPath.home.name));
                     break;
                   case 1:
                     ADT.runWithId(data.id, context);

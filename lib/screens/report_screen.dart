@@ -7,6 +7,8 @@ import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/models/entity/music_infos.dart';
+import 'package:application/services/crop_image.dart';
 import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
@@ -20,7 +22,6 @@ import 'package:application/widgets/report/report_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image/image.dart' as imglib;
 
 class ReportScreen extends StatefulWidget {
   static const double headerHeight = 312;
@@ -40,6 +41,7 @@ class _ReportScreenState extends State<ReportScreen> {
     accuracyCount: AccuracyCount(),
     componentCount: ComponentCount(),
     sourceCount: ComponentCount(),
+    musicEntries: [],
     score: 0,
     bestScore: 0,
     sourceBPM: 0,
@@ -176,7 +178,7 @@ class _ReportScreenState extends State<ReportScreen> {
                             : Alignment.center,
                         child: markedImage != null
                             ? SizedBox(
-                                width: 1024,
+                                width: MusicInfo.imageWidth,
                                 child: Stack(
                                   children: [
                                     Center(
@@ -355,6 +357,7 @@ class _MeasureViewModal extends StatelessWidget {
 
 /// 마디 단위로 악보 자르기
 class _CroppedMeasureImage extends Image {
+  static const double measureHeight = 100;
   _CroppedMeasureImage({
     required Uint8List image,
     required double x,
@@ -363,18 +366,18 @@ class _CroppedMeasureImage extends Image {
     required double h,
     bool isBlur = false,
   }) : super.memory(
-          imglib.encodePng(
-            imglib.copyCrop(
-              imglib.decodeImage(image)!,
-              x: (x * 2).toInt(),
-              y: ((y - (100 - h)) * 2).toInt(),
-              width: (w * 2).toInt(),
-              height: 100 * 2,
-              antialias: true,
+          cropImage(
+            image,
+            rect: Rect.fromLTWH(
+              x,
+              y + h - measureHeight,
+              w,
+              measureHeight,
             ),
+            scale: 2,
           ),
           fit: BoxFit.contain,
-          height: 100,
+          height: measureHeight,
           color: isBlur ? Colors.transparent.withOpacity(0.4) : null,
         );
 }

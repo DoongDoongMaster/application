@@ -1,8 +1,12 @@
 import 'dart:convert';
+import 'dart:math';
+import 'dart:ui';
 
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/convertors/music_entry_convertor.dart';
+import 'package:application/models/entity/drill_info.dart';
+import 'package:application/services/crop_image.dart';
 import 'package:drift/drift.dart';
 import 'package:application/models/entity/default_table.dart';
 
@@ -13,15 +17,20 @@ enum MusicType {
 }
 
 class MusicInfo extends DefaultEntity {
+  static const double imageWidth = 1024;
+  static const double cropPaddingTop = 120;
+  static const double cropPaddingBottom = 30;
+
   final String title, artist;
   final int bpm, measureCount, hitCount;
-  final List<Cursor> cursorList;
-  final Uint8List? sheetImage;
-  final Uint8List? xmlData;
-  final List<Cursor> measureList;
+  final List<Cursor> cursorList, measureList;
+  final Uint8List? sheetImage, xmlData;
   final MusicType type;
   final ComponentCount? sourceCount;
   final List<MusicEntry> musicEntries;
+
+  ComponentCount get sourceCnt => ComponentCount.fromMusicEntries(musicEntries);
+  int get measureCnt => measureList.length;
 
   MusicInfo({
     super.id = "",
@@ -67,18 +76,75 @@ class MusicInfo extends DefaultEntity {
     );
   }
 
-  copyWith({String? title, String? artist, int? bpm}) => MusicInfo(
+  copyWith({
+    String? title,
+    String? artist,
+    int? bpm,
+    List<Cursor>? cursorList,
+    List<Cursor>? measureList,
+    Uint8List? sheetImage,
+    List<MusicEntry>? musicEntries,
+  }) =>
+      MusicInfo(
         title: title ?? this.title,
         artist: artist ?? this.artist,
         bpm: bpm ?? this.bpm,
-        sheetImage: sheetImage,
+        sheetImage: sheetImage ?? this.sheetImage,
         xmlData: xmlData,
-        cursorList: cursorList,
-        measureList: measureList,
+        cursorList: cursorList ?? this.cursorList,
+        measureList: measureList ?? this.measureList,
         sourceCount: sourceCount,
-        musicEntries: musicEntries,
+        musicEntries: musicEntries ?? this.musicEntries,
         hitCount: hitCount,
       );
+
+  MusicInfo extractDrillPart(DrillInfo drill) {
+    var startHeight = max(measureList[drill.start].y - cropPaddingTop, 0.0);
+    var startTs = measureList[drill.start].ts;
+    var endTs = measureList[drill.end].ts;
+
+    // 구간에 맞게 커서 및 마디 정보 자르기
+    var newMeasureList = List<Cursor>.from(measureList
+        .sublist(drill.start, drill.end + 1)
+        .map((e) => e.copyWith(y: e.y - startHeight, ts: e.ts - startTs)));
+
+    var newCursorList = List<Cursor>.from(cursorList
+        .where((e) => e.ts >= startTs && e.ts.floor() <= endTs)
+        .map((e) => e.copyWith(y: e.y - startHeight, ts: e.ts - startTs)));
+
+    var newMusicEntries = List<MusicEntry>.from(musicEntries
+        .where((e) => e.ts >= startTs && e.ts.floor() <= endTs)
+        .map((e) => e.copyWith(ts: e.ts - startTs)));
+
+    // // 악보 이미지 자르기
+    // var height =
+    //     newMeasureList.last.y + newMeasureList.last.h + cropPaddingBottom;
+
+    // // 다음 줄이 있는 경우 한줄 더 늘리기
+    // if (measureList.last.y + measureList.last.h - startHeight > height) {
+    //   height = min(height + cropPaddingTop,
+    //       measureList.last.y + measureList.last.h - startHeight);
+    // }
+
+    var croppedImage = cropImage(
+      sheetImage!,
+      rect: Rect.fromLTWH(
+        0,
+        startHeight,
+        MusicInfo.imageWidth,
+        0,
+      ),
+      scale: 2,
+    );
+
+    // 새로운 객체 반납
+    return copyWith(
+      sheetImage: croppedImage,
+      measureList: newMeasureList,
+      cursorList: newCursorList,
+      musicEntries: newMusicEntries,
+    );
+  }
 }
 
 @UseRowClass(MusicInfo)

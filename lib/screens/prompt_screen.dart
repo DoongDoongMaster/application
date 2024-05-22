@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:application/main.dart';
 import 'package:application/models/adt_result_model.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/models/entity/default_report_info.dart';
+import 'package:application/models/entity/drill_info.dart';
 import 'package:application/models/entity/music_infos.dart';
-import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/screens/home_screen.dart';
 import 'package:application/services/local_storage.dart';
@@ -12,8 +15,9 @@ import 'package:application/services/recorder_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/time_utils.dart';
+import 'package:application/widgets/positioned_container.dart';
 import 'package:application/widgets/prompt/cursor_widget.dart';
-import 'package:application/widgets/prompt/practice_setting_modal.dart';
+import 'package:application/widgets/prompt/prompt_setting_modal.dart';
 import 'package:application/widgets/prompt/precount_widget.dart';
 import 'package:application/widgets/prompt/prompt_app_bar_widget.dart';
 import 'package:application/widgets/prompt/prompt_footer_widget.dart';
@@ -24,18 +28,19 @@ import 'package:flutter/scheduler.dart';
 import 'package:go_router/go_router.dart';
 
 enum PromptState {
-  waiting,
-  initializing,
-  starting,
+  waiting, // 처음
+  initializing, // music, drillInfo, metronome 준비 완료
+  starting, //
   playing,
 }
 
 class PromptScreen extends StatefulWidget {
-  final String? musicId, projectId;
+  final String? musicId, projectId, drillId;
   const PromptScreen({
     super.key,
     required this.musicId,
     required this.projectId,
+    this.drillId,
   });
 
   @override
@@ -44,73 +49,186 @@ class PromptScreen extends StatefulWidget {
 
 class _PromptScreenState extends State<PromptScreen> {
   MusicInfo music = MusicInfo();
-  PracticeInfo practice = PracticeInfo(speed: 0);
+  DefaultReportInfo report = DefaultReportInfo();
+  late PromptOption _option;
+  DrillInfo? drillInfo;
+  final List<Cursor> blurSections = [];
 
   late Metronome _metronome;
 
   final ScrollController _controller = ScrollController();
   Cursor currentCursor = Cursor.createEmpty();
-  static const int cursorOffset = 20;
+  static const int cursorOffset = 170;
   PromptState state = PromptState.waiting;
 
   int currentSec = 0;
   int totalLengthInSec = 0;
+  int currentCount = 0;
+  int lengthPerCountInMs = 0;
 
   final RecorderService _recorder = RecorderService();
 
   /// user settings...
   bool isMuted = true;
-  int currentBPM = 90;
-  double speed = 0;
 
   @override
   void initState() {
     super.initState();
-
+    _option = PromptOption(
+        type: (widget.drillId == null) ? ReportType.full : ReportType.drill);
     /**
-     * 1. _showPracticeSettingModal
-     *    - loadMusic
+     * 1. showPracticeSettingModal
+     *    - getMusicInfo
+     *    - loadMetronome
      *    - wait for user setting (speed)
-     * 2. _showPrecountWidget
+     * 2. showPrecountWidget
      *    - startPractice
      */
+
     WidgetsBinding.instance
         .addPostFrameCallback((_) => _showPracticeSettingModal());
   }
 
-  /// handle user input (speed)
-  Future<void> _showPracticeSettingModal() async {
-    late final double? result;
-    await Future.wait([
-      loadMusic(widget.musicId!),
-      () async {
-        result = await showDialog<double>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) => const PracticeSettingModal(),
-        );
-      }()
-    ]);
+  /// 음악 정보 불러오기
+  Future<void> _getMusicInfo() async {
+    // 악보 불러오기
+    MusicInfo? musicInfo = await (database.select(database.musicInfos)
+          ..where((tbl) => tbl.id.equals(widget.musicId!)))
+        .getSingleOrNull();
+    // 악보 없는 경우 -> 나가기
+    if (musicInfo == null) {
+      _goBack();
+      return;
+    } else {
+      setState(() {
+        music = musicInfo;
+        _option.originalBPM = music.bpm;
+        _option.currentBPM = music.bpm;
+      });
+    }
+  }
 
-    if (result == null) {
-      if (context.mounted) {
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.pushReplacementNamed(RouterPath.home.name,
-              pathParameters: {"tab": HomeTab.projectList.name, "refresh": ''});
-        }
-      }
+  /// drill 정보 가져와서, music 변경하기
+  Future<void> _getDrillInfo() async {
+    drillInfo = await (database.select(database.drillInfos)
+          ..where((tbl) => tbl.id.equals(widget.drillId!)))
+        .getSingle();
+
+    if (drillInfo == null) {
+      _goBack();
       return;
     }
 
+    // 기존 음악 정보 자르기
+    music = music.extractDrillPart(drillInfo!);
+    // 마스킹 생성.
+    blurSections.addAll([
+      // 상단 패딩 부분
+      Cursor(
+        x: 0,
+        y: 0,
+        w: MusicInfo.imageWidth,
+        h: music.cursorList.first.y - 20,
+        ts: 0,
+      ),
+      // 시작 줄 앞 부분
+      Cursor(
+        x: 0,
+        w: music.measureList.first.x,
+        y: music.cursorList.first.y,
+        h: music.cursorList.first.h,
+        ts: 0,
+      ),
+      // 마지막 마디 뒷 부분
+      Cursor(
+        x: music.measureList.last.x + music.measureList.last.w,
+        w: MusicInfo.imageWidth -
+            music.measureList.last.x +
+            music.measureList.last.w,
+        y: music.cursorList.last.y,
+        h: music.cursorList.last.h + MusicInfo.cropPaddingBottom,
+        ts: 0,
+      ),
+      // 다음 줄 부분
+      Cursor(
+        x: 0,
+        w: MusicInfo.imageWidth,
+        y: music.cursorList.last.y +
+            music.cursorList.last.h +
+            MusicInfo.cropPaddingBottom,
+        h: 1000,
+        ts: 0,
+      ),
+    ]);
+  }
+
+  /// 뒤로 가기
+  void _goBack() {
+    if (context.mounted) {
+      if (context.canPop()) {
+        context.pop();
+      } else {
+        context.pushReplacementNamed(RouterPath.home.name,
+            pathParameters: {"tab": HomeTab.projectList.name, "refresh": ''});
+      }
+    }
+  }
+
+  /// handle user input (speed)
+  Future<void> _showPracticeSettingModal() async {
+    PromptOption? result;
+    // 1. 음악 정보 가져오기
+    await _getMusicInfo();
+
+    await Future.wait([
+      // 2. 구간 연습인 경우 정보 가져오고, 업데이트
+      if (widget.drillId != null) _getDrillInfo(),
+      if (mounted)
+        showDialog<PromptOption>(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) => PromptSettingModal(
+            promptOption: _option,
+          ),
+        ).then((value) => result = value)
+    ]);
+    // else // TODO:구간 연습용 설정 모달 만들기!!!!
+
+    if (result == null) {
+      _goBack();
+      return;
+    }
+
+    _option = result!;
+    lengthPerCountInMs =
+        TimeUtils.getTotalDuration(_option.currentBPM, music.measureCnt)
+            .inMilliseconds;
+
+    // 여러번 진행할 경우 커서 및 measure 늘리기.
+    if (_option.count > 1) {
+      // HACK: 좀 더 효율적인 방법으로 바꿀 필요 있음
+      List<Cursor> additionalCursor = [], additionalMeasure = [];
+      var tsPerCount = music.measureList.last.ts + 1;
+      for (var i = 1; i < _option.count; i++) {
+        additionalCursor.addAll(
+            music.cursorList.map((e) => e.copyWith(ts: e.ts + i * tsPerCount)));
+        additionalMeasure.addAll(music.measureList
+            .map((e) => e.copyWith(ts: e.ts + i * tsPerCount)));
+      }
+      music.cursorList.addAll(additionalCursor);
+      music.measureList.addAll(additionalMeasure);
+    }
+
+    _loadMetronome();
+
     setState(() {
-      speed = result!;
       state = PromptState.initializing;
-      currentBPM = (music.bpm * speed).toInt();
+
       totalLengthInSec =
-          TimeUtils.getTotalDuration(currentBPM, music.measureCount).inSeconds;
+          TimeUtils.getTotalDuration(_option.currentBPM, music.measureCnt)
+              .inSeconds;
     });
+
     _showPrecountWidget();
   }
 
@@ -127,26 +245,16 @@ class _PromptScreenState extends State<PromptScreen> {
             borderRadius: BorderRadius.circular(0), side: BorderSide.none),
         backgroundColor: ColorStyles.blackShadow36,
         content: PrecountWidget(
-          usPerBeat: TimeUtils.getUsPerBeat(currentBPM),
+          usPerBeat: TimeUtils.getUsPerBeat(_option.currentBPM),
           startPractice: startPractice,
         ),
       ),
     );
   }
 
-  /// 악보 불러오기
-  Future<void> loadMusic(String id) async {
-    final temp = await (database.select(database.musicInfos)
-          ..where((tbl) => tbl.id.equals(id)))
-        .getSingleOrNull();
-
-    if (temp == null && context.mounted) {
-      context.goNamed(RouterPath.home.name);
-      return;
-    }
-
+  /// metronome 세팅, 커서 초기화
+  _loadMetronome() {
     setState(() {
-      music = temp!;
       _metronome = Metronome(
         updateTime: updateTime,
         music: music,
@@ -154,10 +262,11 @@ class _PromptScreenState extends State<PromptScreen> {
         onComplete: finishPractice,
         volume: isMuted ? 0 : 1,
       );
+      currentCount++;
     });
 
     // UI가 모두 업데이트 된 이후에 커서 업데이트가 진행되어야 함
-    SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
       if (music.cursorList.isNotEmpty) {
         updateCursor(music.cursorList[0]);
       }
@@ -178,17 +287,22 @@ class _PromptScreenState extends State<PromptScreen> {
     if (state == PromptState.playing &&
         currentTickInSec != currentSec &&
         currentTickInSec <= totalLengthInSec) {
-      setState(() {
-        currentSec = currentTickInSec;
-      });
+      currentSec = currentTickInSec;
     }
+
+    if (widget.drillId != null &&
+        currentCount < _option.count &&
+        currentSec * 1000 >= currentCount * lengthPerCountInMs) {
+      currentCount++;
+    }
+    setState(() {});
   }
 
   /// update cursor & scroll down if needed.
   void updateCursor(Cursor newCursor) {
     // y가 바뀐 경우
     if (currentCursor.y != newCursor.y) {
-      final scrollYPos = newCursor.y - cursorOffset;
+      final scrollYPos = max(newCursor.y - cursorOffset, 0.0);
       // only if there is space
       if (scrollYPos < _controller.position.maxScrollExtent) {
         _controller.animateTo(
@@ -204,20 +318,27 @@ class _PromptScreenState extends State<PromptScreen> {
     });
   }
 
-  /// create practice in DB
-  Future<void> createPractice() async {
-    // create practice
-    final temp = await database
-        .into(database.practiceInfos)
-        .insertReturningOrNull(PracticeInfosCompanion.insert(
-          projectId: widget.projectId!,
-          speed: drift.Value(speed),
-          bpm: currentBPM,
-        ));
+  /// create report in DB
+  Future<void> _createReport() async {
+    late DefaultReportInfo? temp;
+    if (widget.drillId == null) {
+      temp = await database
+          .into(database.practiceInfos)
+          .insertReturningOrNull(PracticeInfosCompanion.insert(
+            projectId: widget.projectId!,
+            speed: drift.Value(_option.speed),
+            bpm: _option.currentBPM,
+          ));
+    } else {
+      temp = await database
+          .into(database.drillReportInfos)
+          .insertReturningOrNull(DrillReportInfosCompanion.insert(
+              bpm: _option.currentBPM, drillId: widget.drillId!));
+    }
 
     if (temp != null) {
       setState(() {
-        practice = temp;
+        report = temp!;
       });
     }
   }
@@ -228,7 +349,7 @@ class _PromptScreenState extends State<PromptScreen> {
 
     await Future.wait([
       // 1. 연습 생성
-      createPractice(),
+      _createReport(),
       // 2. 녹음 서비스 초기화
       _recorder.initialize(),
       // 3. 현재 path 구하기
@@ -236,14 +357,14 @@ class _PromptScreenState extends State<PromptScreen> {
         dirPath = await LocalStorage.getLocalPath();
       }(),
       // 4. 메트로놈 초기화
-      _metronome.initialize(currentBPM),
+      _metronome.initialize(_option.currentBPM),
     ]);
 
     state = PromptState.starting;
     Future.delayed(Duration(microseconds: _metronome.offset),
         () => state = PromptState.playing);
     // 녹음 시작
-    await _recorder.startRecord('$dirPath/${practice.id}.wav');
+    await _recorder.startRecord('$dirPath/${report.id}.wav');
     _metronome.start();
   }
 
@@ -255,46 +376,45 @@ class _PromptScreenState extends State<PromptScreen> {
     _recorder.dispose();
     if (filePath != null) {
       ADT.run(
-        practiceId: practice.id,
+        reportId: report.id,
         musicId: music.id,
         filePath: filePath,
-        bpm: currentBPM,
         answer: music.musicEntries,
         context: context.mounted ? context : null,
+        option: _option,
       );
     } else {
       if (context.mounted) {
         showSnackbar(context, '오류가 발생했습니다. - 녹음 저장 실패');
       }
     }
-    if (context.mounted) {
-      context.pop();
-    }
+    _goBack();
   }
 
   /// clean up practice data in DB, record, state
-  cleanUpPractice() {
+  _cleanUpPractice() {
     currentSec = 0;
     showSnackbar(context, '삭제되었습니다.');
 
     return Future.wait(<Future<dynamic>>[
-      database.deletePractice(practice.id),
-      _metronome.stop(),
-      _recorder.stopRecord(),
+      database.deleteReport(report.id, _option.type),
+      if (state != PromptState.waiting) _metronome.stop(),
+      if (_recorder.isReady) _recorder.stopRecord(),
     ]);
   }
 
   /// restart practice with current user setting (speed)
   void restartPractice() async {
     state = PromptState.initializing;
-    await cleanUpPractice();
+    await _cleanUpPractice();
+    _loadMetronome();
     _showPrecountWidget();
   }
 
   /// start new practice
   void cancelPractice() async {
     state = PromptState.waiting;
-    await cleanUpPractice();
+    await _cleanUpPractice();
     _showPracticeSettingModal();
   }
 
@@ -308,14 +428,8 @@ class _PromptScreenState extends State<PromptScreen> {
           title: music.title,
           artist: music.artist,
           exitPractice: () async {
-            await cleanUpPractice();
-            if (context.mounted) {
-              if (context.canPop()) {
-                context.pop();
-              } else {
-                context.goNamed(RouterPath.home.name);
-              }
-            }
+            await _cleanUpPractice();
+            _goBack();
           },
         ),
       ),
@@ -341,8 +455,15 @@ class _PromptScreenState extends State<PromptScreen> {
                               ),
                               Image.memory(
                                 music.sheetImage!,
-                                width: 1024,
+                                width: MusicInfo.imageWidth,
                               ),
+                              ...blurSections.map(
+                                (e) => PositionedContainer(
+                                  cursor: e,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white.withOpacity(0.9)),
+                                ),
+                              )
                             ],
                           ),
                           const SizedBox(
@@ -360,7 +481,6 @@ class _PromptScreenState extends State<PromptScreen> {
             height: 25,
           ),
           PromptFooterWidget(
-            originalBPM: music.bpm,
             isMuted: isMuted,
             onPressMute: toggleMute,
             lengthInSec: totalLengthInSec,
@@ -368,8 +488,8 @@ class _PromptScreenState extends State<PromptScreen> {
             onPressRestart:
                 state == PromptState.playing ? restartPractice : null,
             onPressCancel: state == PromptState.playing ? cancelPractice : null,
-            currentBPM: practice.bpm,
-            currentSpeed: practice.speed,
+            option: _option,
+            currentCount: currentCount,
           ),
         ],
       ),

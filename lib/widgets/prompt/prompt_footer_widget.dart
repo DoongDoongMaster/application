@@ -3,12 +3,12 @@ import 'dart:math';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:application/widgets/prompt/prompt_setting_modal.dart';
 import 'package:flutter/material.dart';
 
 class PromptFooterWidget extends StatelessWidget {
-  final int originalBPM;
-  final int? currentBPM;
-  final double? currentSpeed;
+  final PromptOption option;
+  final int currentCount;
   final int lengthInSec;
   final int currentSec;
 
@@ -20,15 +20,14 @@ class PromptFooterWidget extends StatelessWidget {
 
   const PromptFooterWidget({
     super.key,
-    required this.originalBPM,
-    this.currentBPM,
-    this.currentSpeed,
+    required this.option,
     required this.isMuted,
     required this.onPressMute,
     required this.lengthInSec,
     required this.currentSec,
     required this.onPressRestart,
     required this.onPressCancel,
+    required this.currentCount,
   });
 
   secToString(int sec) {
@@ -67,10 +66,13 @@ class PromptFooterWidget extends StatelessWidget {
                     onPressed: onPressMute,
                   ),
                   const SizedBox(width: 16),
+                  if (currentCount != 0) ...[
+                    _SingleInfoWidget(currentCount, option.count),
+                    const SizedBox(width: 8),
+                  ],
                   _DoubleInfoWidget(
-                    originalBPM: originalBPM,
-                    currentBPM: currentBPM,
-                    currentSpeed: currentSpeed,
+                    option: option,
+                    isSpeedVisible: currentCount == 0,
                   )
                 ],
               ),
@@ -239,21 +241,17 @@ class _MusicProgressIndicator extends StatelessWidget {
 }
 
 class _DoubleInfoWidget extends StatelessWidget {
-  final int originalBPM;
-  final int? currentBPM;
-  final double? currentSpeed;
-  const _DoubleInfoWidget({
-    required this.originalBPM,
-    this.currentBPM,
-    this.currentSpeed,
-  });
+  final PromptOption option;
+  final bool isSpeedVisible;
+  const _DoubleInfoWidget({required this.option, required this.isSpeedVisible});
 
   @override
   Widget build(BuildContext context) {
     return _InfoBoard(
       child: Row(
         children: [
-          _InfoText(label: '원곡 BPM', currentText: originalBPM.toString()),
+          _InfoText(
+              label: '원곡 BPM', currentText: option.originalBPM.toString()),
           const SizedBox(
             height: 40,
             child: VerticalDivider(
@@ -261,12 +259,11 @@ class _DoubleInfoWidget extends StatelessWidget {
               color: ColorStyles.graphMiss,
             ),
           ),
-          if (currentBPM != null)
-            _InfoText(label: '현재 BPM', currentText: currentBPM.toString()),
-          if (currentSpeed != null)
+          _InfoText(label: '현재 BPM', currentText: option.currentBPM.toString()),
+          if (isSpeedVisible)
             _InfoText(
               label: '현재 속도',
-              currentText: currentSpeed!.toStringAsFixed(2),
+              currentText: option.speed.toStringAsFixed(2),
               unitText: ' x',
             ),
         ],
@@ -276,15 +273,16 @@ class _DoubleInfoWidget extends StatelessWidget {
 }
 
 class _SingleInfoWidget extends StatelessWidget {
-  const _SingleInfoWidget();
+  final int currentCount, count;
+  const _SingleInfoWidget(this.currentCount, this.count);
 
   @override
   Widget build(BuildContext context) {
     return _InfoBoard(
-      child: const _InfoText(
+      child: _InfoText(
         label: '반복',
-        currentText: '1',
-        overallText: ' /2',
+        currentText: currentCount.toString(),
+        overallText: ' /$count',
         unitText: ' 번',
       ),
     );

@@ -58,8 +58,10 @@ final GoRouter goRouter = GoRouter(
           context,
           state,
           PromptScreen(
-              musicId: state.pathParameters["musicId"],
-              projectId: state.pathParameters["projectId"]),
+            musicId: state.pathParameters["musicId"],
+            projectId: state.pathParameters["projectId"],
+            drillId: state.uri.queryParameters["drillId"],
+          ),
         );
       },
     ),
