@@ -47,12 +47,30 @@ class PromptSettingModalState extends State<PromptSettingModal> {
     });
   }
 
+  void _updateBPM(int value) {
+    if (value < 0 || value > 200) {
+      return;
+    }
+    setState(() {
+      widget.promptOption.currentBPM = value;
+      widget.promptOption.speed = value / widget.promptOption.originalBPM;
+    });
+  }
+
+  void _updateCount(int value) {
+    if (value < 0) {
+      return;
+    }
+    setState(() {
+      widget.promptOption.count = value;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return CustomDialog(
-      height: widget.promptOption.type == ReportType.full ? 240 : 500,
       child: Column(
-        // crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
             height: 48,
@@ -102,42 +120,62 @@ class PromptSettingModalState extends State<PromptSettingModal> {
           ),
           const Divider(height: 0),
           Container(
-            height: 96,
             decoration: const BoxDecoration(color: ColorStyles.background),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const _GuideText(text: "속도를 설정할 수 있습니다."),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    if (_value != 2) const SizedBox(width: 32),
-                    Wrap(
-                      spacing: 5.0,
-                      children: [
-                        ...speed.mapIndexed(
-                          (index, value) => SpeedChoiceChip(
-                            selected: _value == index,
-                            speed: value,
-                            onSelected: (selected) => setState(() {
-                              if (selected) {
-                                changeSpeed(index);
-                              }
-                            }),
-                          ),
+                if (widget.promptOption.type == ReportType.full) ...[
+                  const _GuideText(text: "속도를 설정할 수 있습니다."),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      if (_value != 2) const SizedBox(width: 32),
+                      Wrap(
+                        spacing: 5.0,
+                        children: [
+                          ...speed.mapIndexed(
+                            (index, value) => SpeedChoiceChip(
+                              selected: _value == index,
+                              speed: value,
+                              onSelected: (selected) => setState(() {
+                                if (selected) {
+                                  changeSpeed(index);
+                                }
+                              }),
+                            ),
+                          )
+                        ],
+                      ),
+                      if (_value != 2)
+                        ResetButton(
+                          onPressed: () => changeSpeed(_initialValue),
                         )
-                      ],
-                    ),
-                    if (_value != 2)
-                      ResetButton(
-                        onPressed: () => changeSpeed(_initialValue),
-                      )
-                  ],
-                ),
+                    ],
+                  ),
+                ] else ...[
+                  const SizedBox(height: 10),
+                  const _GuideText(text: 'BPM을 설정할 수 있습니다.'),
+                  ValueSettingWidget(
+                    updateValue: _updateBPM,
+                    value: widget.promptOption.currentBPM,
+                    originalValue: widget.promptOption.originalBPM,
+                    text: "BPM",
+                    maxValue: 200,
+                  ),
+                  const _GuideText(text: '반복 횟수를 설정할 수 있습니다.'),
+                  ValueSettingWidget(
+                    updateValue: _updateCount,
+                    value: widget.promptOption.count,
+                    originalValue: 3,
+                    text: "번",
+                    maxValue: 10,
+                  ),
+                  const SizedBox(height: 10),
+                ],
               ],
             ),
           ),
+          Container(),
           const Divider(height: 0),
           StartButton(
               onPressed: () => Navigator.pop(context, widget.promptOption))
@@ -147,19 +185,117 @@ class PromptSettingModalState extends State<PromptSettingModal> {
   }
 }
 
+class ValueSettingWidget extends StatelessWidget {
+  final String text;
+  final void Function(int value) updateValue;
+  final int value, originalValue;
+  final int minValue, maxValue;
+
+  const ValueSettingWidget({
+    super.key,
+    required this.value,
+    required this.originalValue,
+    required this.updateValue,
+    required this.text,
+    this.minValue = 1,
+    required this.maxValue,
+  });
+
+  int _floorToTen(int value) {
+    var r = value % 10;
+    if (r == 0) {
+      value -= 10;
+    } else {
+      value -= r;
+    }
+    return value;
+  }
+
+  int _ceilToTen(int value) {
+    value += 10 - value % 10;
+    return value;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        children: [
+          const Spacer(flex: 1),
+          Center(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AddSubButton(
+                  icon: Icons.remove_rounded,
+                  onTap: value > minValue ? () => updateValue(value - 1) : null,
+                  onLongPress: value > minValue
+                      ? () => updateValue(_floorToTen(value))
+                      : null,
+                ),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: 50,
+                  child: Text(
+                    " $value",
+                    style: TextStyles.bodyLarge.copyWith(
+                      fontWeight: FontWeight.bold,
+                      decorationColor: ColorStyles.darkGray,
+                      decoration: TextDecoration.combine(
+                        [TextDecoration.underline],
+                      ),
+                    ),
+                    textAlign: TextAlign.right,
+                  ),
+                ),
+                SizedBox(
+                    width: 50,
+                    child: Text("  $text", style: TextStyles.bodyMedium)),
+                const SizedBox(width: 8),
+                AddSubButton(
+                  icon: Icons.add_rounded,
+                  onTap: value < maxValue ? () => updateValue(value + 1) : null,
+                  onLongPress: value < maxValue
+                      ? () => updateValue(_ceilToTen(value))
+                      : null,
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            flex: 1,
+            child: Padding(
+              padding: const EdgeInsets.only(right: 40),
+              child: (value != originalValue)
+                  ? Align(
+                      alignment: Alignment.centerRight,
+                      child: ResetButton(
+                          onPressed: () => updateValue(originalValue)))
+                  : null,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+}
+
 class _GuideText extends StatelessWidget {
   final String text;
   const _GuideText({
-    super.key,
     required this.text,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Text(
-      text,
-      style: TextStyles.bodysmall
-          .copyWith(color: ColorStyles.onSurfaceBlackVariant),
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 4),
+      child: Text(
+        text,
+        style: TextStyles.bodyMedium
+            .copyWith(color: ColorStyles.onSurfaceBlackVariant),
+      ),
     );
   }
 }
@@ -239,5 +375,37 @@ class ResetButton extends StatelessWidget {
         style: IconButton.styleFrom(backgroundColor: ColorStyles.lightGray),
       ),
     );
+  }
+}
+
+class AddSubButton extends StatelessWidget {
+  final IconData icon;
+  final void Function()? onTap, onLongPress;
+
+  const AddSubButton({
+    super.key,
+    required this.icon,
+    required this.onTap,
+    required this.onLongPress,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+        color: ColorStyles.lighterGray,
+        borderRadius: BorderRadius.circular(6),
+        clipBehavior: Clip.hardEdge,
+        child: InkWell(
+          onTap: onTap,
+          onLongPress: onLongPress,
+          child: SizedBox.square(
+            dimension: 40,
+            child: Icon(
+              icon,
+              size: 18,
+              color: Colors.black,
+            ),
+          ),
+        ));
   }
 }

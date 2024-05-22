@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:application/models/entity/default_report_info.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
@@ -66,13 +67,12 @@ class PromptFooterWidget extends StatelessWidget {
                     onPressed: onPressMute,
                   ),
                   const SizedBox(width: 16),
-                  if (currentCount != 0) ...[
+                  if (option.type == ReportType.drill) ...[
                     _SingleInfoWidget(currentCount, option.count),
                     const SizedBox(width: 8),
                   ],
                   _DoubleInfoWidget(
                     option: option,
-                    isSpeedVisible: currentCount == 0,
                   )
                 ],
               ),
@@ -242,8 +242,7 @@ class _MusicProgressIndicator extends StatelessWidget {
 
 class _DoubleInfoWidget extends StatelessWidget {
   final PromptOption option;
-  final bool isSpeedVisible;
-  const _DoubleInfoWidget({required this.option, required this.isSpeedVisible});
+  const _DoubleInfoWidget({required this.option});
 
   @override
   Widget build(BuildContext context) {
@@ -260,7 +259,7 @@ class _DoubleInfoWidget extends StatelessWidget {
             ),
           ),
           _InfoText(label: '현재 BPM', currentText: option.currentBPM.toString()),
-          if (isSpeedVisible)
+          if (option.type == ReportType.full)
             _InfoText(
               label: '현재 속도',
               currentText: option.speed.toStringAsFixed(2),
