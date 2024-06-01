@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:application/main.dart';
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
@@ -74,8 +73,11 @@ class AppDatabase extends _$AppDatabase {
         beforeOpen: (details) async {
           final m = Migrator(this);
           await m.recreateAllViews();
-          await m.deleteTable(drillReportInfos.actualTableName);
-          await m.createTable(drillReportInfos);
+          try {
+            // await m.alterTable(TableMigration(practiceInfos));
+          } catch (e) {
+            print(e);
+          }
           if (false) {
             print("recreating database...");
             final m = Migrator(this);
@@ -164,20 +166,6 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteProject(String id) =>
       (delete(projectInfos)..where((tbl) => tbl.id.equals(id))).go();
 
-  /// REPORT - UPATE
-  // Future<void> UpdateSelectionIntent(String id, ReportType type) {
-  //   if (type == ReportType.full) {
-  //     return (update(practiceInfos)..where((tbl) => tbl.id.equals(id)))
-  //         .write(const PracticeInfosCompanion(
-  //       isNew: Value(false),
-  //       score: Value.absent(),
-  //     ));
-  //   } else {
-  //     return (update(drillReportInfos)..where((tbl) => tbl.id.equals(id)))
-  //         .write(const DrillReportInfosCompanion());
-  //   }
-  // }
-
   /// REPORT - SELECT
   Future<List<DrillReportInfo>> getPreviosDrillRecord(String drillId) =>
       (select(drillReportInfos)
@@ -242,7 +230,7 @@ class AppDatabase extends _$AppDatabase {
 
     return AnalysisSummaryData(
       projectInfo: projectInfo,
-      practiceList: practiceList,
+      practiceList: practiceList.reversed.toList(),
       bestCount: AccuracyCount.fromScoredEntries(bestCount?.result ?? []),
     );
   }

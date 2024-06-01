@@ -30,26 +30,39 @@ class _NewMusicScreenState extends State<NewMusicScreen> {
   void initState() {
     super.initState();
 
-    ApiService.getOMRResult(widget.filePath!).then((data) {
-      Uint8List bytes = utf8.encode(data);
-      OSMDService osmd = OSMDService(
-        callback: (base64Image, json) {
-          setState(() {
-            musicInfo = MusicInfo.fromJson(
-              title: widget.fileName!,
-              json: json!,
-              base64String: base64Image,
-              xmlData: bytes,
-            );
-          });
-        },
-      );
-      osmd.run(xmlData: bytes);
-    }).onError((error, stackTrace) {
-      if (mounted) {
-        context.pop();
+    getXml();
+  }
+
+  void getXml() async {
+    late Uint8List bytes;
+
+    if (widget.filePath!.endsWith('xml')) {
+      bytes = await File(widget.filePath!).readAsBytes();
+    } else {
+      try {
+        var data = await ApiService.getOMRResult(widget.filePath!);
+
+        bytes = utf8.encode(data);
+      } catch (e) {
+        if (mounted) {
+          context.pop();
+        }
       }
-    });
+    }
+
+    OSMDService osmd = OSMDService(
+      callback: (base64Image, json) {
+        setState(() {
+          musicInfo = MusicInfo.fromJson(
+            title: widget.fileName!,
+            json: json!,
+            base64String: base64Image,
+            xmlData: bytes,
+          );
+        });
+      },
+    );
+    osmd.run(xmlData: bytes);
   }
 
   @override

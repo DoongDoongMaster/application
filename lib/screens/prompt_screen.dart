@@ -120,7 +120,7 @@ class _PromptScreenState extends State<PromptScreen> {
     }
 
     // 기존 음악 정보 자르기
-    music = music.extractDrillPart(drillInfo!);
+    music = music.extractDrillPart(drillInfo!, _option);
     // 마스킹 생성.
     blurSections.addAll([
       // 상단 패딩 부분
@@ -180,7 +180,7 @@ class _PromptScreenState extends State<PromptScreen> {
     // 1. 음악 정보 가져오기
     await _getMusicInfo();
     var sourceCnt = music.sourceCnt;
-    var hitCnt = music.hitCount;
+    var hitCnt = music.hitCnt;
 
     await Future.wait([
       // 2. 구간 연습인 경우 정보 가져오고, 업데이트
@@ -388,6 +388,7 @@ class _PromptScreenState extends State<PromptScreen> {
         musicId: music.id,
         filePath: filePath,
         answer: music.musicEntries,
+        measureCnt: music.measureCnt,
         context: context.mounted ? context : null,
         option: _option,
       );

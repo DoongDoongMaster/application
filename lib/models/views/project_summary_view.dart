@@ -1,7 +1,6 @@
 import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/db/app_database.dart';
-import 'package:application/models/entity/drill_report_info.dart';
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/models/entity/practice_infos.dart';
 import 'package:application/models/entity/project_infos.dart';
@@ -67,7 +66,7 @@ class AnalysisSummaryData {
   AnalysisSummaryData.fromDrillReport({
     required int bestIdx,
     required this.sourceCnt,
-    required this.hitCount,
+    this.hitCount,
     required List<int> scores,
     required this.accuracyList,
   })  : sourceCount = ComponentCount(),

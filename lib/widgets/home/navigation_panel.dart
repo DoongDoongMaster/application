@@ -62,7 +62,7 @@ class NavigationPanel extends StatelessWidget {
             onSelected: (_) => onTab(HomeTab.favoriteProjectList),
           ),
           MenuChip(
-            label: "악보 리스트",
+            label: "악보 목록",
             icon: Icons.queue_music_rounded,
             // onSelected: (x) => changePath(x, path: RouterPath.favoriteList),
             isSelected: currentTab == HomeTab.musicList,

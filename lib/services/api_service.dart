@@ -17,19 +17,18 @@ class ApiService {
   static const baseUrl = Environment.serverHost;
 
   static Future<ADTApiResponse?> getADTResult(
-      {required String dataPath, required int bpm}) async {
-    print("uploading file... ${File(dataPath).path}");
-
-    var uri = Uri.parse('${ApiService.baseUrl}/models/adt/predict')
-        .replace(queryParameters: {'bpm': bpm.toString()});
-
+      {required String dataPath}) async {
     try {
+      print("uploading file... ${File(dataPath).path}");
+      var file = await http.MultipartFile.fromPath('file', File(dataPath).path);
+
+      var uri = Uri.parse('${ApiService.baseUrl}/models/adt/predict');
+
       var request = http.MultipartRequest('POST', uri)
         ..headers.addAll({
           'Content-Type': 'multipart/form-data',
         })
-        ..files.add(
-            await http.MultipartFile.fromPath('file', File(dataPath).path));
+        ..files.add(file);
 
       print("request url: ${request.url.toString()}, $dataPath");
 

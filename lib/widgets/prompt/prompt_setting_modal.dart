@@ -1,7 +1,6 @@
 import 'dart:math';
 
 import 'package:application/main.dart';
-import 'package:application/models/convertors/accuracy_count_convertor.dart';
 import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/entity/default_report_info.dart';
 import 'package:application/models/entity/drill_report_info.dart';
@@ -140,8 +139,13 @@ class PromptSettingModalState extends State<PromptSettingModal> {
                 future: database.getPreviosDrillRecord(widget.drillId!),
                 builder: (context, snapshot) {
                   if (!snapshot.hasData) {
-                    return const LinearProgressIndicator();
+                    return const Padding(
+                      padding: EdgeInsets.all(20),
+                      child: CircularProgressIndicator(),
+                    );
                   }
+
+                  snapshot.data!.map((e) => e.transcription).toList();
                   if (snapshot.data!.isEmpty ||
                       snapshot.data![0].scores == null) {
                     return const Text("레포트가 비어 있음");
@@ -149,7 +153,6 @@ class PromptSettingModalState extends State<PromptSettingModal> {
                     var report = snapshot.data![0];
                     var idx = 0;
                     var bestScore = 0;
-                    // report.scores
                     for (var i = 0; i < report.count; i++) {
                       if (report.scores![i] > bestScore) {
                         bestScore = report.scores![i];
@@ -160,7 +163,7 @@ class PromptSettingModalState extends State<PromptSettingModal> {
                     var data = AnalysisSummaryData.fromDrillReport(
                       bestIdx: idx,
                       sourceCnt: widget.sourceCnt!,
-                      hitCount: widget.hitCnt,
+                      // hitCount: widget.hitCnt,
                       scores: report.scores!,
                       accuracyList: report.accuracyCounts,
                     );
@@ -447,20 +450,21 @@ class AddSubButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-        color: ColorStyles.lighterGray,
-        borderRadius: BorderRadius.circular(6),
-        clipBehavior: Clip.hardEdge,
-        child: InkWell(
-          onTap: onTap,
-          onLongPress: onLongPress,
-          child: SizedBox.square(
-            dimension: 40,
-            child: Icon(
-              icon,
-              size: 18,
-              color: Colors.black,
-            ),
+      color: ColorStyles.lighterGray,
+      borderRadius: BorderRadius.circular(6),
+      clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: SizedBox.square(
+          dimension: 40,
+          child: Icon(
+            icon,
+            size: 18,
+            color: Colors.black,
           ),
-        ));
+        ),
+      ),
+    );
   }
 }

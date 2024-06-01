@@ -31,7 +31,7 @@ class AnalysisSummary extends StatelessWidget {
                 child: _ScoreChart(
                   previewSize: previewSize,
                   bestScore: data.bestScore?.toString() ?? '-',
-                  scoreList: data.scoreList.reversed.toList(),
+                  scoreList: data.scoreList.toList(),
                 ),
               ),
             ),
@@ -44,7 +44,7 @@ class AnalysisSummary extends StatelessWidget {
                     previewSize: previewSize,
                     hitCount: data.hitCount,
                     accuracyCount: data.bestCount,
-                    accuracyList: data.accuracyList.reversed.toList()),
+                    accuracyList: data.accuracyList.toList()),
               ),
             ),
           ],

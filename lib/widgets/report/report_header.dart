@@ -36,7 +36,7 @@ class ReportHeader extends StatelessWidget {
           artist: report.musicArtist!,
           score: report.score!,
           sourceBPM: report.sourceBPM!,
-          bpm: report.bpm,
+          // bpm: report.bpm,
           speed: report.speed,
         ),
         SizedBox(width: spaceUnit * 2),
@@ -294,7 +294,7 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                                   ? FontWeight.bold
                                   : FontWeight.normal),
                         ),
-                        if (data == AccuracyType.correct)
+                        if (data == AccuracyType.correct && hitCount != null)
                           TextSpan(
                             text: "/${hitCount ?? "-"}",
                             style:

@@ -7,6 +7,7 @@ import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/entity/drill_info.dart';
 import 'package:application/services/crop_image.dart';
+import 'package:application/widgets/prompt/prompt_setting_modal.dart';
 import 'package:drift/drift.dart';
 import 'package:application/models/entity/default_table.dart';
 
@@ -31,6 +32,7 @@ class MusicInfo extends DefaultEntity {
 
   ComponentCount get sourceCnt => ComponentCount.fromMusicEntries(musicEntries);
   int get measureCnt => measureList.length;
+  int get hitCnt => musicEntries.where((e) => e.pitch != -1).length;
 
   MusicInfo({
     super.id = "",
@@ -100,7 +102,7 @@ class MusicInfo extends DefaultEntity {
         hitCount: hitCount,
       );
 
-  MusicInfo extractDrillPart(DrillInfo drill) {
+  MusicInfo extractDrillPart(DrillInfo drill, PromptOption option) {
     var startHeight = max(measureList[drill.start].y - cropPaddingTop, 0.0);
     var startTs = measureList[drill.start].ts;
     var endTs = measureList[drill.end].ts;
@@ -114,19 +116,15 @@ class MusicInfo extends DefaultEntity {
         .where((e) => e.ts >= startTs && e.ts.floor() <= endTs)
         .map((e) => e.copyWith(y: e.y - startHeight, ts: e.ts - startTs)));
 
-    var newMusicEntries = List<MusicEntry>.from(musicEntries
+    var croppedMusicEntries = List<MusicEntry>.from(musicEntries
         .where((e) => e.ts >= startTs && e.ts.floor() <= endTs)
         .map((e) => e.copyWith(ts: e.ts - startTs)));
 
-    // // 악보 이미지 자르기
-    // var height =
-    //     newMeasureList.last.y + newMeasureList.last.h + cropPaddingBottom;
-
-    // // 다음 줄이 있는 경우 한줄 더 늘리기
-    // if (measureList.last.y + measureList.last.h - startHeight > height) {
-    //   height = min(height + cropPaddingTop,
-    //       measureList.last.y + measureList.last.h - startHeight);
-    // }
+    var secPerOne = (drill.end - drill.start + 1);
+    List<MusicEntry> newMusicEntries = [
+      for (var i = 0; i < option.count; i++)
+        ...croppedMusicEntries.map((e) => e.copyWith(ts: e.ts + i * secPerOne))
+    ];
 
     var croppedImage = cropImage(
       sheetImage!,

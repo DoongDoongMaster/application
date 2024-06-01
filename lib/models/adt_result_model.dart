@@ -20,8 +20,12 @@ class ADT {
     required String filePath,
     required List<MusicEntry> answer,
     required PromptOption option,
+    int? measureCnt,
     BuildContext? context,
   }) async {
+    if (option.type == ReportType.drill && measureCnt == null) {
+      throw Exception('measure count is not given for drill');
+    }
     // 다시 채점할 때 다시 비워놓기
     if (option.type == ReportType.full) {
       (database.update(database.practiceInfos)
@@ -34,19 +38,23 @@ class ADT {
       );
     }
 
-    late ADTApiResponse? result;
-
-    result = await ApiService.getADTResult(
-        dataPath: filePath, bpm: option.currentBPM);
+    ADTApiResponse? result = await ApiService.getADTResult(dataPath: filePath);
 
     if (result == null) {
+      if (context != null && context.mounted) {
+        showSnackbar(context, '오류가 발생했습니다.');
+      }
       return;
     }
 
+// 결과 모델 생성
+    var adt = ADTResultModel(
+        bpm: option.currentBPM, transcription: result.transcription);
+
+    await adt.calculateWithAnswer(answer);
+
     if (option.type == ReportType.full) {
-      var adt = ADTResultModel(
-          bpm: option.currentBPM, transcription: result.transcription);
-      await adt.calculateWithAnswer(answer);
+      // 완곡인 경우 그대로 넣기
       await (database.update(database.practiceInfos)
             ..where((tbl) => tbl.id.equals(reportId)))
           .write(
@@ -61,45 +69,40 @@ class ADT {
         ),
       );
     } else {
-      // TODO: 이거 정리하기 - 일단 가장 무식한 방법으로!!!
-      var rawTranscription = result.transcription;
       List<List<ScoredEntry>> results = [];
       List<int> scores = [];
-      double? delay;
 
-      double timePerDrill =
-          TimeUtils.getTotalDuration(option.currentBPM, answer.last.ts.ceil())
-                  .inMilliseconds /
-              1000;
+      double offset =
+          TimeUtils.getSecPerBeat(option.currentBPM) * 4 * measureCnt!;
 
-      // 메트로놈 기다리는 소리
-      double offset = TimeUtils.getSecPerBeat(option.currentBPM) * 4;
+      adt.result.map((e) => print(e.toJson())).toList();
 
-      for (var i = 0; i < option.count; i++) {
-        var transcription = List<MusicEntry>.from(rawTranscription
-            .where(
-              (e) => (
-                  // 첫 반복에는 offset 고려하지 않고 첫마디 다 넣기
-                  e.ts >=
-                          i * timePerDrill +
-                              (i == 0 ? 0 : offset) +
-                              (delay ?? 0) &&
-                      e.ts <= (i * timePerDrill) + offset),
-            )
-            .map((e) => e.copyWith(ts: e.ts - (i * timePerDrill))));
+      filterTs(double ts, int i) {
+        var flag1 = ts > i * offset;
+        var flag2 = ts <= (i + 1) * offset;
 
-        var data = ADTResultModel(
-          bpm: option.currentBPM,
-          transcription: transcription,
-        );
-        data.calculateWithAnswer(
-          answer,
-          calculatedDelay: delay,
-        );
-        results.add(data.result);
-        scores.add(data.score);
-        delay = data.delay;
+        if (i == 0) {
+          return flag2;
+        } else if (i == measureCnt - 1) {
+          return flag1;
+        }
+        return flag1 && flag2;
       }
+
+      /// TODO: 이 밑으로 점검하기
+      for (var i = 0; i < option.count; i++) {
+        var transcription = List<ScoredEntry>.from(
+          adt.result.where((e) => filterTs(e.ts, i)),
+        );
+
+        results.add(transcription);
+        var score = ADTResultModel.calculateScore(
+            AccuracyCount.fromScoredEntries(transcription));
+
+        scores.add(score);
+      }
+      print(scores);
+
       await (database.update(database.drillReportInfos)
             ..where((tbl) => tbl.id.equals(reportId)))
           .write(
@@ -157,16 +160,23 @@ class ADTResultModel {
 
   ///분모: 전부 정답 + 박자 정답 + 음정 정답 + 오답 + miss<br>
   ///분자: 전부 정답 + 박자 정답 * **0.8** + 음정 정답 * **0.4**
+  static calculateScore(AccuracyCount acc) {
+    var divisor = acc.correct +
+        acc.wrongComponent +
+        acc.wrongTiming +
+        // acc.wrong +
+        acc.miss;
+
+    if (divisor == 0) {
+      return 0;
+    }
+    return (100 *
+            (acc.correct + acc.wrongComponent * 0.8 + acc.wrongTiming * 0.6)) ~/
+        divisor;
+  }
+
   _setScore() {
-    score = (100 *
-            (accuracyCount.correct +
-                accuracyCount.wrongComponent * 0.8 +
-                accuracyCount.wrongTiming * 0.6)) ~/
-        (accuracyCount.correct +
-            accuracyCount.wrongComponent +
-            accuracyCount.wrongTiming +
-            // accuracyCount.wrong +
-            accuracyCount.miss);
+    score = calculateScore(accuracyCount);
   }
 
   _setComponentCount() {
