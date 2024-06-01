@@ -5,14 +5,14 @@ import 'dart:convert';
 part 'cursor_convertor.g.dart';
 
 @JsonSerializable()
-class Cursors {
+class Cursor {
   final double x;
   final double y;
   final double w;
   final double h;
   final double ts;
 
-  Cursors({
+  Cursor({
     required this.x,
     required this.y,
     required this.w,
@@ -20,30 +20,37 @@ class Cursors {
     required this.ts,
   });
 
-  Cursors.createEmpty()
+  Cursor.createEmpty()
       : x = 0,
         y = 0,
         w = 0,
         h = 0,
         ts = 0;
 
-  factory Cursors.fromJson(Map<String, dynamic> json) =>
-      _$CursorsFromJson(json);
+  copyWith({double? x, double? y, double? w, double? h, double? ts}) => Cursor(
+        x: x ?? this.x,
+        y: y ?? this.y,
+        w: w ?? this.w,
+        h: h ?? this.h,
+        ts: ts ?? this.ts,
+      );
 
-  Map<String, dynamic> toJson() => _$CursorsToJson(this);
+  factory Cursor.fromJson(Map<String, dynamic> json) => _$CursorFromJson(json);
+
+  Map<String, dynamic> toJson() => _$CursorToJson(this);
 }
 
-class CursorListConvertor extends TypeConverter<List<Cursors>, String> {
+class CursorListConvertor extends TypeConverter<List<Cursor>, String> {
   const CursorListConvertor();
   @override
-  List<Cursors> fromSql(String fromDb) {
-    return List<Cursors>.from((json.decode(fromDb) as List<dynamic>)
-        .map((v) => Cursors.fromJson(v))
+  List<Cursor> fromSql(String fromDb) {
+    return List<Cursor>.from((json.decode(fromDb) as List<dynamic>)
+        .map((v) => Cursor.fromJson(v))
         .toList());
   }
 
   @override
-  String toSql(List<Cursors> value) {
+  String toSql(List<Cursor> value) {
     return json.encode(value.map((v) => v.toJson()).toList());
   }
 }

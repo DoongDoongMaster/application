@@ -7,7 +7,7 @@ import 'package:flutter/scheduler.dart';
 class Metronome {
   /// 악보에 의존
   final MusicInfo music;
-  final void Function(Cursors) updateCursor;
+  final void Function(Cursor) updateCursor;
   final void Function(int) updateTime;
   final void Function() onComplete;
   double volume;

@@ -1,6 +1,7 @@
 import 'package:application/screens/home_screen.dart';
 import 'package:application/screens/new_music_screen.dart';
 import 'package:application/screens/prompt_screen.dart';
+import 'package:application/screens/drill_setting_screen.dart';
 import 'package:application/screens/report_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -13,6 +14,7 @@ enum RouterPath {
   prompt,
   report,
   newMusic,
+  drillSetting,
 }
 
 CustomTransitionPage buildPageWithDefaultTransition<T>(
@@ -56,8 +58,26 @@ final GoRouter goRouter = GoRouter(
           context,
           state,
           PromptScreen(
-              musicId: state.pathParameters["musicId"],
-              projectId: state.pathParameters["projectId"]),
+            musicId: state.pathParameters["musicId"],
+            projectId: state.pathParameters["projectId"],
+            drillId: state.uri.queryParameters["drillId"],
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/${RouterPath.drillSetting.name}/:projectId',
+      name: RouterPath.drillSetting.name,
+      pageBuilder: (context, state) {
+        if (state.pathParameters["projectId"] == null) {
+          return goHome(context, state);
+        }
+        return buildPageWithDefaultTransition(
+          context,
+          state,
+          DrillSettingScreen(
+            projectId: state.pathParameters["projectId"],
+          ),
         );
       },
     ),

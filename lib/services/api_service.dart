@@ -1,29 +1,34 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:application/models/adt_result_model.dart';
+import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/environment.dart';
 import 'package:http/http.dart' as http;
+
+class ADTApiResponse {
+  final List<MusicEntry> transcription;
+
+  ADTApiResponse.fromJson(Map<String, dynamic> json)
+      : transcription = List<MusicEntry>.from(
+            json["result"].map((v) => MusicEntry.fromJson(v)));
+}
 
 class ApiService {
   static const baseUrl = Environment.serverHost;
 
-  static Future<ADTResultModel?> getADTResult(
-      {required String dataPath, required int bpm}) async {
-    print("uploading file... ${File(dataPath).path}");
-
-    // 서버 엔드포인트 URL 수정
-    var uri = Uri.parse('${ApiService.baseUrl}/models/adt/predict')
-        .replace(queryParameters: {'bpm': bpm.toString()});
-
+  static Future<ADTApiResponse?> getADTResult(
+      {required String dataPath}) async {
     try {
+      print("uploading file... ${File(dataPath).path}");
+      var file = await http.MultipartFile.fromPath('file', File(dataPath).path);
+
+      var uri = Uri.parse('${ApiService.baseUrl}/models/adt/predict');
+
       var request = http.MultipartRequest('POST', uri)
         ..headers.addAll({
           'Content-Type': 'multipart/form-data',
-          'ngrok-skip-browser-warning': '1',
         })
-        ..files.add(
-            await http.MultipartFile.fromPath('file', File(dataPath).path));
+        ..files.add(file);
 
       print("request url: ${request.url.toString()}, $dataPath");
 
@@ -35,7 +40,7 @@ class ApiService {
         // 서버 응답 데이터를 JSON으로 파싱
         var jsonResponse = json.decode(responseBody);
         print(jsonResponse);
-        return ADTResultModel.fromJson(jsonResponse);
+        return ADTApiResponse.fromJson(jsonResponse);
         // return ADTResultModel.fromJson({'instrument': [], 'rhythm': []});)
       } else {
         print('${response.statusCode}: ${response.reasonPhrase}');
@@ -66,6 +71,38 @@ class ApiService {
         var jsonResponse = json.decode(responseBody);
         print(jsonResponse);
         return jsonResponse;
+      } else {
+        print('${response.statusCode}: ${response.reasonPhrase}');
+        // throw Error();
+        return null;
+      }
+    } catch (error) {
+      print('오류 발생: $error');
+      return null;
+    }
+  }
+
+  static Future<dynamic> getOMRResult(String dataPath) async {
+    var uri = Uri.parse('${ApiService.baseUrl}/models/omr/predict');
+
+    try {
+      var request = http.MultipartRequest('POST', uri)
+        ..headers.addAll({
+          'Content-Type': 'multipart/form-data',
+        })
+        ..files.add(
+            await http.MultipartFile.fromPath('file', File(dataPath).path));
+      print("request url: ${request.url.toString()}, $dataPath");
+
+      var response = await request.send();
+      print("request, ${request.files}");
+      var responseBody = await response.stream.bytesToString();
+
+      if (response.statusCode == 200) {
+        // 서버 응답 데이터를 JSON으로 파싱
+        var jsonResponse = json.decode(responseBody);
+        return jsonResponse["result"];
+        // return ADTResultModel.fromJson({'instrument': [], 'rhythm': []});)
       } else {
         print('${response.statusCode}: ${response.reasonPhrase}');
         // throw Error();

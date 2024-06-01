@@ -1,25 +1,13 @@
-import 'package:application/models/convertors/cursor_convertor.dart';
-import 'package:application/screens/prompt_screen.dart';
 import 'package:application/styles/color_styles.dart';
+import 'package:application/widgets/positioned_container.dart';
 import 'package:flutter/material.dart';
 
-class CursorWidget extends StatelessWidget {
-  final Cursors cursorInfo;
-
-  const CursorWidget({super.key, required this.cursorInfo});
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: cursorInfo.x,
-      top: cursorInfo.y + PromptScreen.sheetPadding,
-      child: Container(
-        decoration: BoxDecoration(
+class CursorWidget extends PositionedContainer {
+  CursorWidget({super.key, required super.cursor})
+      : super(
+          decoration: BoxDecoration(
             color: ColorStyles.primaryShadow36,
-            borderRadius: BorderRadius.circular(4)),
-        height: cursorInfo.h,
-        width: cursorInfo.w,
-      ),
-    );
-  }
+            borderRadius: BorderRadius.circular(4),
+          ),
+        );
 }

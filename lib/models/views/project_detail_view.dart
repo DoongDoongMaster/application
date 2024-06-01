@@ -20,7 +20,7 @@ abstract class ProjectDetailView extends View {
         musicInfos.artist,
         musicInfos.bpm,
         musicInfos.type,
-        musicInfos.measureCount,
+        musicInfos.measureList,
       ]).from(projects).join([
         innerJoin(musicInfos, projects.musicId.equalsExp(musicInfos.id)),
       ]);

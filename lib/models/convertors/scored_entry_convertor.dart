@@ -56,3 +56,20 @@ class ScoredEntryListConvertor
     return json.encode(value.map((v) => v.toJson()).toList());
   }
 }
+
+class ScoredEntry2dListConvertor
+    extends TypeConverter<List<List<ScoredEntry>>, String> {
+  const ScoredEntry2dListConvertor();
+  @override
+  List<List<ScoredEntry>> fromSql(String fromDb) {
+    return List<List<ScoredEntry>>.from((json.decode(fromDb) as List<dynamic>)
+        .map((v) => const ScoredEntryListConvertor().fromSql(v))
+        .toList());
+  }
+
+  @override
+  String toSql(List<List<ScoredEntry>> value) {
+    return json.encode(
+        value.map((v) => const ScoredEntryListConvertor().toSql(v)).toList());
+  }
+}

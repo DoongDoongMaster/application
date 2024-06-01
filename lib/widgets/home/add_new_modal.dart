@@ -179,7 +179,7 @@ class _NewMusicModalState extends State<NewMusicModal> {
                         validator: (v) {
                           if (v != null) {
                             bpm = int.tryParse(v) ?? 0;
-                            if (bpm > 0) {
+                            if (bpm >= 1 && bpm <= 200) {
                               return null;
                             }
                           }

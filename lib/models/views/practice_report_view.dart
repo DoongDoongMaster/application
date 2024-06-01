@@ -29,6 +29,7 @@ abstract class PracticeReportView extends View {
         practice.isNew,
         practice.result,
         musicInfo.sourceCount,
+        musicInfo.musicEntries,
         musicInfo.xmlData,
         musicInfo.hitCount,
         musicInfo.measureList,

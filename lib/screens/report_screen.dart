@@ -7,6 +7,8 @@ import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/models/entity/music_infos.dart';
+import 'package:application/services/crop_image.dart';
 import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
@@ -15,11 +17,11 @@ import 'package:application/time_utils.dart';
 import 'package:application/widgets/custom_dialog.dart';
 import 'package:application/widgets/modal_widget.dart';
 import 'package:application/widgets/music_sheet_viewer_widget.dart';
+import 'package:application/widgets/positioned_container.dart';
 import 'package:application/widgets/report/report_header.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:image/image.dart' as imglib;
 
 class ReportScreen extends StatefulWidget {
   static const double headerHeight = 312;
@@ -39,10 +41,12 @@ class _ReportScreenState extends State<ReportScreen> {
     accuracyCount: AccuracyCount(),
     componentCount: ComponentCount(),
     sourceCount: ComponentCount(),
+    musicEntries: [],
     score: 0,
     bestScore: 0,
     sourceBPM: 0,
     bpm: 0,
+    speed: 1,
     xmlData: Uint8List(0),
     result: [],
     hitCount: 0,
@@ -97,7 +101,7 @@ class _ReportScreenState extends State<ReportScreen> {
 
     setState(() {
       _data = practice;
-      _secPerMeasure = 4 * TimeUtils.getSecPerBeat(practice.bpm!);
+      _secPerMeasure = 4 * TimeUtils.getSecPerBeat(practice.bpm);
     });
 
     // OSMD - 악보에 답 표기
@@ -174,10 +178,12 @@ class _ReportScreenState extends State<ReportScreen> {
                             : Alignment.center,
                         child: markedImage != null
                             ? SizedBox(
-                                width: 1024,
+                                width: MusicInfo.imageWidth,
                                 child: Stack(
                                   children: [
-                                    MusicSheetWidget(image: markedImage!),
+                                    Center(
+                                        child: MusicSheetWidget(
+                                            image: markedImage!)),
                                     for (var i = 0;
                                         i < _data.measureList.length;
                                         i++)
@@ -230,38 +236,31 @@ class _MeasureViewButton extends StatelessWidget {
 
   final Uint8List? markedImage;
   final double ts1, ts2;
-  final Cursors curr;
-  final Cursors? prev, next;
+  final Cursor curr;
+  final Cursor? prev, next;
   final List<ScoredEntry> notes;
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      left: curr.x + 1,
-      top: curr.y,
-      child: GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: () {
-          showDialog(
-            context: context,
-            builder: (context) {
-              return _MeasureViewModal(
-                markedImage: markedImage!,
-                curr: curr,
-                prev: prev,
-                next: next,
-                notes: notes,
-                ts1: ts1,
-                ts2: ts2,
-              );
-            },
-          );
-        },
-        child: SizedBox(
-          width: curr.w - 2,
-          height: curr.h,
-        ),
-      ),
+    return PositionedInkWell(
+      cursor: curr,
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (context) {
+            // TODO: 너무 느림!!!!! (비동기로 바꿀 수 있을지 찾아보기)
+            return _MeasureViewModal(
+              markedImage: markedImage!,
+              curr: curr,
+              prev: prev,
+              next: next,
+              notes: notes,
+              ts1: ts1,
+              ts2: ts2,
+            );
+          },
+        );
+      },
     );
   }
 }
@@ -279,8 +278,8 @@ class _MeasureViewModal extends StatelessWidget {
   });
 
   final Uint8List markedImage;
-  final Cursors curr;
-  final Cursors? prev, next;
+  final Cursor curr;
+  final Cursor? prev, next;
   final List<ScoredEntry> notes;
   final double ts1, ts2;
 
@@ -358,6 +357,7 @@ class _MeasureViewModal extends StatelessWidget {
 
 /// 마디 단위로 악보 자르기
 class _CroppedMeasureImage extends Image {
+  static const double measureHeight = 100;
   _CroppedMeasureImage({
     required Uint8List image,
     required double x,
@@ -366,18 +366,18 @@ class _CroppedMeasureImage extends Image {
     required double h,
     bool isBlur = false,
   }) : super.memory(
-          imglib.encodePng(
-            imglib.copyCrop(
-              imglib.decodeImage(image)!,
-              x: (x * 2).toInt(),
-              y: ((y - (100 - h)) * 2).toInt(),
-              width: (w * 2).toInt(),
-              height: 100 * 2,
-              antialias: true,
+          cropImage(
+            image,
+            rect: Rect.fromLTWH(
+              x,
+              y + h - measureHeight,
+              w,
+              measureHeight,
             ),
+            scale: 2,
           ),
           fit: BoxFit.contain,
-          height: 100,
+          height: measureHeight,
           color: isBlur ? Colors.transparent.withOpacity(0.4) : null,
         );
 }
