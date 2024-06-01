@@ -1,11 +1,16 @@
 import 'package:application/models/db/app_database.dart';
 import 'package:application/router.dart';
+import 'package:application/services/firebase.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
 import 'package:application/test_codes.dart';
 import 'package:flutter/material.dart';
 
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+
 late final AppDatabase database;
+final FireBaseService fbService = FireBaseService();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +21,10 @@ void main() async {
   } catch (e) {
     print(e);
   }
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   runApp(const MyApp());
 }

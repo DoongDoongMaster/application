@@ -54,6 +54,9 @@ dependencies:
   flutter_inappwebview: ^6.0.0
   image: ^4.1.7
   collection: ^1.18.0
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.17.8
+  google_sign_in: ^6.2.1
 
 dev_dependencies:
   flutter_test:

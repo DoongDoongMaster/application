@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:application/main.dart';
 import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/environment.dart';
 import 'package:http/http.dart' as http;
@@ -15,6 +16,9 @@ class ADTApiResponse {
 
 class ApiService {
   static const baseUrl = Environment.serverHost;
+  static Future<Map<String, String>> get defaultHeader async => {
+        "Authorization": "Bearer ${await fbService.idToken}",
+      };
 
   static Future<ADTApiResponse?> getADTResult(
       {required String dataPath}) async {
@@ -26,6 +30,7 @@ class ApiService {
 
       var request = http.MultipartRequest('POST', uri)
         ..headers.addAll({
+          ...await defaultHeader,
           'Content-Type': 'multipart/form-data',
         })
         ..files.add(file);
@@ -54,10 +59,11 @@ class ApiService {
   }
 
   static Future<double?> getParams(String key) async {
-    var uri = Uri.parse('${ApiService.baseUrl}/adt/$key');
+    var uri = Uri.parse('${ApiService.baseUrl}/models/adt/$key');
     try {
       var request = http.MultipartRequest('GET', uri)
         ..headers.addAll({
+          ...await defaultHeader,
           'ngrok-skip-browser-warning': '1',
         });
 
@@ -88,6 +94,7 @@ class ApiService {
     try {
       var request = http.MultipartRequest('POST', uri)
         ..headers.addAll({
+          ...await defaultHeader,
           'Content-Type': 'multipart/form-data',
         })
         ..files.add(

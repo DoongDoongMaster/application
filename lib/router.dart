@@ -1,4 +1,6 @@
+import 'package:application/main.dart';
 import 'package:application/screens/home_screen.dart';
+import 'package:application/screens/login_screen.dart';
 import 'package:application/screens/new_music_screen.dart';
 import 'package:application/screens/prompt_screen.dart';
 import 'package:application/screens/drill_setting_screen.dart';
@@ -7,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 enum RouterPath {
+  login,
   home,
   // list,
   // favoriteList,
@@ -30,9 +33,16 @@ CustomTransitionPage buildPageWithDefaultTransition<T>(
 }
 
 final GoRouter goRouter = GoRouter(
-  initialLocation: '/${RouterPath.home.name}',
+  // initialLocation: '/${RouterPath.home.name}',
+  initialLocation: '/${RouterPath.login.name}',
   debugLogDiagnostics: true,
   routes: [
+    GoRoute(
+      path: '/${RouterPath.login.name}',
+      name: RouterPath.login.name,
+      pageBuilder: (context, state) =>
+          buildPageWithDefaultTransition(context, state, const LoginScreen()),
+    ),
     GoRoute(
       path: '/${RouterPath.home.name}',
       name: RouterPath.home.name,
@@ -113,6 +123,12 @@ final GoRouter goRouter = GoRouter(
       },
     ),
   ],
+  redirect: (context, state) {
+    if (!fbService.isloggedIn) {
+      return '/${RouterPath.login.name}';
+    }
+    return '/${RouterPath.home.name}';
+  },
 );
 
 CustomTransitionPage<dynamic> goHome(
