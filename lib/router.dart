@@ -33,7 +33,6 @@ CustomTransitionPage buildPageWithDefaultTransition<T>(
 }
 
 final GoRouter goRouter = GoRouter(
-  // initialLocation: '/${RouterPath.home.name}',
   initialLocation: '/${RouterPath.login.name}',
   debugLogDiagnostics: true,
   routes: [
@@ -127,7 +126,7 @@ final GoRouter goRouter = GoRouter(
     if (!fbService.isloggedIn) {
       return '/${RouterPath.login.name}';
     }
-    return '/${RouterPath.home.name}';
+    return null;
   },
 );
 

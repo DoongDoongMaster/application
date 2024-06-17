@@ -149,7 +149,7 @@ class _AnalysisPerComponent extends StatelessWidget {
                     backgroundColor: (sourceCnt == 0
                             ? ColorStyles.secondary
                             : ColorStyles.primary)
-                        .withOpacity(0.2),
+                        .withOpacity(0.5),
                   );
                 },
               ),
@@ -177,7 +177,7 @@ class _AnalysisPerComponent extends StatelessWidget {
                         TextSpan(
                           text:
                               '${sourceCnt == 0 ? '-' : (100 * score).toInt()}',
-                          style: TextStyles.headlineSmall
+                          style: TextStyles.titleLarge
                               .copyWith(color: Colors.white),
                         ),
                         TextSpan(

@@ -15,6 +15,7 @@ class FireBaseService {
   }
 
   Future<void> signInWithGoogle() async {
+  Future<bool> signInWithGoogle() async {
     try {
       GoogleSignIn googleSignIn = GoogleSignIn();
       GoogleSignInAccount? account = await googleSignIn.signIn();
@@ -26,10 +27,49 @@ class FireBaseService {
           accessToken: authentication.accessToken,
         );
         await _auth.signInWithCredential(googleCredential);
+        return true;
+      } else {
+        return false;
       }
     } catch (e) {
-      print(e);
+      return false;
     }
+  }
+
+  Future<String?> singInWithEmail(String email, String password) async {
+    try {
+      await _auth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case "user-not-found":
+          return "가입된 이메일이 아닙니다.";
+        case "wrong-password":
+          return "비밀번호가 틀렸습니다.";
+        case "invalid-email":
+          return "이메일 형식이 맞지 않습니다.";
+      }
+    }
+    return null;
+  }
+
+  Future<String?> createUserWithEmail(String email, String password) async {
+    try {
+      await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    } on FirebaseAuthException catch (e) {
+      switch (e.code) {
+        case "email-already-in-use":
+          return "이미 가입된 이메일 입니다.";
+        case "invalid-email":
+          return "이메일 형식이 맞지 않습니다.";
+      }
+    }
+    return null;
   }
 
   Future<void> signOut() async {

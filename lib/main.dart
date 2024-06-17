@@ -1,3 +1,4 @@
+import 'package:application/globals.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/router.dart';
 import 'package:application/services/firebase.dart';
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
+      scaffoldMessengerKey: snackbarKey,
       theme: ThemeData(
         useMaterial3: true,
         canvasColor: Colors.transparent,

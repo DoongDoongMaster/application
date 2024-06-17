@@ -389,8 +389,8 @@ class _PromptScreenState extends State<PromptScreen> {
         filePath: filePath,
         answer: music.musicEntries,
         measureCnt: music.measureCnt,
-        context: context.mounted ? context : null,
         option: _option,
+        projectTitle: music.title,
       );
     } else {
       if (context.mounted) {

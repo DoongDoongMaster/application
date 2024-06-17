@@ -18,22 +18,24 @@ class ADT {
     required String reportId,
     required String musicId,
     required String filePath,
+    String? projectTitle,
     required List<MusicEntry> answer,
     required PromptOption option,
     int? measureCnt,
-    BuildContext? context,
   }) async {
     if (option.type == ReportType.drill && measureCnt == null) {
       throw Exception('measure count is not given for drill');
     }
     // 다시 채점할 때 다시 비워놓기
     if (option.type == ReportType.full) {
-      (database.update(database.practiceInfos)
+      await (database.update(database.practiceInfos)
             ..where((tbl) => tbl.id.equals(reportId)))
-          .write(
+          .writeReturning(
         const PracticeInfosCompanion(
           isNew: drift.Value(false),
-          score: drift.Value.absent(),
+          score: drift.Value(null),
+          accuracyCount: drift.Value(null),
+          result: drift.Value(null),
         ),
       );
     }
@@ -41,9 +43,7 @@ class ADT {
     ADTApiResponse? result = await ApiService.getADTResult(dataPath: filePath);
 
     if (result == null) {
-      if (context != null && context.mounted) {
-        showSnackbar(context, '오류가 발생했습니다.');
-      }
+      showGlobalSnackbar('오류가 발생했습니다.');
       return;
     }
 
@@ -68,6 +68,10 @@ class ADT {
           updatedAt: drift.Value(DateTime.now()),
         ),
       );
+
+      if (option.type == ReportType.full) {
+        pnService.showNotification(projectTitle ?? "", reportId);
+      }
     } else {
       List<List<ScoredEntry>> results = [];
       List<int> scores = [];
@@ -115,17 +119,12 @@ class ADT {
         ),
       );
     }
-
-    // TODO: push 알림 등 처리 필요
-    if (context != null && context.mounted) {
-      return showSnackbar(context, '채점이 완료되었습니다.');
-    }
   }
 
-  static Future runWithId(String practiceId, BuildContext context) {
+  static Future runWithId(String practiceId, String projectTitle) {
     return Future.wait(
             [LocalStorage.getLocalPath(), database.getADTRequest(practiceId)])
-        .then((futureList) {
+        .then((futureList) async {
       var requestInfo = futureList[1] as ADTRequestViewData;
 
       return ADT.run(
@@ -133,8 +132,8 @@ class ADT {
         musicId: requestInfo.musicId!,
         reportId: practiceId,
         answer: requestInfo.musicEntries,
-        context: context,
         option: PromptOption(type: ReportType.full, bpm: requestInfo.bpm),
+        projectTitle: projectTitle,
       );
     });
   }

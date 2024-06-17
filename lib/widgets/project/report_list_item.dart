@@ -109,7 +109,7 @@ class ReportListItem extends StatelessWidget {
                     }
                     break;
                   case 1:
-                    ADT.runWithId(data.id, context);
+                    ADT.runWithId(data.id, "");
                 }
               },
               itemBuilder: (context) => [

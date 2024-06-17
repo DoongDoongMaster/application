@@ -8,6 +8,7 @@ import 'package:application/models/convertors/cursor_convertor.dart';
 import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
+import 'package:application/router.dart';
 import 'package:application/services/crop_image.dart';
 import 'package:application/services/osmd_service.dart';
 import 'package:application/styles/color_styles.dart';
@@ -68,7 +69,13 @@ class _ReportScreenState extends State<ReportScreen> {
   getPracticeReport() async {
     var practice = await database.getPracticeReport(widget.practiceId!);
     if (practice == null) {
-      Future.microtask(() => context.pop());
+      Future.microtask(() {
+        if (context.canPop()) {
+          context.pop();
+        } else {
+          context.goNamed(RouterPath.home.name);
+        }
+      });
       return;
     }
 
