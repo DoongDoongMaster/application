@@ -96,6 +96,7 @@ flutter:
     - assets/web/js/opensheetmusicdisplay.min.js
     - assets/web/js/fileSelectAndLoadOSMD.js
     - assets/config/.env
+    - assets/ddm_db.sqlite
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

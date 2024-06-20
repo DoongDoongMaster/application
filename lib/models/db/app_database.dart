@@ -25,6 +25,7 @@ import 'package:application/models/views/project_thumbnail_view.dart';
 import 'package:application/services/local_storage.dart';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 
@@ -32,16 +33,15 @@ part 'app_database.g.dart';
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final file =
+    File file =
         File(p.join(await LocalStorage.getLocalPath(), 'ddm_db.sqlite'));
 
     if (!await file.exists()) {
       // Extract the pre-populated database file from assets
-      // final blob = await rootBundle.load('assets/srn_db_2.sqlite');
-      // final buffer = blob.buffer;
-      // await file.writeAsBytes(
-      //     buffer.asUint8List(blob.offsetInBytes, blob.lengthInBytes));
-      print("not exists");
+      final blob = await rootBundle.load('assets/ddm_db.sqlite');
+      final buffer = blob.buffer;
+      await file.writeAsBytes(
+          buffer.asUint8List(blob.offsetInBytes, blob.lengthInBytes));
     }
     return NativeDatabase.createInBackground(file);
   });
