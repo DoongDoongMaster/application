@@ -127,7 +127,7 @@ class NavigationPanel extends StatelessWidget {
                                     ? Padding(
                                         padding: const EdgeInsets.all(2),
                                         child: Image.asset(
-                                          'assets/images/logo.png',
+                                          'assets/icons/ddm.png',
                                         ),
                                       )
                                     : null,

@@ -52,6 +52,7 @@ final GoRouter goRouter = GoRouter(
           homeTab: state.uri.queryParameters["tab"] == null
               ? null
               : HomeTab.values.byName(state.uri.queryParameters["tab"]!),
+          projectId: state.uri.queryParameters["projectId"],
         ),
       ),
     ),

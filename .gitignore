@@ -140,7 +140,6 @@ app.*.symbols
 
 assets/*
 !assets/web/
-assets/web/js/opensheetmusicdisplay.min.js
 
 fonts/*
 

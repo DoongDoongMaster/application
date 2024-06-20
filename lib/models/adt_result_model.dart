@@ -11,7 +11,6 @@ import 'package:application/time_utils.dart';
 import 'package:application/widgets/prompt/prompt_setting_modal.dart';
 import 'package:application/widgets/show_snackbar.dart';
 import 'package:drift/drift.dart' as drift;
-import 'package:flutter/material.dart';
 
 class ADT {
   static run({
@@ -47,7 +46,7 @@ class ADT {
       return;
     }
 
-// 결과 모델 생성
+    // 결과 모델 생성
     var adt = ADTResultModel(
         bpm: option.currentBPM, transcription: result.transcription);
 

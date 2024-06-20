@@ -2,9 +2,10 @@ import 'package:application/globals.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/router.dart';
 import 'package:application/services/firebase.dart';
+import 'package:application/services/push_notification_service.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
-import 'package:application/test_codes.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
@@ -12,20 +13,23 @@ import 'firebase_options.dart';
 
 late final AppDatabase database;
 final FireBaseService fbService = FireBaseService();
+final PushNotificationService pnService = PushNotificationService();
+
+Future<void> _onBackgroundMessage(RemoteMessage message) async {
+  print(message.data);
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   database = AppDatabase();
-  try {
-    await listAll();
-  } catch (e) {
-    print(e);
-  }
 
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+
+  await fbService.requestPermission();
+  FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);
 
   runApp(const MyApp());
 }

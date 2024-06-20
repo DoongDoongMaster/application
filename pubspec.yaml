@@ -57,6 +57,9 @@ dependencies:
   firebase_core: ^2.27.0
   firebase_auth: ^4.17.8
   google_sign_in: ^6.2.1
+  firebase_messaging: ^14.7.19
+  flutter_local_notifications: ^17.1.2
+  permission_handler: ^11.3.1
 
 dev_dependencies:
   flutter_test:
@@ -84,17 +87,13 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/video/demo-sheet-play.mp4
-    - assets/video/demo-sheet-play-unmuted.mp4
-    - assets/music/stay-with-me.png
     - assets/sound/metronome.wav
-    - assets/images/logo.svg
-    - assets/images/logo.png
+    - assets/icons/ddm.svg
+    - assets/icons/ddm.png
+    - assets/icons/google.png
     - assets/web/index.html
     - assets/web/js/opensheetmusicdisplay.min.js
     - assets/web/js/fileSelectAndLoadOSMD.js
-    - assets/music/demo.xml
-    - assets/music/iu.xml
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
@@ -117,15 +116,6 @@ flutter:
           weight: 300
         - asset: fonts/NanumBarunGothicUltraLight.ttf
           weight: 100
-    # - family: NotoMusic
-    #   fonts:
-    #     - asset: fonts/NotoMusic-Regular.ttf
-    - family: Bravura
-      fonts:
-        - asset: fonts/Bravura.otf
-    - family: BravuraText
-      fonts:
-        - asset: fonts/BravuraText.otf
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

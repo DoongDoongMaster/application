@@ -83,7 +83,7 @@ class ProjectPreview extends StatelessWidget {
                       ? Padding(
                           padding: const EdgeInsets.only(top: 14, bottom: 2),
                           child: Image.asset(
-                            'assets/images/logo.png',
+                            'assets/icons/ddm.png',
                           ),
                         )
                       : null,

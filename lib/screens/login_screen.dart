@@ -1,4 +1,3 @@
-import 'package:application/globals.dart';
 import 'package:application/main.dart';
 import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
@@ -137,7 +136,7 @@ class AuthModalState extends State<AuthModal> {
             right: '',
           ),
           const Divider(height: 0),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           Form(
             key: _formKey,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -247,8 +246,13 @@ class AuthModalState extends State<AuthModal> {
                 setState(() {
                   isLoading = true;
                 });
-                await fbService.signInWithGoogle();
-                if (context.mounted) {
+                final loginSuccess = await fbService.signInWithGoogle();
+                if (!loginSuccess) {
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+                if (loginSuccess && context.mounted) {
                   context.goNamed(RouterPath.home.name);
                 }
               },
@@ -259,7 +263,7 @@ class AuthModalState extends State<AuthModal> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 10),
                     child: Image.asset(
-                      'assets/images/google-icon.png',
+                      'assets/icons/google.png',
                       width: 20,
                       height: 20,
                     ),
@@ -402,7 +406,7 @@ class _DDMLogo extends StatelessWidget {
       ),
       child: Padding(
         padding: const EdgeInsets.all(30),
-        child: Image.asset('assets/images/logo.png'),
+        child: Image.asset('assets/icons/ddm.png'),
       ),
     );
   }

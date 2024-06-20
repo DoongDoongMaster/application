@@ -383,7 +383,7 @@ class _BigThumbnail extends StatelessWidget {
         ],
       ),
       child: Image.asset(
-        'assets/images/logo.png',
+        'assets/icons/ddm.png',
         color: musicType != MusicType.ddm ? Colors.transparent : null,
       ),
     );
