@@ -31,6 +31,8 @@ void main() async {
   await fbService.requestPermission();
   FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);
 
+  goRouter.goNamed(RouterPath.home.name);
+
   runApp(const MyApp());
 }
 
