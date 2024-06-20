@@ -15,7 +15,7 @@ class ADTApiResponse {
 }
 
 class ApiService {
-  static const baseUrl = Environment.serverHost;
+  static String baseUrl = Environment.serverHost;
   static Future<Map<String, String>> get defaultHeader async => {
         "Authorization": "Bearer ${await fbService.idToken}",
       };

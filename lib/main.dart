@@ -9,6 +9,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'firebase_options.dart';
 
 late final AppDatabase database;
@@ -30,7 +31,7 @@ void main() async {
 
   await fbService.requestPermission();
   FirebaseMessaging.onBackgroundMessage(_onBackgroundMessage);
-
+  await dotenv.load(fileName: "assets/config/.env");
   goRouter.goNamed(RouterPath.home.name);
 
   runApp(const MyApp());

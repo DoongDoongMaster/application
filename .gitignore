@@ -139,12 +139,11 @@ app.*.symbols
 
 
 assets/music
-!assets/web/
+assets/config
 
 fonts/*
 
 lib/test_codes.dart
-**/environment.dart
 
 
 # firebase
