@@ -4,75 +4,135 @@ import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:application/models/convertors/music_entry_convertor.dart';
 import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:application/models/db/app_database.dart';
+import 'package:application/models/entity/default_report_info.dart';
 import 'package:application/services/api_service.dart';
 import 'package:application/services/local_storage.dart';
 import 'package:application/time_utils.dart';
+import 'package:application/widgets/prompt/prompt_setting_modal.dart';
 import 'package:application/widgets/show_snackbar.dart';
 import 'package:drift/drift.dart' as drift;
-import 'package:flutter/material.dart';
 
 class ADT {
   static run({
-    required String practiceId,
+    required String reportId,
     required String musicId,
     required String filePath,
-    required int bpm,
+    String? projectTitle,
     required List<MusicEntry> answer,
-    BuildContext? context,
+    required PromptOption option,
+    int? measureCnt,
   }) async {
+    if (option.type == ReportType.drill && measureCnt == null) {
+      throw Exception('measure count is not given for drill');
+    }
     // 다시 채점할 때 다시 비워놓기
-    (database.update(database.practiceInfos)
-          ..where((tbl) => tbl.id.equals(practiceId)))
-        .write(
-      const PracticeInfosCompanion(
-        isNew: drift.Value(false),
-        score: drift.Value.absent(),
-      ),
-    );
+    if (option.type == ReportType.full) {
+      await (database.update(database.practiceInfos)
+            ..where((tbl) => tbl.id.equals(reportId)))
+          .writeReturning(
+        const PracticeInfosCompanion(
+          isNew: drift.Value(false),
+          score: drift.Value(null),
+          accuracyCount: drift.Value(null),
+          result: drift.Value(null),
+        ),
+      );
+    }
 
-    late ADTResultModel? result;
-
-    result = await ApiService.getADTResult(dataPath: filePath, bpm: bpm);
+    ADTApiResponse? result = await ApiService.getADTResult(dataPath: filePath);
 
     if (result == null) {
+      showGlobalSnackbar('오류가 발생했습니다.');
       return;
     }
 
-    await result.calculateWithAnswer(answer, bpm);
+    // 결과 모델 생성
+    var adt = ADTResultModel(
+        bpm: option.currentBPM, transcription: result.transcription);
 
-    await (database.update(database.practiceInfos)
-          ..where((tbl) => tbl.id.equals(practiceId)))
-        .write(
-      PracticeInfosCompanion(
-        isNew: const drift.Value(true),
-        score: drift.Value(result.score),
-        accuracyCount: drift.Value(result.accuracyCount),
-        componentCount: drift.Value(result.componentCount),
-        transcription: drift.Value(result.transcription),
-        result: drift.Value(result.result),
-        updatedAt: drift.Value(DateTime.now()),
-      ),
-    );
+    await adt.calculateWithAnswer(answer);
 
-    // TODO: push 알림 등 처리 필요
-    if (context != null && context.mounted) {
-      return showSnackbar(context, '채점이 완료되었습니다.');
+    if (option.type == ReportType.full) {
+      // 완곡인 경우 그대로 넣기
+      await (database.update(database.practiceInfos)
+            ..where((tbl) => tbl.id.equals(reportId)))
+          .write(
+        PracticeInfosCompanion(
+          isNew: const drift.Value(true),
+          score: drift.Value(adt.score),
+          accuracyCount: drift.Value(adt.accuracyCount),
+          componentCount: drift.Value(adt.componentCount),
+          transcription: drift.Value(adt.transcription),
+          result: drift.Value(adt.result),
+          updatedAt: drift.Value(DateTime.now()),
+        ),
+      );
+
+      if (option.type == ReportType.full) {
+        pnService.showNotification(projectTitle ?? "", reportId);
+      }
+    } else {
+      List<List<ScoredEntry>> results = [];
+      List<int> scores = [];
+
+      double offset =
+          TimeUtils.getSecPerBeat(option.currentBPM) * 4 * measureCnt!;
+
+      adt.result.map((e) => print(e.toJson())).toList();
+
+      filterTs(double ts, int i) {
+        var flag1 = ts > i * offset;
+        var flag2 = ts <= (i + 1) * offset;
+
+        if (i == 0) {
+          return flag2;
+        } else if (i == measureCnt - 1) {
+          return flag1;
+        }
+        return flag1 && flag2;
+      }
+
+      /// TODO: 이 밑으로 점검하기
+      for (var i = 0; i < option.count; i++) {
+        var transcription = List<ScoredEntry>.from(
+          adt.result.where((e) => filterTs(e.ts, i)),
+        );
+
+        results.add(transcription);
+        var score = ADTResultModel.calculateScore(
+            AccuracyCount.fromScoredEntries(transcription));
+
+        scores.add(score);
+      }
+      print(scores);
+
+      await (database.update(database.drillReportInfos)
+            ..where((tbl) => tbl.id.equals(reportId)))
+          .write(
+        DrillReportInfosCompanion(
+          isNew: const drift.Value(true),
+          scores: drift.Value(scores),
+          transcription: drift.Value(result.transcription),
+          results: drift.Value(results),
+          updatedAt: drift.Value(DateTime.now()),
+        ),
+      );
     }
   }
 
-  static Future runWithId(String practiceId, BuildContext context) {
+  static Future runWithId(String practiceId, String projectTitle) {
     return Future.wait(
             [LocalStorage.getLocalPath(), database.getADTRequest(practiceId)])
-        .then((futureList) {
+        .then((futureList) async {
       var requestInfo = futureList[1] as ADTRequestViewData;
 
       return ADT.run(
         filePath: "${futureList[0]}/$practiceId.wav",
         musicId: requestInfo.musicId!,
-        practiceId: practiceId,
+        reportId: practiceId,
         answer: requestInfo.musicEntries,
-        bpm: requestInfo.bpm!,
-        context: context,
+        option: PromptOption(type: ReportType.full, bpm: requestInfo.bpm),
+        projectTitle: projectTitle,
       );
     });
   }
@@ -80,37 +140,41 @@ class ADT {
 
 class ADTResultModel {
   final List<MusicEntry> transcription;
+  final int bpm;
   late final List<MusicEntry> _buffer;
   final AccuracyCount accuracyCount = AccuracyCount();
   final ComponentCount componentCount = ComponentCount();
   late final double initBound, minBound, maxBound;
-  late double delay;
+  double delay = 0;
   late final List<ScoredEntry> result;
   List<ScoredEntry> get remainingList =>
       result.where((element) => element.type == AccuracyType.miss).toList();
 
   int score = 0;
 
-  ADTResultModel({this.transcription = const []})
-      : _buffer = List<MusicEntry>.from(transcription);
-  ADTResultModel.fromJson(Map<String, dynamic> json)
-      : transcription = List<MusicEntry>.from(
-            json["result"].map((v) => MusicEntry.fromJson(v))) {
-    _buffer = List<MusicEntry>.from(transcription);
-  }
+  ADTResultModel({this.transcription = const [], required this.bpm})
+      : _buffer = List<MusicEntry>.from(transcription.map(
+            (e) => e.copyWith(ts: e.ts - TimeUtils.getSecPerBeat(bpm) * 4)));
 
   ///분모: 전부 정답 + 박자 정답 + 음정 정답 + 오답 + miss<br>
   ///분자: 전부 정답 + 박자 정답 * **0.8** + 음정 정답 * **0.4**
+  static calculateScore(AccuracyCount acc) {
+    var divisor = acc.correct +
+        acc.wrongComponent +
+        acc.wrongTiming +
+        // acc.wrong +
+        acc.miss;
+
+    if (divisor == 0) {
+      return 0;
+    }
+    return (100 *
+            (acc.correct + acc.wrongComponent * 0.8 + acc.wrongTiming * 0.6)) ~/
+        divisor;
+  }
+
   _setScore() {
-    score = (100 *
-            (accuracyCount.correct +
-                accuracyCount.wrongComponent * 0.8 +
-                accuracyCount.wrongTiming * 0.6)) ~/
-        (accuracyCount.correct +
-            accuracyCount.wrongComponent +
-            accuracyCount.wrongTiming +
-            // accuracyCount.wrong +
-            accuracyCount.miss);
+    score = calculateScore(accuracyCount);
   }
 
   _setComponentCount() {
@@ -163,7 +227,7 @@ class ADTResultModel {
       // 선택된 경우 삭제
       if (matchedIdx != -1) {
         answer.type = accType;
-        answer.ts = _buffer[matchedIdx].ts;
+        answer.ts = _buffer[matchedIdx].ts - delay;
         _buffer.removeAt(matchedIdx);
         // 정답 개수 증가
         count++;
@@ -238,7 +302,8 @@ class ADTResultModel {
   }
 
   // 채점하기
-  calculateWithAnswer(List<MusicEntry> musicEntries, int bpm) async {
+  calculateWithAnswer(List<MusicEntry> musicEntries,
+      {double? calculatedDelay}) async {
     initBound =
         // await ApiService.getParams('init-bound') ??
         0.3;
@@ -250,19 +315,19 @@ class ADTResultModel {
         // await ApiService.getParams('max-bound') ??
         // 0.1;
         0.15;
-
-    delay = TimeUtils.getSecPerBeat(bpm) * 4; //for prompt count
-
-    result =
-        musicEntries.map((e) => ScoredEntry.fromMusicEntry(e, bpm)).toList();
-
     // 채점 안된 것들 정렬
     // 시간 순으로 정렬
     musicEntries.sort((a, b) => a.ts.compareTo(b.ts));
     _buffer.sort((a, b) => a.ts.compareTo(b.ts));
+    result =
+        musicEntries.map((e) => ScoredEntry.fromMusicEntry(e, bpm)).toList();
 
-    // HACK: 이 부분 로직을 유지해야 할지 모르겠음.
-    delay -= _calculateInitialDelay();
+    if (calculatedDelay == null) {
+      // HACK: 이 부분 로직을 유지해야 할지 모르겠음.
+      delay -= _calculateInitialDelay();
+    } else {
+      delay = calculatedDelay;
+    }
 
     // 우선 박자 / 피치 모두 맞는 경우만 채점.
     _classify(AccuracyType.correct);
@@ -279,7 +344,7 @@ class ADTResultModel {
     result.addAll(_buffer.map((e) => ScoredEntry(
           key: e.key,
           pitch: e.pitch,
-          ts: e.ts,
+          ts: e.ts - delay,
           absTS: -1,
           type: AccuracyType.wrong,
         )));

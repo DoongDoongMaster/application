@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:application/router.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/shadow_styles.dart';
 import 'package:application/styles/text_styles.dart';
@@ -74,7 +75,13 @@ class DiscShapeWidget extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 IconButton(
-                  onPressed: () => context.pop(),
+                  onPressed: () {
+                    if (context.canPop()) {
+                      context.pop();
+                    } else {
+                      context.goNamed(RouterPath.home.name);
+                    }
+                  },
                   icon: const Icon(
                     Icons.arrow_back_ios_rounded,
                     size: 24,

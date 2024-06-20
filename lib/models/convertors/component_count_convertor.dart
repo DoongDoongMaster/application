@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:application/models/convertors/accuracy_count_convertor.dart';
+import 'package:application/models/convertors/music_entry_convertor.dart';
+import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:drift/drift.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -40,6 +43,30 @@ class ComponentCount {
   factory ComponentCount.fromJson(Map<String, dynamic> json) =>
       _$ComponentCountFromJson(json);
   Map<String, dynamic> toJson() => _$ComponentCountToJson(this);
+
+  factory ComponentCount.fromMusicEntries(List<MusicEntry> musicEntries) {
+    var counter = ComponentCount();
+
+    for (var entry in musicEntries) {
+      counter.setByType(
+          entry.drumPitch, counter.getByType(entry.drumPitch) + 1);
+    }
+
+    return counter;
+  }
+
+  factory ComponentCount.fromScoredEntries(List<ScoredEntry> scoredEntries) {
+    var counter = ComponentCount();
+
+    for (var entry in scoredEntries) {
+      if (entry.type == AccuracyType.correct) {
+        counter.setByType(
+            entry.drumPitch, counter.getByType(entry.drumPitch) + 1);
+      }
+    }
+
+    return counter;
+  }
 
   getByType(DrumComponent type) {
     switch (type) {
@@ -91,5 +118,22 @@ class ComponentCountConvertor extends TypeConverter<ComponentCount, String> {
   @override
   String toSql(ComponentCount value) {
     return json.encode(value.toJson());
+  }
+}
+
+class ComponentCountListConvertor
+    extends TypeConverter<List<ComponentCount>, String> {
+  const ComponentCountListConvertor();
+
+  @override
+  List<ComponentCount> fromSql(String fromDb) {
+    return List<ComponentCount>.from((json.decode(fromDb) as List<dynamic>)
+        .map((e) => ComponentCount.fromJson(e))
+        .toList());
+  }
+
+  @override
+  String toSql(List<ComponentCount> value) {
+    return json.encode(value.map((e) => e.toJson()).toList());
   }
 }

@@ -1,5 +1,10 @@
+import 'package:application/main.dart';
+import 'package:application/router.dart';
+import 'package:application/services/api_service.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:application/widgets/delete_confirm_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 class HomeHeader extends StatelessWidget {
   final String label;
@@ -40,10 +45,23 @@ class _ProfileButton extends StatelessWidget {
       ),
       tooltip: 'show logout',
       constraints: const BoxConstraints(),
-      onSelected: (value) {
+      onSelected: (value) async {
         switch (value) {
           case 0:
-          //TODO: logout 함수 구현하기.
+            fbService.signOut();
+          // case 1: // HACK: !!!
+          //   var response = showDialog<DeleteConfirm>(
+          //       context: context,
+          //       builder: (context) =>
+          //           DeleteConfirmDialog(guideText: '악보/연습장/연습기록이 전부 삭제됩니다.'));
+
+          //   if (response == DeleteConfirm.ok) {
+          //     database.resetDatabse().then(
+          //         (value) => context.pushReplacement(RouterPath.home.name));
+          //   }
+          case 2: // HACK: API 테스트!!!
+            var key = await ApiService.getParams('init-bound');
+            print(key);
         }
       },
       itemBuilder: (BuildContext context) => <PopupMenuEntry<int>>[
@@ -60,7 +78,36 @@ class _ProfileButton extends StatelessWidget {
               "로그아웃",
             ),
           ),
-        )
+        ),
+        // const PopupMenuItem(
+        //   padding: EdgeInsets.symmetric(horizontal: 16),
+        //   height: 28,
+        //   value: 1,
+        //   child: ListTile(
+        //     trailing: Icon(
+        //       Icons.delete_forever_rounded,
+        //       size: 18,
+        //     ),
+        //     leading: Text(
+        //       "초기화",
+        //     ),
+        //   ),
+        // ),
+
+        const PopupMenuItem(
+          padding: EdgeInsets.symmetric(horizontal: 16),
+          height: 28,
+          value: 2,
+          child: ListTile(
+            trailing: Icon(
+              Icons.error,
+              size: 18,
+            ),
+            leading: Text(
+              "API TEST",
+            ),
+          ),
+        ),
       ],
     );
   }

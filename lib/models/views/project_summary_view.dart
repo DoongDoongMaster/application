@@ -17,6 +17,7 @@ abstract class ProjectSummaryView extends View {
   Query as() => select([
         projectInfo.id,
         musicInfo.sourceCount,
+        musicInfo.musicEntries,
         bestScore,
         musicInfo.hitCount,
       ]).from(projectInfo).join([
@@ -35,13 +36,14 @@ abstract class PracticeAnalysisView extends View {
         practiceList.id,
         practiceList.projectId,
         practiceList.accuracyCount,
+        practiceList.result,
         practiceList.score,
         practiceList.createdAt,
       ]).from(practiceList);
 }
 
 class AnalysisSummaryData {
-  final ComponentCount sourceCount;
+  final ComponentCount sourceCount, sourceCnt;
   final int? bestScore, hitCount;
   final AccuracyCount? bestCount;
 
@@ -53,8 +55,22 @@ class AnalysisSummaryData {
     required List<PracticeAnalysisViewData> practiceList,
     this.bestCount,
   })  : sourceCount = projectInfo.sourceCount,
+        sourceCnt = ComponentCount.fromMusicEntries(projectInfo.musicEntries),
         bestScore = projectInfo.bestScore,
         hitCount = projectInfo.hitCount,
         scoreList = practiceList.map((d) => d.score?.toDouble()).toList(),
-        accuracyList = practiceList.map((d) => d.accuracyCount).toList();
+        accuracyList = practiceList
+            .map((d) => AccuracyCount.fromScoredEntries(d.result ?? []))
+            .toList();
+
+  AnalysisSummaryData.fromDrillReport({
+    required int bestIdx,
+    required this.sourceCnt,
+    this.hitCount,
+    required List<int> scores,
+    required this.accuracyList,
+  })  : sourceCount = ComponentCount(),
+        bestScore = scores[bestIdx].toInt(),
+        bestCount = accuracyList[bestIdx],
+        scoreList = scores.map((e) => e.toDouble()).toList();
 }

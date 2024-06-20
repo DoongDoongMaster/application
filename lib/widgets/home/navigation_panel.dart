@@ -4,6 +4,7 @@ import 'package:application/main.dart';
 import 'package:application/screens/home_screen.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:drift/drift.dart' as drift;
 import 'package:flutter/material.dart';
 
 /// 연습장 화면 왼쪽 패널
@@ -60,6 +61,13 @@ class NavigationPanel extends StatelessWidget {
             isSelected: currentTab == HomeTab.favoriteProjectList,
             onSelected: (_) => onTab(HomeTab.favoriteProjectList),
           ),
+          MenuChip(
+            label: "악보 목록",
+            icon: Icons.queue_music_rounded,
+            // onSelected: (x) => changePath(x, path: RouterPath.favoriteList),
+            isSelected: currentTab == HomeTab.musicList,
+            onSelected: (_) => onTab(HomeTab.musicList),
+          ),
           Padding(
             padding: const EdgeInsets.only(top: 18, bottom: 12),
             child: ActionChip(
@@ -93,7 +101,12 @@ class NavigationPanel extends StatelessWidget {
             ),
             const Divider(),
             FutureBuilder<List<ProjectSidebarViewData>>(
-              future: database.select(database.projectSidebarView).get(),
+              future: (database.select(database.projectSidebarView)
+                    ..orderBy([
+                      (u) => drift.OrderingTerm.desc(
+                          database.projectSidebarView.createdAt)
+                    ]))
+                  .get(),
               builder: (context, snapshot) {
                 if (snapshot.hasData) {
                   return Expanded(
@@ -114,7 +127,7 @@ class NavigationPanel extends StatelessWidget {
                                     ? Padding(
                                         padding: const EdgeInsets.all(2),
                                         child: Image.asset(
-                                          'assets/images/logo.png',
+                                          'assets/icons/ddm.png',
                                         ),
                                       )
                                     : null,
@@ -131,7 +144,7 @@ class NavigationPanel extends StatelessWidget {
             const Spacer(),
           MenuChip(
             label: "새로운 연습",
-            isSelected: currentTab == HomeTab.musicList,
+            isSelected: false,
             onSelected: (_) => onTab(HomeTab.musicList),
             iconBgColor: currentTab == HomeTab.musicList
                 ? Colors.transparent

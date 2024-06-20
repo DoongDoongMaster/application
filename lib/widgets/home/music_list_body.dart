@@ -1,9 +1,12 @@
 import 'package:application/main.dart';
 import 'package:application/models/db/app_database.dart';
 import 'package:application/models/entity/music_infos.dart';
+import 'package:application/models/entity/project_infos.dart';
 import 'package:application/router.dart';
+import 'package:application/screens/home_screen.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:application/styles/text_styles.dart';
+import 'package:application/widgets/delete_confirm_dialog.dart';
 import 'package:application/widgets/home/add_new_button.dart';
 import 'package:application/widgets/home/add_new_modal.dart';
 import 'package:application/widgets/home/n_column_grid_view.dart';
@@ -185,6 +188,44 @@ class MusicPreview extends StatelessWidget {
       onPressed: () => showDialog(
           context: context,
           builder: (context) => NewProjectModal(music: music)),
+      onLongPress: music.type == MusicType.user
+          ? () async {
+              List<ProjectInfo> projects =
+                  await (database.select(database.projectInfos)
+                        ..where((tbl) => tbl.musicId.equals(music.id)))
+                      .get();
+
+              var text = "${music.title}(${music.artist})가 삭제됩니다.";
+
+              if (projects.isNotEmpty) {
+                text += "\n\n<함께 삭제되는 연습장>\n* ";
+                text += projects.map((e) => e.title).join("\n* ");
+              }
+
+              if (!context.mounted) {
+                return;
+              }
+
+              var response = await showDialog<DeleteConfirm>(
+                  context: context,
+                  builder: (context) => DeleteConfirmDialog(
+                        guideText: text,
+                      ));
+
+              if (response == DeleteConfirm.ok) {
+                await (database.delete(database.musicInfos)
+                      ..where((tbl) => tbl.id.equals(music.id)))
+                    .go();
+                if (context.mounted) {
+                  context.pushReplacementNamed(RouterPath.home.name,
+                      queryParameters: {
+                        "tab": HomeTab.musicList.name,
+                        "refresh": ''
+                      });
+                }
+              }
+            }
+          : null,
       style: ElevatedButton.styleFrom(
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(4),

@@ -1,3 +1,4 @@
+import 'package:application/models/convertors/component_count_convertor.dart';
 import 'package:drift/drift.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'dart:convert';
@@ -9,6 +10,7 @@ class MusicEntry implements Comparable<MusicEntry> {
   final int pitch;
   double ts;
   final int? key;
+  DrumComponent get drumPitch => getDrumComponentFromADTKey(pitch);
 
   MusicEntry({
     required this.pitch,
@@ -43,6 +45,9 @@ class MusicEntry implements Comparable<MusicEntry> {
       return 0;
     }
   }
+
+  MusicEntry copyWith({double? ts}) =>
+      MusicEntry(pitch: pitch, key: key, ts: ts ?? this.ts);
 }
 
 class MusicEntryListConvertor extends TypeConverter<List<MusicEntry>, String> {

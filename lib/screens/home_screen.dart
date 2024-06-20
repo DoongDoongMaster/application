@@ -1,3 +1,4 @@
+import 'package:application/main.dart';
 import 'package:application/widgets/home/music_list_body.dart';
 import 'package:application/widgets/home/project_body.dart';
 import 'package:application/widgets/home/project_list_body.dart';
@@ -13,7 +14,8 @@ enum HomeTab {
 
 class HomeScreen extends StatefulWidget {
   final HomeTab? homeTab;
-  const HomeScreen({super.key, this.homeTab});
+  final String? projectId;
+  const HomeScreen({super.key, this.homeTab, this.projectId});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -28,10 +30,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-
     currentTab = widget.homeTab ?? HomeTab.projectList;
+    projectId = widget.projectId;
+    pnService.initialization(context);
   }
 
   void changeTab(HomeTab tab, {String? selectedId}) {

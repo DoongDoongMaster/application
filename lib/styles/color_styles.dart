@@ -21,6 +21,7 @@ class ColorStyles {
   static const lightGray = Color(0xFFDDDDDD);
   static const subTextGray = Color(0xFF9F9F9F);
 
+  static const red = Color(0xFFFF0000);
   static const blackShadow8 = Color(0x14000000);
   static const blackShadow16 = Color(0x29000000);
   static const blackShadow24 = Color(0x3D000000);

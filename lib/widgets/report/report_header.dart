@@ -24,6 +24,9 @@ class ReportHeader extends StatelessWidget {
             visibleWidth) /
         5;
 
+    AccuracyCount accuracyCnt =
+        AccuracyCount.fromScoredEntries(report.result ?? []);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
@@ -33,7 +36,7 @@ class ReportHeader extends StatelessWidget {
           artist: report.musicArtist!,
           score: report.score!,
           sourceBPM: report.sourceBPM!,
-          bpm: report.bpm,
+          // bpm: report.bpm,
           speed: report.speed,
         ),
         SizedBox(width: spaceUnit * 2),
@@ -45,14 +48,14 @@ class ReportHeader extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: _AccuracyAnalysisChart(
-                  accuracyData: report.accuracyCount!,
+                  accuracyData: accuracyCnt,
                   score: report.score!,
                   bestScore: report.bestScore!,
                 ),
               ),
               const Spacer(),
               AccuracyAnalysisChartLegend(
-                accuracyCnt: report.accuracyCount!,
+                accuracyCnt: accuracyCnt,
                 autoSizeGroup: AutoSizeGroup(),
                 hitCount: report.hitCount,
               ),
@@ -73,8 +76,15 @@ class ReportHeader extends StatelessWidget {
                   .map(
                     (data) => _AnalysisPerComponent(
                       label: data.label,
-                      hitCnt: report.componentCount!.getByType(data),
-                      sourceCnt: report.sourceCount.getByType(data),
+                      // TODO: 여러 번 계산하는거 비효율적임 -> 싱글톤 느낌으로 바꿀 수 있지 않을까?
+                      // hitCnt: report.componentCount!.getByType(data),
+                      hitCnt:
+                          ComponentCount.fromScoredEntries(report.result ?? [])
+                              .getByType(data),
+                      // sourceCnt: report.sourceCount.getByType(data),
+                      sourceCnt:
+                          ComponentCount.fromMusicEntries(report.musicEntries)
+                              .getByType(data),
                     ),
                   ),
             ],
@@ -139,7 +149,7 @@ class _AnalysisPerComponent extends StatelessWidget {
                     backgroundColor: (sourceCnt == 0
                             ? ColorStyles.secondary
                             : ColorStyles.primary)
-                        .withOpacity(0.2),
+                        .withOpacity(0.5),
                   );
                 },
               ),
@@ -167,7 +177,7 @@ class _AnalysisPerComponent extends StatelessWidget {
                         TextSpan(
                           text:
                               '${sourceCnt == 0 ? '-' : (100 * score).toInt()}',
-                          style: TextStyles.headlineSmall
+                          style: TextStyles.titleLarge
                               .copyWith(color: Colors.white),
                         ),
                         TextSpan(
@@ -284,7 +294,7 @@ class AccuracyAnalysisChartLegend extends StatelessWidget {
                                   ? FontWeight.bold
                                   : FontWeight.normal),
                         ),
-                        if (data == AccuracyType.correct)
+                        if (data == AccuracyType.correct && hitCount != null)
                           TextSpan(
                             text: "/${hitCount ?? "-"}",
                             style:

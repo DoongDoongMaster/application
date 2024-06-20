@@ -69,21 +69,20 @@ class _ProjectListBodyState extends State<ProjectListBody> {
                       ];
 
                       if (snapshot.hasData) {
-                        if (snapshot.data!.isNotEmpty) {
+                        Iterable<ProjectThumbnailViewData> dataList =
+                            snapshot.data!.where(
+                                (data) => data.isLiked || !widget.favoriteOnly);
+                        if (dataList.isNotEmpty) {
                           return NColumnGridView(
                             colCount: ProjectListBody.colCount,
                             gridList: [
                               ...gridList,
-                              ...snapshot.data!
-                                  .where((data) =>
-                                      data.isLiked || !widget.favoriteOnly)
-                                  .map((data) => UnconstrainedBox(
-                                        child: ProjectPreview(
-                                          data: data,
-                                          onPressed: () =>
-                                              selectProject(data.id),
-                                        ),
-                                      ))
+                              ...dataList.map((data) => UnconstrainedBox(
+                                    child: ProjectPreview(
+                                      data: data,
+                                      onPressed: () => selectProject(data.id),
+                                    ),
+                                  ))
                             ],
                           );
                         }
@@ -94,8 +93,10 @@ class _ProjectListBodyState extends State<ProjectListBody> {
                               colCount: ProjectListBody.colCount,
                               gridList: gridList),
                           const SizedBox(height: 20),
-                          const NoContentWidget(
-                            title: "연습장이 비어 있음",
+                          NoContentWidget(
+                            title: widget.favoriteOnly
+                                ? "즐겨찾는 연습장이 없음"
+                                : "연습장이 비어 있음",
                             subTitle: "새로운 연습을 추가하세요.",
                           ),
                         ],

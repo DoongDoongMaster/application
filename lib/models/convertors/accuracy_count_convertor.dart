@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:application/models/convertors/scored_entry_convertor.dart';
 import 'package:application/styles/color_styles.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/material.dart';
@@ -68,6 +69,16 @@ class AccuracyCount {
       _$AccuracyCountFromJson(json);
   Map<String, dynamic> toJson() => _$AccuracyCountToJson(this);
 
+  factory AccuracyCount.fromScoredEntries(List<ScoredEntry> scoredEntries) {
+    var counter = AccuracyCount();
+
+    for (var entry in scoredEntries) {
+      counter.setByType(entry.type, counter.getByType(entry.type) + 1);
+    }
+
+    return counter;
+  }
+
   getByType(AccuracyType type) {
     switch (type) {
       case AccuracyType.correct:
@@ -110,5 +121,22 @@ class AccuracyCountConvertor extends TypeConverter<AccuracyCount, String> {
   @override
   String toSql(AccuracyCount value) {
     return json.encode(value.toJson());
+  }
+}
+
+class AccuracyCountListConvertor
+    extends TypeConverter<List<AccuracyCount>, String> {
+  const AccuracyCountListConvertor();
+
+  @override
+  List<AccuracyCount> fromSql(String fromDb) {
+    return List<AccuracyCount>.from((json.decode(fromDb) as List<dynamic>)
+        .map((e) => AccuracyCount.fromJson(e))
+        .toList());
+  }
+
+  @override
+  String toSql(List<AccuracyCount> value) {
+    return json.encode(value.map((e) => e.toJson()).toList());
   }
 }

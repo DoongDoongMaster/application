@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:application/models/entity/music_infos.dart';
 import 'package:application/router.dart';
 import 'package:application/screens/home_screen.dart';
+import 'package:application/services/api_service.dart';
 import 'package:application/services/osmd_service.dart';
 import 'package:application/widgets/home/add_new_modal.dart';
 import 'package:application/widgets/music_sheet_viewer_widget.dart';
@@ -27,21 +30,39 @@ class _NewMusicScreenState extends State<NewMusicScreen> {
   void initState() {
     super.initState();
 
-    File(widget.filePath!).readAsBytes().then((bytes) {
-      OSMDService osmd = OSMDService(
-        callback: (base64Image, json) {
-          setState(() {
-            musicInfo = MusicInfo.fromJson(
-              title: widget.fileName!,
-              json: json!,
-              base64String: base64Image,
-              xmlData: bytes,
-            );
-          });
-        },
-      );
-      osmd.run(xmlData: bytes);
-    });
+    getXml();
+  }
+
+  void getXml() async {
+    late Uint8List bytes;
+
+    if (widget.filePath!.endsWith('xml')) {
+      bytes = await File(widget.filePath!).readAsBytes();
+    } else {
+      try {
+        var data = await ApiService.getOMRResult(widget.filePath!);
+
+        bytes = utf8.encode(data);
+      } catch (e) {
+        if (mounted) {
+          context.pop();
+        }
+      }
+    }
+
+    OSMDService osmd = OSMDService(
+      callback: (base64Image, json) {
+        setState(() {
+          musicInfo = MusicInfo.fromJson(
+            title: widget.fileName!,
+            json: json!,
+            base64String: base64Image,
+            xmlData: bytes,
+          );
+        });
+      },
+    );
+    osmd.run(xmlData: bytes);
   }
 
   @override
@@ -66,7 +87,10 @@ class _NewMusicScreenState extends State<NewMusicScreen> {
                 ).then((value) {
                   if (value == true) {
                     context.pushReplacementNamed(RouterPath.home.name,
-                        queryParameters: {"tab": HomeTab.musicList.name});
+                        queryParameters: {
+                          "tab": HomeTab.musicList.name,
+                          "refresh": ''
+                        });
                   }
                 }),
       ),

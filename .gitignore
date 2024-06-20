@@ -139,6 +139,16 @@ app.*.symbols
 
 
 assets/*
+!assets/web/
+
 fonts/*
 
+lib/test_codes.dart
 **/environment.dart
+
+
+# firebase
+google-services.json
+firebase.json
+lib/firebase_options.dart
+GoogleService-info.plist
