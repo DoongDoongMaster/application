@@ -53,6 +53,7 @@
 
 0. **set environments**
     - [application/lib/assets/config/.env](https://drive.google.com/file/d/1rxOTtyIelUYNQ4_86W6ZdJ5OTZimjZmg/view?usp=sharing)
+    - [Firebase 세팅](https://firebase.google.com/docs/flutter/setup?platform=ios&hl=ko)
 
 1. **Clone the repository**
 
@@ -72,6 +73,11 @@
    pod install
    cd ..
    ```
+   * 에러 발생 시
+   ![image](https://github.com/DoongDoongMaster/application/assets/78730403/01fa9f89-9b77-4d0d-b36c-7054138c67b6)
+      ```
+      pod install --repo-update
+      ```
 
 ## Running the App
 
