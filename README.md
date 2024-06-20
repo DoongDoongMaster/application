@@ -51,20 +51,22 @@
 
 ## Installation
 
-1. **Clone the repository**:
+0. **set environments**
+    - [application/lib/assets/config/.env](https://drive.google.com/file/d/1rxOTtyIelUYNQ4_86W6ZdJ5OTZimjZmg/view?usp=sharing)
+
+1. **Clone the repository**
 
    ```bash
    git clone https://github.com/DoongDoongMaster/application.git
-   cd application
    ```
 
-2. **Install Flutter dependencies**:
+2. **Install Flutter dependencies**
 
    ```bash
    flutter pub get
    ```
 
-3. **Install iOS dependencies**:
+3. **Install iOS dependencies**
    ```bash
    cd ios
    pod install
@@ -100,3 +102,5 @@ flutter run
 - 연주 채점: 악보와 연주를 비교하여 악기 및 박자 정확도를 기준으로 채점레포트 제공
 - 연습장: 채점 레포트 모아보기, 점수 추이 확인 가능
 - 구간 반복: 원하는 구간을 선택해서 반복 연습 가능
+---
+[제품설명서 바로가기](https://drive.google.com/file/d/1q96eO9ZqEwI8xdiEi16yt1Gv7tqtEdiv/view?usp=sharing)
