@@ -138,7 +138,7 @@ app.*.symbols
 !.vscode/settings.json
 
 
-assets/*
+assets/music
 !assets/web/
 
 fonts/*
